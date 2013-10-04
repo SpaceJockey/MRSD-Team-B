@@ -5,23 +5,35 @@
 
 #import <Arduino.h>
 #import "Pinout.h"
+
+
+#include <Servo.h>
+Servo servo1;
+
 #import "Stepper.h"
+Stepper stepper1;
+
+#import "Motor.h"
+Motor motor1(EN1, L11, L12);
 
 
 void setup() {
-	stepper_init();
-	
 	//signal Arduino reset (to watch for brownouts)
-	pinMode(FAULT_LED, OUTPUT);
 	pinMode(STATUS_LED, OUTPUT);
-	digitalWrite(FAULT_LED, HIGH);
-	delay(50);
-	digitalWrite(FAULT_LED, LOW);
 	digitalWrite(STATUS_LED, HIGH);
+	delay(50);
+	digitalWrite(STATUS_LED, LOW);
+	
+	
+	stepper1.enable();
+	
+	servo1.attach(SERVO1);
 }
 
 void loop() {
+	motor1.set_dir(CCW);
+	
 	//Spin the stepper motor...
 	delay(10);
-	step();
+	stepper1.step();
 }
