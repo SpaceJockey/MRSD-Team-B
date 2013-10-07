@@ -21,7 +21,7 @@ class Packet {
 			int16_t channel[8];
 			uint16_t checksum;
 			uint16_t footer;
-		} data;
+		};
 		uint8_t chars[24];
 	};
 
