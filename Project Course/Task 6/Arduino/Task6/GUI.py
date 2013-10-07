@@ -37,7 +37,12 @@ def updateSensors():
 	
 def moveStepper():
     print stepper_val.get()
-	
+
+def dcUpdate(val):
+    print val
+    
+def dcMove():
+    print ""
 	
 root.wm_title("MRSD Sensors and Motors Lab")
 root.config(background="#DDDDDD")
@@ -66,25 +71,46 @@ Label(leftFrame, textvariable=rangeVar).grid(row=4,column=1,pady=1,stick=W)
 
 
 # Right Frame - Motor Controls	
-
-rightFrame = Frame(root, width=200, height = 400)
+rightFrame = Frame(root, width=800, height = 500)
 rightFrame.grid(row=0, column=1, padx=10, pady=2)
-
 Label(rightFrame, text="Motor Controls").grid(row=0, column=0, columnspan=3, padx=10, pady=2)
+
+
+# Servo Motor Controls
 Label(rightFrame, text="Servo:").grid(row=1,column=0,padx=2,pady=1, sticky=E)
-Label(rightFrame, text="DC:").grid(row=2,column=0,padx=2,pady=1, sticky=E)
-Label(rightFrame, text="Stepper:",).grid(row=3,column=0,padx=2,pady=1, sticky=E)
-
+servoFrame = Frame(rightFrame)
+servoFrame.grid(row=1,column=1,columnspan=2,pady=10)
+Label(servoFrame,text="Move to position:").grid(row=0,column=0, pady=5, sticky=W)
 servo_val = StringVar()
-servo_entry = Entry(rightFrame,textvariable=servo_val,width=4).grid(row=1,column=1)
-servo_set = Button(rightFrame,text="Set",command=setServo).grid(row=1,column=2,padx=5)
+servo_entry = Entry(servoFrame,textvariable=servo_val,width=6).grid(row=0,column=1)
+servo_set = Button(servoFrame,text="Move",command=setServo).grid(row=0,column=2,padx=5)
 
+
+# DC Motor Controls
+Label(rightFrame, text="DC:").grid(row=2,column=0,padx=2,pady=1, sticky=E)
+dcFrame = Frame(rightFrame, width=200, height=200,borderwidth=1)
+dcFrame.grid(row=2,column=1,columnspan=2, pady=10)
+Label(dcFrame,text="Velocity Control").grid(row=0,column=0,columnspan=3)
+dc_vel_val = DoubleVar()
+dc_scale = Scale(dcFrame, command=dcUpdate, variable=dc_vel_val,orient=HORIZONTAL, from_=-100.0, to=100.0, tickinterval=50, length=200,width=10)
+dc_scale.grid(row=1, column = 0, columnspan=3, pady=0,padx=5)
+Label(dcFrame,text="Move by # degrees:").grid(row=2,column=0, pady=5)
+dc_move_val = DoubleVar()
+dc_move_entry = Entry(dcFrame,textvariable=dc_move_val,width=6)
+dc_move_entry.grid(row=2,column=1)
+dc_move_set = Button(dcFrame,text="Move",command=dcMove)
+dc_move_set.grid(row=2,column=2,padx=5)
+
+
+
+# Stepper Motor Controls
+Label(rightFrame, text="Stepper:",).grid(row=3,column=0,padx=2,pady=1, sticky=E)
+stepperFrame = Frame(rightFrame)
+stepperFrame.grid(row=3,column=1,columnspan=2,pady=10)
+Label(stepperFrame,text="Move by # degrees:").grid(row=0,column=0, pady=5, sticky=W)
 stepper_val = StringVar()
-stepper_entry = Entry(rightFrame,textvariable=servo_val,width=4).grid(row=3,column=1)
-stepper_set = Button(rightFrame,text="Move",command=moveStepper).grid(row=3,column=2,padx=5)
+stepper_entry = Entry(stepperFrame,textvariable=servo_val,width=6).grid(row=0,column=1,sticky=W)
+stepper_set = Button(stepperFrame,text="Move",command=moveStepper).grid(row=0,column=2,padx=5,sticky=W)
 
-
-#pingButt = Button(rightFrame, text="Ping", command=ping)
-#pingButt.grid(row=1,column=1,padx=10,pady=2)
 
 root.mainloop()
