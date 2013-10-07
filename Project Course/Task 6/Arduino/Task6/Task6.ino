@@ -15,7 +15,7 @@ Servo servo1;
 Stepper stepper1;
 
 #import "Motor.h"
-Motor motor1(EN1, L11, L12);
+//Motor motor1(EN1, L11, L12);
 
 
 void setup() {
@@ -34,7 +34,7 @@ void setup() {
 }
 
 void loop() {
-	motor1.set_dir(CCW);
+	//motor1.setDir(CCW);
 	
 	//Spin the stepper motor...
 	delay(10);

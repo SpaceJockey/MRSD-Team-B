@@ -6,14 +6,23 @@
 #import "Stepper.h"
 #import <Arduino.h>
 
+//sets ths speed from an input channel
+void Stepper::setValue(uint16_t val) {
+	if(val > MID_16){
+		setDir(CW);
+	}else{
+		setDir(CCW);
+	}
+} 
+
 //sets ths motor step size using the constants in Stepper.h
-void Stepper::set_step(uint8_t stepsize) { 
+void Stepper::setStep(uint8_t stepsize) { 
 	PORTD = (PORTD & ~0xC0) | (stepsize << 6);
 	delayMicroseconds(STEP_CTL_US);
 }
 
 //Default 0s on all MSX pins sets the device in FULL_STEP mode by default
-void Stepper::set_dir(uint8_t dir) {
+void Stepper::setDir(uint8_t dir) {
 	PORTB = (PORTB & ~DIR_PB) | dir;
 	delayMicroseconds(STEP_CTL_US);
 }

@@ -4,6 +4,7 @@
 */
 
 #import <Arduino.h>
+#import "Comtypes.h"
 
 #ifndef STEPPER_H
 #define STEPPER_H
@@ -39,15 +40,17 @@
 
 //This library is hard-wired, which is fast, but not too reusable... need to rework later
 
-class Stepper
+class Stepper : OutputChannel
 {
 	public:
+		void setValue(uint16_t val);
+		
 		//Stepper();
 		void enable();
 		void disable();
 		
-		void set_step(uint8_t stepsize);
-		void set_dir(uint8_t dir);
+		void setStep(uint8_t stepsize);
+		void setDir(uint8_t dir);
 
 		void step();
 	private:

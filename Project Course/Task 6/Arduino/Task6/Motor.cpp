@@ -29,25 +29,41 @@ Motor::Motor(uint8_t en_pin, uint8_t l1_pin, uint8_t l2_pin){
 	_l2_pin = _l2_pin;
 }
 
+void Motor::setValue(uint16_t val){
+	if(val > MID_16) {
+		setDir(FORWARD);
+		setSpeed(val >> 8);
+	}else{
+		setDir(BACKWARD);
+		setSpeed(MID_16 - val);
+	}	
+}
 
-void Motor::set_dir(uint8_t dir){
-  if(dir == FORWARD) {
-    digitalWrite(_en_pin, HIGH);
+
+void Motor::setSpeed(uint8_t spd){
+	analogWrite(_en_pin, spd);
+}
+
+void Motor::setDir(uint8_t dir){
+  if(dir == CW) {
     digitalWrite(_l1_pin, LOW);
     digitalWrite(_l2_pin, HIGH);
-  }else if (dir == BACKWARD){
-    digitalWrite(_en_pin, HIGH);
+  }else {
     digitalWrite(_l1_pin, HIGH);
     digitalWrite(_l2_pin, LOW);
   }
 }
 
+void Motor::enable(){
+	digitalWrite(_en_pin, HIGH);
+}
+
 void Motor::coast(){
-  digitalWrite(_en_pin, LOW);
+	digitalWrite(_en_pin, LOW);
 }
 
 void Motor::brake(){
-  digitalWrite(_en_pin, HIGH);
-  digitalWrite(_l1_pin,  HIGH);
-  digitalWrite(_l2_pin,  HIGH);
+	digitalWrite(_en_pin, HIGH);
+	digitalWrite(_l1_pin,  HIGH);
+	digitalWrite(_l2_pin,  HIGH);
 }

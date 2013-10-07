@@ -5,6 +5,7 @@
 
 #import <Arduino.h>
 #import "Stepper.h"
+#import "Comtypes.h"
 
 #ifndef MOTOR_H
 #define MOTOR_H
@@ -13,20 +14,24 @@
 #define FORWARD  CW
 #define BACKWARD CCW
 
-class Motor
+class Motor : OutputChannel
 {
 	public:
-		Motor(uint8_t en_pin, uint8_t l1_pin, uint8_t l2_pin);
+	void setValue(uint16_t val);
 
-		void set_dir(uint8_t dir);
+	Motor(uint8_t en_pin, uint8_t l1_pin, uint8_t l2_pin);
 
-		void coast();
-		void brake();
+	void setSpeed(uint8_t spd);
+	void setDir(uint8_t dir);
 
-		private:
-		uint8_t _en_pin;
-		uint8_t _l1_pin;
-		uint8_t _l2_pin;
+	void enable();
+	void coast();
+	void brake();
+
+	private:
+	uint8_t _en_pin;
+	uint8_t _l1_pin;
+	uint8_t _l2_pin;
 };
 
 void set_m_dir(uint8_t dir);
