@@ -6,6 +6,9 @@
 #ifndef PINOUT_H
 #define PINOUT_H
 
+//Use 9600 Baud default
+#define SERIAL_SPEED 9600
+
 //Sensor Pins
 #define RANGEFINDER A0 //IR rangefinder	
 #define PRESSURE 	A1 //Resistive Pressure sensors

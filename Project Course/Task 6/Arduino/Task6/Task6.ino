@@ -25,6 +25,8 @@ void setup() {
 	delay(50);
 	digitalWrite(STATUS_LED, LOW);
 	
+	//Start Serial
+	Serial.begin(SERIAL_SPEED);
 	
 	stepper1.enable();
 	
