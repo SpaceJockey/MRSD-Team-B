@@ -5,6 +5,7 @@
 
 #import <Arduino.h>
 #import "Pinout.h"
+#import "Comtypes.h"
 
 
 #include <Servo.h>
