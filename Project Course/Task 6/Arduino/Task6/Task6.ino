@@ -28,6 +28,14 @@ Motor motor1(EN1, L11, L12);
 Stepper stepper1;
 ServoChannel servo1;
 
+//Setup Serial I/O stuff
+Packet errorPacket;
+Packet packetBuffer[2]; //statically-allocated packet buffer for retransmits
+uint8_t packetIndex; 	//points to the current packet, packetIndex ^
+#define lastPacketIndex (packetIndex ^ 0x01)
+#define currPacket 		packetBuffer[packetIndex]
+#define lastPacket 		packetBuffer[lastPacketIndex]
+
 //Output Channel Array
 #define OUT_ZERO_CH 0 //nothing connected to Channel 0
 #define OUT_LED_CH 1
@@ -49,6 +57,11 @@ void setup() {
 	//Start Serial
 	Serial.begin(SERIAL_SPEED);
 	
+	//Initialize Packet data structures
+	errorPacket.in_chan = 0xff;
+	errorPacket.out_chan = 0xff;
+	errorPacket.pack();
+	
 	//Init the stepper motor
 	stepper1.enable();
 	//Init the servo motor
@@ -56,13 +69,13 @@ void setup() {
 	
 	outChannel[OUT_LED_CH]->attachInput(&inChannel[IN_TEST_CH]);
 	outChannel[OUT_STEPPER_CH]->attachInput(&inChannel[IN_TEST_CH]);
-	outChannel[OUT_SERVO_CH]->attachInput(&inChannel[IN_TEST_CH]);
+	outChannel[OUT_SERVO_CH]->attachInput(&inChannel[IN_POT_CH]);
 }
 
 void loop() {
 	//update input channels
 		//analog input Channels
-		inChannel[IN_POT_CH].set10BitValue(analogRead(POTENTIOMETER));
+		inChannel[IN_POT_CH].setValue(map(analogRead(POTENTIOMETER), 30, 950, 0, 0xffff));
 		inChannel[IN_PRESSURE_CH].set10BitValue(analogRead(PRESSURE));
 		inChannel[IN_RANGE_CH].set10BitValue(analogRead(RANGEFINDER));
 
@@ -70,7 +83,16 @@ void loop() {
 		inChannel[IN_TEST_CH].setValue(inChannel[IN_TEST_CH].getValue() + 0x0100);
 	
 	//Check Serial and parse packets
+	//Serial.println(inChannel[IN_POT_CH].getValue());
 	//TODO: Implement this!
+	
+	//Output sensor data
+	for(int i = 1; i <= 8; i++) {
+		currPacket.channel[i - 1] = inChannel[i].getValue();
+	}
+	currPacket.pack();
+	currPacket.transmit();
+	packetIndex = lastPacketIndex;
 	
 	//update output channels
 	for(int i = 1; i < OUT_NUM_CHANS; i++) outChannel[i]->updateChannel();
