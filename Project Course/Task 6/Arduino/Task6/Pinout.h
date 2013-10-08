@@ -31,6 +31,6 @@
 #define DIR   9
 
 //our trusty debugging LEDs
-#define STATUS_LED 13
+#define STATUS_LED 3
 
 #endif

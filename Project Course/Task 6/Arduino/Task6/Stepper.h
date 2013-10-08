@@ -40,7 +40,7 @@
 
 //This library is hard-wired, which is fast, but not too reusable... need to rework later
 
-class Stepper : OutputChannel
+class Stepper : public OutputChannel
 {
 	public:
 		void setValue(uint16_t val);

@@ -4,6 +4,7 @@
 */
 
 #import <Arduino.h>
+#import "pinout.h"
 
 #ifndef COMTYPES_H
 #define COMTYPES_H
@@ -32,7 +33,10 @@ class OutputChannel {
 	void updateChannel();
 };
 
-
+class LEDChannel : public OutputChannel {
+	public:
+	void setValue(uint16_t val);
+};
 
 class Packet {
 	public:

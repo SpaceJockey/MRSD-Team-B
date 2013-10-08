@@ -14,7 +14,7 @@
 #define FORWARD  CW
 #define BACKWARD CCW
 
-class Motor : OutputChannel
+class Motor : public OutputChannel
 {
 	public:
 	void setValue(uint16_t val);

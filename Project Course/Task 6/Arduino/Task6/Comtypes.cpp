@@ -6,37 +6,67 @@
 #import <Arduino.h>
 #import "Comtypes.h"
 
+
+
+void InputChannel::setValue(uint16_t val){
+	value = val;
+}
+void InputChannel::set10BitValue(uint16_t val){
+	value = (val << 6);
+}
+
+uint16_t InputChannel::getValue(){
+	return value;
+}
+
+void OutputChannel::attachInput(InputChannel * src){
+	source = src;
+}
+
+void OutputChannel::updateChannel(){
+	setValue(source->getValue());
+}
+
+void LEDChannel::setValue(uint16_t val) {
+	analogWrite(STATUS_LED, val >> 8);
+}
+
 Packet::Packet() {
 	//Init our packet frame
-	this->header = 0xDEAD;
-	this->footer = 0xBEEF;
+	header = 0xDEAD;
+	footer = 0xBEEF;
 }
 
 //Check a packet to verify no transmission errors
 bool Packet::is_valid(){
 	//Check headers and footers
-	if ((this->header != 0xDEAD) || (this->footer != 0xBEEF)) return false;
+	if ((header != 0xDEAD) || (footer != 0xBEEF)) return false;
 	
 	//calculate checksum
-	uint16_t checksum = this->in_chan + this->out_chan;
-	for(int i = 0; i < 8; i++) checksum += this->channel[i];
-	if(checksum != this->checksum) return false;
+	uint16_t chk = in_chan + out_chan;
+	for(int i = 0; i < 8; i++) chk += channel[i];
+	if(chk != checksum) return false;
 
 	//Looks ok!
 	return true;
 }
 
+//Check to see if this is an error packet
+bool Packet::is_error(){
+	return (in_chan == 0xFF) && (out_chan == 0xFF); 
+}
+
 //pack for transmission
 void Packet::pack(){
 	//re-init our packet frame
-	this->header = 0xDEAD;
-	this->footer = 0xBEEF;
+	header = 0xDEAD;
+	footer = 0xBEEF;
 	
 	//calculate checksum
-	this->checksum = this->in_chan + this->out_chan;
-	for(int i = 0; i < 8; i++) this->checksum += this->channel[i];
+	checksum = in_chan + out_chan;
+	for(int i = 0; i < 8; i++) checksum += channel[i];
 }
 
 void Packet::transmit(){
-	Serial.write(this->chars, sizeof(Packet));
+	Serial.write(chars, sizeof(Packet));
 }
