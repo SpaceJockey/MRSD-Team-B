@@ -3,12 +3,12 @@
 *  MRSD Team B
 */
 
+#ifndef MOTOR_H
+#define MOTOR_H
+
 #import <Arduino.h>
 #import "Stepper.h"
 #import "Comtypes.h"
-
-#ifndef MOTOR_H
-#define MOTOR_H
 
 //share definitions with the Stepper motor for reusability
 #define FORWARD  CW

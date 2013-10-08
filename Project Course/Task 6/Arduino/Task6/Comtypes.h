@@ -3,11 +3,12 @@
 *  Project Class Task 6
 */
 
-#import <Arduino.h>
-#import "pinout.h"
-
 #ifndef COMTYPES_H
 #define COMTYPES_H
+
+#import <Arduino.h>
+#import "pinout.h"
+#import "Servo.h"
 
 //16 bit midpoint value
 #define MID_16 0x8000
@@ -34,6 +35,12 @@ class OutputChannel {
 };
 
 class LEDChannel : public OutputChannel {
+	public:
+	void setValue(uint16_t val);
+};
+
+//Wrap the built in servo class to use the Channel Schema
+class ServoChannel : public OutputChannel, public Servo  {
 	public:
 	void setValue(uint16_t val);
 };

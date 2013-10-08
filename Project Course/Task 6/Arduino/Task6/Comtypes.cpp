@@ -3,9 +3,7 @@
 *  Project Class Task 6
 */
 
-#import <Arduino.h>
 #import "Comtypes.h"
-
 
 
 void InputChannel::setValue(uint16_t val){
@@ -29,6 +27,10 @@ void OutputChannel::updateChannel(){
 
 void LEDChannel::setValue(uint16_t val) {
 	analogWrite(STATUS_LED, val >> 8);
+}
+
+void ServoChannel::setValue(uint16_t val){
+	this->writeMicroseconds(map(val, 0, 0xFFFF, 1000, 2000));
 }
 
 Packet::Packet() {

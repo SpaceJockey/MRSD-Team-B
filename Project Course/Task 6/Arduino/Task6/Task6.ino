@@ -5,28 +5,39 @@
 
 #import <Arduino.h>
 #import "Pinout.h"
+#import "Servo.h" //local copy of servo library to fix Arduino Compile path issues
 #import "Comtypes.h"
-
-
-#define TEST_CH 8
-
-InputChannel inChannel[16];
-//steady triangle wave - Channel 8
-
-//Status LED test channel - Channel 1
-LEDChannel ledChan;
-
-#include <Servo.h>
-Servo servo1;
-
 #import "Stepper.h"
-Stepper stepper1;
-
 #import "Motor.h"
+
+
+//Channel definitions
+#define IN_ZERO_CH 0 //Channel 0 is always 0 (like /dev/null)
+#define IN_POT_CH 1
+#define IN_PRESSURE_CH 2
+#define IN_RANGE_CH 3
+
+#define IN_TEST_CH 8 //steady triangle wave - Channel 8
+
+//Input Channel Array
+InputChannel inChannel[17];
+
+//Setup output channels
+LEDChannel led;
 Motor motor1(EN1, L11, L12);
+Stepper stepper1;
+ServoChannel servo1;
 
+//Output Channel Array
+#define OUT_ZERO_CH 0 //nothing connected to Channel 0
+#define OUT_LED_CH 1
+#define OUT_MOTOR_CH 2
+#define OUT_STEPPER_CH 3
+#define OUT_SERVO_CH 4
+#define OUT_NUM_CHANS 5 //nothing connected to Channels 5-7
 
-
+//Array is size 8 to match out IO packets, additional channels can easily be added in future
+OutputChannel * outChannel[8] = {0, &led, &motor1, &stepper1, &servo1, 0, 0, 0}; 
 
 void setup() {
 	//signal Arduino reset (to watch for brownouts)
@@ -38,21 +49,31 @@ void setup() {
 	//Start Serial
 	Serial.begin(SERIAL_SPEED);
 	
+	//Init the stepper motor
 	stepper1.enable();
+	//Init the servo motor
+	servo1.attach(SERVO1);
 	
-	//servo1.attach(SERVO1);
-	ledChan.attachInput(&inChannel[TEST_CH]);
-	stepper1.attachInput(&inChannel[TEST_CH]);
+	outChannel[OUT_LED_CH]->attachInput(&inChannel[IN_TEST_CH]);
+	outChannel[OUT_STEPPER_CH]->attachInput(&inChannel[IN_TEST_CH]);
+	outChannel[OUT_SERVO_CH]->attachInput(&inChannel[IN_TEST_CH]);
 }
 
 void loop() {
 	//update input channels
+		//analog input Channels
+		inChannel[IN_POT_CH].set10BitValue(analogRead(POTENTIOMETER));
+		inChannel[IN_PRESSURE_CH].set10BitValue(analogRead(PRESSURE));
+		inChannel[IN_RANGE_CH].set10BitValue(analogRead(RANGEFINDER));
+
+		//Dummy Test Channel (Constant Triangle Wave)
+		inChannel[IN_TEST_CH].setValue(inChannel[IN_TEST_CH].getValue() + 0x0100);
 	
-	//Test Channel, this channel outputs a constant triangle wave
-	uint16_t val = inChannel[TEST_CH].getValue();
-	inChannel[TEST_CH].setValue(val + 0x0100);
-	ledChan.updateChannel();
-	stepper1.updateChannel();
+	//Check Serial and parse packets
+	//TODO: Implement this!
+	
+	//update output channels
+	for(int i = 1; i < OUT_NUM_CHANS; i++) outChannel[i]->updateChannel();
 	
 	//motor1.setDir(CCW);
 	

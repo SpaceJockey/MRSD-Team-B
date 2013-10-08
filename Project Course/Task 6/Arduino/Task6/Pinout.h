@@ -10,8 +10,9 @@
 #define SERIAL_SPEED 9600
 
 //Sensor Pins
-#define RANGEFINDER A0 //IR rangefinder	
-#define PRESSURE 	A1 //Resistive Pressure sensors
+#define RANGEFINDER 	A0 //IR rangefinder	
+#define POTENTIOMETER 	A1 //Potentiometer dial
+#define PRESSURE 		A2 //Resistive Pressure sensors
 
 
 //DC H-Bridge Motor Driver Pins
@@ -20,7 +21,7 @@
 #define L12    12 	// Logic 2 for motor 2
 
 //Servo Motor Control Pin
-#define SERVO1 4   // Servo pin
+#define SERVO1 13   // Servo pin
 
 //Stepper Motor Control Pins
 #define _EN   5    // Stepper ~EN line

@@ -3,11 +3,11 @@
 *  Nathaniel Chapman
 */
 
-#import <Arduino.h>
-#import "Comtypes.h"
-
 #ifndef STEPPER_H
 #define STEPPER_H
+
+#import <Arduino.h>
+#import "Comtypes.h"
 
 //Raw pins ATMega Stepper Pinout
 //http://www.pighixxx.com/pgdev/Temp/ARDUINO_V2.png
