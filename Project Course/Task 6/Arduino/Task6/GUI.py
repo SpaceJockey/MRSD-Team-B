@@ -9,20 +9,21 @@ from copy import copy
 port = "COM5"
 baudRate= 9600
 ser = Serial(port, baudRate, timeout=0,writeTimeout=0)
-time.sleep(1)
+time.sleep(2)
 
 # Setup GUI Window
 root = Tk()   
 root.wm_title("MRSD Sensors and Motors Lab")
 root.config(background="#DDDDDD")
 
-forceVal, rangeVal,potVal,triVal = (1.0,)*4
+forceVal, rangeVal,potVal,triVal,encoderVal = (1.0,)*5
 sensor_options = ('Local','On','Off','Force','Range','Potentiometer','Triangle')
 data = [0.0,]*100
 
 forceVar = StringVar()
 rangeVar = StringVar()
 potVar = StringVar()
+encoderVar = StringVar()
 
 packet = b''
 
@@ -55,13 +56,20 @@ def getPacket():
     except struct.error:
         return False
 
-def sendPacket(thetas):
-    thetas[0]=0xDEAD
-    thetas[12] = 0xBEEF
-    print(thetas);
+def sendPacket(theta):
+    theta[0]=0xDEAD
+    theta[12] = 0xBEEF
+    theta[3]=int(int("0xFFFF",0)*servo_val.get()/90)
+    if old_type == 'Position Control':
+        theta[4] = int(int("0xFFFF",0)*(int(dc_vel_val.get())+100)/200);
+    elif old_type == 'Velocity Control':
+        theta[4] = int(int("0xFFFF",0)*(int(dc_vel_val.get())+100)/200);   
+    theta[5] = int(int("0xFFFF",0)*stepper_val.get()/90)   
+
+    print(theta);
     # Fix checksum later
     txBuf = ctypes.create_string_buffer(24)
-    struct.pack_into("=HBBHHHHHHHHHH", txBuf, 0, *tuple(thetas))
+    struct.pack_into("=HBBHHHHHHHHHH", txBuf, 0, *tuple(theta))
     ser.write(txBuf)
     
 # isValid: Checks the validity of a given packet     
@@ -72,15 +80,16 @@ def isValid(thetas):
         return True
                 
 def processPacket(thetas):         
-    global forceVal, rangeVal, potVal, triVal
+    global forceVal, rangeVal, potVal, triVal,encoderVal
     sensors = thetas[2:]
     forceVal = sensors[getChan('Force')]
     rangeVal = sensors[getChan('Range')]
     potVal = sensors[getChan('Potentiometer')]
     triVal = sensors[getChan('Triangle')]
+    encoderVal = sensors[getChan('Encoder')]
     
 def getVal(name):
-    global forceVal, rangeVal, potVal,triVal
+    global forceVal, rangeVal, potVal,triVal,encoderVal
     if name=="Local":
         return 0.0
     elif name=="On":
@@ -95,6 +104,8 @@ def getVal(name):
         return potVal   
     elif name=="Triangle":
         return triVal
+    elif name=="Encoder":
+        return encoderVal
     
 def getChan(name):
     if name=="Local":
@@ -111,6 +122,8 @@ def getChan(name):
         return 1  
     elif name=="Triangle":
         return 8
+    elif name=="Encoder":
+        return 8        # PLACEHOLDER!!!!!!!!!!!!!!!!!
         
 def getChanOut(name):
     if name=="Servo":
@@ -129,6 +142,7 @@ def updateSensors():
     forceVar.set("%4.3f" % getVal('Force'))
     rangeVar.set("%4.3f" % getVal('Range'))
     potVar.set("%4.3f" % getVal('Potentiometer'))
+    encoderVar.set("%4.3f" % getVal('Encoder'))
 
     # UPDATE DATA BUFFER AND PLOT
     if old_plot != wChan.get():
@@ -147,6 +161,8 @@ def updateSensors():
         old_servo = servo_chan_val.get()
         thetaL[2]=getChanOut('Servo')
         thetaL[1]=getChan(old_servo)
+        if old_servo == "Local":
+            thetaL[1]= 9
         sendPacket(thetaL)        
     
     # DC MOTOR
@@ -166,6 +182,8 @@ def updateSensors():
         old_stepper = stepper_chan_val.get()
         thetaL[2]=getChanOut('Stepper')
         thetaL[1]=getChan(old_stepper) 
+        if old_stepper == "Local":
+            thetaL[1] = 11
         sendPacket(thetaL)        
 
     root.after(100,updateSensors)
@@ -177,42 +195,38 @@ def updatePlot(data,plotWin):
         plotWin.create_line((i-1)*2,d[i-1],i*2,d[i], fill="red")
     
 
-def servoSet():
-    global old_servo
-    if old_servo == "Local":
-        theta = [0,]*13
-        theta[2]=getChanOut('Servo')
-        theta[1]=9
-        theta[3]=int(int("0xFFFF",0)*servo_val.get()/90)
-        sendPacket(theta)
-    
+def updateMotors(val=0):
+    print("update")
+    theta = [0,]*13
+    sendPacket(theta)
 
-# dcUpdate: Fires whenever the DC velocity slider is moved
-def dcUpdate(val):
-    global old_dc,old_type
-    if old_dc == "Local":
-        theta = [0,]*13
-        theta[1]=10 
-        if old_type == 'Position Control':
-            theta[2]=getChanOut('DCPos')
-            theta[4] = int(int("0xFFFF",0)*(int(val)+100)/200);
-        elif old_type == 'Velocity Control':
-            theta[2]=getChanOut('DCVel')
-            theta[4] = int(int("0xFFFF",0)*(int(val)+100)/200);
-           
+
+
+# # dcUpdate: Fires whenever the DC velocity slider is moved
+# def dcUpdate(val):
+    # global old_dc,old_type
+    # print(val)
+    # print(dc_vel_val.get())
+    # if old_dc == "Local":
+        # theta = [0,]*13
+        # theta[1]=10 
+        # if old_type == 'Position Control':
+            # theta[2]=getChanOut('DCPos')
+        # elif old_type == 'Velocity Control':
+            # theta[2]=getChanOut('DCVel')
+        # sendPacket(theta)
         
-        sendPacket(theta)
         
-        
-# stepperMove: Fires whenever the "Move" button  is pressed in the stepper frame
-def stepperMove():
-    global old_stepper
-    if old_stepper == "Local":
-        theta = [0,]*13
-        theta[2]=getChanOut('Stepper')
-        theta[1] = 11
-        theta[5] = int(int("0xFFFF",0)*stepper_val.get()/90)
-        sendPacket(theta)
+# # stepperMove: Fires whenever the "Move" button  is pressed in the stepper frame
+# def stepperMove():
+    # print("move stepper")
+    # global old_stepper
+    # if old_stepper == "Local":
+        # theta = [0,]*13
+        # theta[2]=getChanOut('Stepper')
+        # theta[1] = 11
+        # theta[5] = int(int("0xFFFF",0)*stepper_val.get()/90)
+        # sendPacket(theta)
  
 #########################################
 ########## SET UP GUI ELEMENTS ##########
@@ -232,6 +246,8 @@ Label(leftFrame, text="Range:").grid(row=2,column=0,padx=2,pady=1, sticky=E)
 Label(leftFrame, textvariable=rangeVar).grid(row=2,column=1,pady=1,stick=W)
 Label(leftFrame, text="Potentiometer:").grid(row=3,column=0,padx=2,pady=1, sticky=E)
 Label(leftFrame, textvariable=potVar).grid(row=3,column=1,pady=1,stick=W)
+Label(leftFrame, text="DC Encoder:").grid(row=4,column=0,padx=2,pady=1, sticky=E)
+Label(leftFrame, textvariable=encoderVar).grid(row=4,column=1,pady=1,stick=W)
 
 # Plot Window
 plotWin = Canvas(leftFrame, width=200, height=110,bg="#FFFFFF")
@@ -258,7 +274,7 @@ servoFrame.grid(row=1,column=1,columnspan=2,pady=10,sticky=W)
 Label(servoFrame,text="Move to position:").grid(row=0,column=0, pady=5, sticky=W,padx=2)
 servo_val = IntVar()
 servo_entry = Entry(servoFrame,textvariable=servo_val,width=6).grid(row=0,column=1)
-servo_set = Button(servoFrame,text="Move",command=servoSet).grid(row=0,column=2,padx=5)
+servo_set = Button(servoFrame,text="Move",command=updateMotors).grid(row=0,column=2,padx=5)
 servo_chan_val = StringVar()
 old_servo = ''
 servo_chan_val.set(sensor_options[0])
@@ -276,7 +292,7 @@ control_type = OptionMenu(dcFrame,control_type_val,*control_options).grid(row=0,
 control_type_val.set(control_options[0])
 dc_vel_val = IntVar()
 dc_vel_val.set(-100)
-dc_scale = Scale(dcFrame, command=dcUpdate, variable=dc_vel_val,orient=HORIZONTAL, from_=-100.0, to=100.0, tickinterval=50, length=200,width=10)
+dc_scale = Scale(dcFrame, command=updateMotors, variable=dc_vel_val,orient=HORIZONTAL, from_=-100.0, to=100.0, tickinterval=50, length=200,width=10)
 dc_scale.grid(row=1, column = 0, columnspan=3, padx=5,pady=2)
 dc_chan_val = StringVar()
 old_dc = ''
@@ -291,7 +307,7 @@ stepperFrame.grid(row=3,column=1,columnspan=2,pady=10,sticky=W)
 Label(stepperFrame,text="Move by # degrees:").grid(row=0,column=0, pady=5, sticky=W,padx=2)
 stepper_val = IntVar()
 stepper_entry = Entry(stepperFrame,textvariable=stepper_val,width=6).grid(row=0,column=1,sticky=W)
-stepper_set = Button(stepperFrame,text="Move",command=stepperMove).grid(row=0,column=2,padx=5,sticky=W)
+stepper_set = Button(stepperFrame,text="Move",command=updateMotors).grid(row=0,column=2,padx=5,sticky=W)
 stepper_chan_val = StringVar()
 old_stepper = ''
 stepper_chan_val.set(sensor_options[0])
