@@ -9,23 +9,23 @@
 //sets ths speed from an input channel
 //gets called once per loop
 void Stepper::setValue(uint16_t val) {
-    desiredPos = map(val, 0, 0xFFFF, -400, 400); //+- 400 steps roughly equals 360 degrees
+    desiredPos = (val / 164) - 200; // 200 steps roughly equals 180 degrees
+    //desiredPos = map(val, 0, 0xFFFF, -200, 200); 
     if (desiredPos != currPos) {
         if( desiredPos < currPos) {
             setDir(CCW);
         } else setDir(CW);
-      
-    }
     
-    uint16_t ms = millis();
-    if (ms >= STEP_DELAY_MS + this->lastMs) {
-        this->step();
-        if(currDir == CCW) {
-            currPos--;
-        } else {
-            currPos++;
+        uint16_t ms = millis();
+        if (ms >= STEP_DELAY_MS + this->lastMs) {
+            this->step();
+            if(currDir == CCW) {
+                currPos--;
+            } else {
+                currPos++;
+            }
+            lastMs = ms;
         }
-        lastMs = ms;
     }
 } 
 
@@ -37,6 +37,7 @@ void Stepper::setValue(uint16_t val) {
 
 //Default 0s on all MSX pins sets the device in FULL_STEP mode by default
 void Stepper::setDir(uint8_t dir) {
+    currDir = dir;
     if(dir){
         digitalWrite(DIR, HIGH);
     } else {

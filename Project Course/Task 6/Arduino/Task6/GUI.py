@@ -6,7 +6,7 @@ import random
 from copy import copy
 
 # Open Serial Port
-port = "COM14"
+port = "COM13"
 baudRate= 9600
 ser = Serial(port, baudRate, timeout=0,writeTimeout=0)
 time.sleep(2)
@@ -59,12 +59,12 @@ def getPacket():
 def sendPacket(theta):
     theta[0]=0xDEAD
     theta[12] = 0xBEEF
-    theta[3]=int(int("0xFFFF",0)*servo_val.get()/90)
+    theta[3]=int(int("0xFFFF",0)*(servo_val.get() + 90)/180.00)
     if old_type == 'Position Control':
         theta[4] = int(int("0xFFFF",0)*(int(dc_vel_val.get())+100)/200);
     elif old_type == 'Velocity Control':
         theta[4] = int(int("0xFFFF",0)*(int(dc_vel_val.get())+100)/200);   
-    theta[5] = int(int("0xFFFF",0)*stepper_val.get()/90)   
+    theta[5] = int(int("0xFFFF",0)*((stepper_val.get()+180)/360.00))   
 
     print(theta);
     # Fix checksum later
@@ -304,7 +304,7 @@ dc_chan.grid(row=2,column=4,padx=5)
 Label(rightFrame, text="Stepper:",).grid(row=3,column=0,padx=2,pady=1, sticky=E)
 stepperFrame = Frame(rightFrame,bg="#DEDEDE")
 stepperFrame.grid(row=3,column=1,columnspan=2,pady=10,sticky=W)
-Label(stepperFrame,text="Move by # degrees:").grid(row=0,column=0, pady=5, sticky=W,padx=2)
+Label(stepperFrame,text="Move to # degrees:").grid(row=0,column=0, pady=5, sticky=W,padx=2)
 stepper_val = IntVar()
 stepper_entry = Entry(stepperFrame,textvariable=stepper_val,width=6).grid(row=0,column=1,sticky=W)
 stepper_set = Button(stepperFrame,text="Move",command=updateMotors).grid(row=0,column=2,padx=5,sticky=W)

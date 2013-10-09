@@ -29,8 +29,10 @@ void LEDChannel::setValue(uint16_t val) {
 	analogWrite(STATUS_LED, val >> 8);
 }
 
+void NullChannel::setValue(uint16_t val) {}
+
 void ServoChannel::setValue(uint16_t val){
-	this->writeMicroseconds(map(val, 0, 0xFFFF, 1000, 2000));
+	this->writeMicroseconds(map(val, 0, 0xFFFF, 700, 2400));
 }
 
 Packet::Packet() {

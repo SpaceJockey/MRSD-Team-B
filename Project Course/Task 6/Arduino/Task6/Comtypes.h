@@ -34,6 +34,11 @@ class OutputChannel {
 	void updateChannel();
 };
 
+class NullChannel : public OutputChannel {
+	public:
+	void setValue(uint16_t val);
+};
+
 class LEDChannel : public OutputChannel {
 	public:
 	void setValue(uint16_t val);

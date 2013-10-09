@@ -10,7 +10,7 @@
 #import "Stepper.h"
 #import "Motor.h"
 
-#define IN_BUTTON A3
+
 
 //Channel definitions
 #define IN_ZERO_CH 0 //Channel 0 is always 0 (like /dev/null)
@@ -24,11 +24,18 @@
 //Input Channel Array
 InputChannel inChannel[17];
 
+//Button State
+uint8_t lastButton;
+uint16_t lastBounce;
+#define BUTTON_BOUNCE_MS 100
+uint8_t testMode;
+
 //Setup output channels
 LEDChannel led;
 //MotorPositionController motorPos;
 Stepper stepper1;
 ServoChannel servo1;
+NullChannel null1;
 
 //Setup Serial I/O stuff
 Packet errorPacket;
@@ -38,6 +45,8 @@ uint8_t packetIndex; 	//points to the current packet, packetIndex ^
 #define currPacket 		packetBuffer[packetIndex]
 #define lastPacket 		packetBuffer[lastPacketIndex]
 #define PSIZE 			sizeof(Packet)
+uint16_t lastPacketSent;
+#define PACKET_RATE_MS 50
 
 char recvChars[PSIZE + 1]; 
 Packet recvPacket;
@@ -54,7 +63,7 @@ volatile int time = 0;
 #define OUT_NUM_CHANS 6 //nothing connected to Channels 6-7
 
 //Array is size 8 to match out IO packets, additional channels can easily be added in future
-OutputChannel * outChannel[8] = {0, &led, 0, 0, &servo1, &stepper1, 0, 0}; 
+OutputChannel * outChannel[8] = {&null1, &led, &null1, &null1, &servo1, &stepper1, &null1, &null1}; 
 
 void setup() {
 	//signal Arduino reset (to watch for brownouts)
@@ -92,6 +101,7 @@ void setup() {
     outChannel[OUT_MOTOR_V_CH]->attachInput(&inChannel[10]);
     outChannel[OUT_MOTOR_P_CH]->attachInput(&inChannel[10]);
     outChannel[OUT_STEPPER_CH]->attachInput(&inChannel[11]);
+    //outChannel[OUT_STEPPER_CH]->attachInput(&inChannel[IN_HIGH_CH]);
 
     attachInterrupt(IN_BUTTON,stateChange, RISING);
 }
@@ -107,8 +117,6 @@ void stateChange(){
     }else if(state == 2){
       state = 0;
     }
-     Serial.print("Now in state ");
-     Serial.println(state);
    }
  }
 
@@ -120,10 +128,35 @@ void loop() {
 		inChannel[IN_RANGE_CH].set10BitValue(analogRead(RANGEFINDER));
 
 		//Dummy Test Channel (Constant Triangle Wave)
-		inChannel[IN_TEST_CH].setValue(inChannel[IN_TEST_CH].getValue() + 0x0100);
+		inChannel[IN_TEST_CH].setValue(inChannel[IN_TEST_CH].getValue() + 0x0004);
 	
+    //Poll Button State
+    uint8_t buttonState = digitalRead(IN_BUTTON);
+    if(buttonState && !lastButton){
+        uint16_t ms = millis();
+        if((ms - lastBounce) > BUTTON_BOUNCE_MS){ //Button click handler
+            testMode = !testMode;
+            if(testMode){
+            	outChannel[OUT_LED_CH]->attachInput(&inChannel[IN_TEST_CH]);
+                outChannel[OUT_SERVO_CH]->attachInput(&inChannel[IN_TEST_CH]);
+                outChannel[OUT_MOTOR_V_CH]->attachInput(&inChannel[IN_TEST_CH]);
+                outChannel[OUT_MOTOR_P_CH]->attachInput(&inChannel[IN_TEST_CH]);
+                outChannel[OUT_STEPPER_CH]->attachInput(&inChannel[IN_TEST_CH]);
+            } else {
+                outChannel[OUT_LED_CH]->attachInput(&inChannel[IN_HIGH_CH]);
+                outChannel[OUT_SERVO_CH]->attachInput(&inChannel[9]);
+                outChannel[OUT_MOTOR_V_CH]->attachInput(&inChannel[10]);
+                outChannel[OUT_MOTOR_P_CH]->attachInput(&inChannel[10]);
+                outChannel[OUT_STEPPER_CH]->attachInput(&inChannel[11]);
+            }
+        }        
+        lastBounce = ms;
+    }
+    lastButton = buttonState;
+    
 	//Check Serial and parse packets
 	//TODO: add findUntil to fix dropped characters
+
 	if (Serial.available() >= PSIZE) {
 		Serial.readBytes((char *) recvPacket.chars, PSIZE);
 		
@@ -147,17 +180,22 @@ void loop() {
 	}
 	
 	//Output sensor data
-    for(int i = 1; i <= 8; i++) {
-		currPacket.channel[i - 1] = inChannel[i].getValue();
-	}
+    uint16_t ms = millis();
+    if(ms >= PACKET_RATE_MS + lastPacketSent) {
+        for(int i = 1; i <= 8; i++) {
+            currPacket.channel[i - 1] = inChannel[i].getValue();
+        }
+        
+        currPacket.pack();
+        currPacket.transmit();
+        packetIndex = lastPacketIndex;
+        lastPacketSent = ms;
+    }
+
     
-	currPacket.pack();
-	currPacket.transmit();
-	packetIndex = lastPacketIndex;
-	
+    
 	//update output channels
-	for(int i = 2; i < OUT_NUM_CHANS; i++) outChannel[i]->updateChannel();
-	
-	//Spin the stepper motor...
-	stepper1.step();
+	for(int i = 1; i < OUT_NUM_CHANS; i++) {
+        outChannel[i]->updateChannel();
+    }
 }

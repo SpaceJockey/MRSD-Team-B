@@ -39,8 +39,8 @@
 // Control pulse delay
 // according to the datasheet, this could be set to 1 uS
 // but 10 suits me better
-#define STEP_CTL_US	10
-#define STEP_DELAY_MS	10
+#define STEP_CTL_US	  10
+#define STEP_DELAY_MS 5
 
 //This library is hard-wired, which is fast, but not too reusable... need to rework later
 
@@ -57,7 +57,7 @@ class Stepper : public OutputChannel
 		void setDir(uint8_t dir);
 
 		void step();
-	private:
+	//private:
         uint8_t currDir;
         int16_t currPos;
         int16_t desiredPos;

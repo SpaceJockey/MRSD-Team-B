@@ -14,6 +14,7 @@
 #define POTENTIOMETER 	A1 //Potentiometer dial
 #define PRESSURE 		A2 //Resistive Pressure sensors
 
+#define IN_BUTTON 6 //Formerly used by the Stepper
 
 //DC H-Bridge Motor Driver Pins
 #define EN1   10 	//Enable pin for motor 1
@@ -27,10 +28,12 @@
 #define SERVO1 13   // Servo pin
 
 //Stepper Motor Control Pins
+/*
 #define _EN   5    // Stepper ~EN line
 #define MS1   6    // Stepper Microstep Lines
 #define MS2   7
 // #define MS3   7  //To save pins, we're dropping support for 16X microstepping
+*/
 #define STEP  8
 #define DIR   9
 
