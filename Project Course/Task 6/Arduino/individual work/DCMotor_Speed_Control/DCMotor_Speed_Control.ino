@@ -7,8 +7,8 @@
 #define LOOPTIME        100                     // PID loop time every 100ms
 unsigned long lastMilli = 0;                    // loop timing 
 unsigned long lastMilliPrint = 0;               // loop timing
-int speed_req = 0;                             // speed (Set Point)
-int speed_act = 0;                              // speed (actual value)
+int speed_req = 0;                              // speed (Set Point)
+int motorSpeedCurr = 0;                              // speed (actual value)
 int PWM_val = 0;                                // (25% = 64; 50% = 127; 75% = 191; 100% = 255)
 volatile long count = 0;                        // rev counter
 float Kp =   .4;                                // PID proportional control Gain
@@ -19,7 +19,7 @@ int revolution = 0 ;                            // how many times the revolution
 float pidTerm = 0;                              // PID correction
 int error=0;                                    // error calculation = target value- actual value                     
 static int last_error=0;                        // Last error
-static long countAnt = 0;                                                 // last count
+static long last_count = 0;                       // last count
 
 
 ////////////////////////////////////////// SETUP PINS////////////////////////////////////////////
@@ -115,8 +115,8 @@ void motor_dc(char c)
 
 void getMotorData()  {                                                        // calculate speed
 
-  speed_act = ((encoder0Pos - countAnt)*(60*(1000/LOOPTIME)))/(360);          // 360 pulse each revolution
-  countAnt = encoder0Pos;                 
+  motorSpeedCurr = ((encoder0Pos - last_count)*(60*(1000/LOOPTIME)))/(360);          // 360 pulse each revolution
+  last_count = encoder0Pos;                 
 }
 
 int updatePid(int command, int targetValue, int currentValue)   {             // compute PWM value
@@ -142,12 +142,12 @@ void motor_speed(int speed_desired)
   if((millis()-lastMilli) >= LOOPTIME)   {                                    // enter timed loop
     lastMilli = millis();
     getMotorData();                                                           // calculate speed
-    PWM_val= updatePid(PWM_val, speed_desired, speed_act);                        // compute PWM value
+    PWM_val= updatePid(PWM_val, speed_desired, motorSpeedCurr);                        // compute PWM value
     analogWrite(En1, PWM_val);                                               // send PWM to motor
   }
     
   Serial.print("Speed RPM: ");
-  Serial.println(speed_act);
+  Serial.println(motorSpeedCurr);
 
 }
 

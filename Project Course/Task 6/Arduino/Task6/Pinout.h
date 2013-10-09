@@ -20,6 +20,9 @@
 #define L11	  11 	// Logic 1 for motor 1
 #define L12    12 	// Logic 2 for motor 2
 
+#define ENCODER_A 2 // encoder channel A
+#define ENCODER_B 3 // encoder channel B
+
 //Servo Motor Control Pin
 #define SERVO1 13   // Servo pin
 
@@ -32,6 +35,6 @@
 #define DIR   9
 
 //our trusty debugging LEDs
-#define STATUS_LED 3
+#define STATUS_LED 4
 
 #endif

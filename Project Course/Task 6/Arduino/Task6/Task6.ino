@@ -10,7 +10,6 @@
 #import "Stepper.h"
 #import "Motor.h"
 
-
 //Channel definitions
 #define IN_ZERO_CH 0 //Channel 0 is always 0 (like /dev/null)
 #define IN_POT_CH 1
@@ -25,7 +24,7 @@ InputChannel inChannel[17];
 
 //Setup output channels
 LEDChannel led;
-Motor motor1(EN1, L11, L12);
+//MotorPositionController motorPos;
 Stepper stepper1;
 ServoChannel servo1;
 
@@ -44,13 +43,14 @@ Packet recvPacket;
 //Output Channel Array
 #define OUT_ZERO_CH 0 //nothing connected to Channel 0
 #define OUT_LED_CH 1
-#define OUT_MOTOR_CH 2
-#define OUT_STEPPER_CH 3
+#define OUT_MOTOR_P_CH 2
+#define OUT_MOTOR_V_CH 3
 #define OUT_SERVO_CH 4
-#define OUT_NUM_CHANS 5 //nothing connected to Channels 5-7
+#define OUT_STEPPER_CH 5
+#define OUT_NUM_CHANS 6 //nothing connected to Channels 6-7
 
 //Array is size 8 to match out IO packets, additional channels can easily be added in future
-OutputChannel * outChannel[8] = {0, &led, &motor1, &stepper1, &servo1, 0, 0, 0}; 
+OutputChannel * outChannel[8] = {0, &led, 0, 0, &servo1, &stepper1, 0, 0}; 
 
 void setup() {
 	//signal Arduino reset (to watch for brownouts)
@@ -61,13 +61,15 @@ void setup() {
 	
 	//Start Serial
 	Serial.begin(SERIAL_SPEED);
-	Serial.flush();
-	
+
 	//Initialize Packet data structures
 	errorPacket.inChannel = 0xff;
 	errorPacket.outChannel = 0xff;
 	errorPacket.pack();
 	recvPacket.pack();
+    
+    //init the DC Motor
+    //init_motor();
 	
 	//Init the stepper motor
 	stepper1.enable();
@@ -78,9 +80,13 @@ void setup() {
 	inChannel[IN_HIGH_CH].setValue(0xFFFF);
 	inChannel[9].setValue(0x8000);
 	
-	outChannel[OUT_LED_CH]->attachInput(&inChannel[IN_TEST_CH]);
-	outChannel[OUT_STEPPER_CH]->attachInput(&inChannel[IN_TEST_CH]);
-	//outChannel[OUT_SERVO_CH]->attachInput(&inChannel[9]);
+    //initialize output channels
+	outChannel[OUT_LED_CH]->attachInput(&inChannel[IN_HIGH_CH]);
+	outChannel[OUT_SERVO_CH]->attachInput(&inChannel[9]);
+    outChannel[OUT_MOTOR_V_CH]->attachInput(&inChannel[10]);
+    outChannel[OUT_MOTOR_P_CH]->attachInput(&inChannel[10]);
+    outChannel[OUT_STEPPER_CH]->attachInput(&inChannel[11]);
+
 }
 
 void loop() {
@@ -118,19 +124,17 @@ void loop() {
 	}
 	
 	//Output sensor data
-	for(int i = 1; i <= 8; i++) {
+    for(int i = 1; i <= 8; i++) {
 		currPacket.channel[i - 1] = inChannel[i].getValue();
 	}
+    
 	currPacket.pack();
 	currPacket.transmit();
 	packetIndex = lastPacketIndex;
 	
 	//update output channels
-	for(int i = 1; i < OUT_NUM_CHANS; i++) outChannel[i]->updateChannel();
-	
-	//motor1.setDir(CCW);
+	for(int i = 2; i < OUT_NUM_CHANS; i++) outChannel[i]->updateChannel();
 	
 	//Spin the stepper motor...
-	delay(20);
 	stepper1.step();
 }

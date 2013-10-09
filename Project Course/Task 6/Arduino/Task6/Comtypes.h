@@ -24,7 +24,7 @@ class InputChannel {
 };
 
 class OutputChannel {
-	private:
+	protected:
 	InputChannel * source;
 	
     public:

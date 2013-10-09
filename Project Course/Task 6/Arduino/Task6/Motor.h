@@ -14,7 +14,51 @@
 #define FORWARD  CW
 #define BACKWARD CCW
 
-class Motor : public OutputChannel
+#define Kp .4   // PID proportional control Gain
+#define Kd 1    // PID Derivitave control gain
+
+
+// PID loop time every 100ms
+#define LOOPTIME 100                     
+
+
+
+void init_motor();
+void doEncoderA();
+void doEncoderB();
+void calcMotorData();
+void setMotorSpeed(uint8_t spd);
+void setMotorDir(uint8_t dir);
+
+class MotorSpeedController : public OutputChannel
+{
+	public:
+	void setValue(uint16_t val);
+    void updateChannel();
+    
+    private:
+    int speed_req;              //Speed Set Point
+    int updatePID(int command, int targetValue, int currentValue);
+    int last_error; // Last error
+    unsigned long lastMilli;    // loop timing 
+};
+
+class MotorPositionController : public OutputChannel
+{
+    public:
+	void setValue(uint16_t val);
+    //void updateChannel();
+    void update();
+    
+    //private:
+    int degree_req; //Position Set Point
+    int updatePID(int command, int targetValue, int currentValue);
+    int PWM_val;          //pid control signal
+    int last_error; // Last error
+};
+
+/* REMOVED FOR TEMPORARY SANITY
+class Motor
 {
 	public:
 	void setValue(uint16_t val);
@@ -34,7 +78,7 @@ class Motor : public OutputChannel
 	uint8_t _l2_pin;
 };
 
-void set_m_dir(uint8_t dir);
+*/
 
 
 

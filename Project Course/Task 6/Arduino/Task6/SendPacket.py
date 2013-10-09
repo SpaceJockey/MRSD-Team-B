@@ -2,7 +2,7 @@ from serial import *
 import time
 import struct
 
-port = "COM14"
+port = "COM15"
 baudRate= 9600
 ser = Serial(port, baudRate, timeout=0, writeTimeout=0)
 #timeout=0,
@@ -12,8 +12,8 @@ time.sleep(3)
 packet = b''
 
 thetaL = [0,]*13
-thetaL[2]=4
-thetaL[1]=9
+thetaL[2]=2
+thetaL[1]=7
 thetaL[3]=0xffff
 thetaL[0]=0xDEAD
 thetaL[12] = 0xBEEF
