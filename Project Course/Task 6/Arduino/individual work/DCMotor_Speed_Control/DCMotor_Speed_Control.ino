@@ -44,7 +44,6 @@ void setup()
   analogWrite(En1, PWM_val);
 
 }
-////////////////////////////////////////// SETUP PINS END////////////////////////////////////////////
 
 
 // function to read encoder in interrupt
@@ -116,7 +115,7 @@ void motor_dc(char c)
 
 void getMotorData()  {                                                        // calculate speed
 
-  speed_act = ((encoder0Pos - countAnt)*(60*(1000/LOOPTIME)))/(180);          // 180 pulse each revolution
+  speed_act = ((encoder0Pos - countAnt)*(60*(1000/LOOPTIME)))/(360);          // 360 pulse each revolution
   countAnt = encoder0Pos;                 
 }
 
@@ -129,14 +128,11 @@ int updatePid(int command, int targetValue, int currentValue)   {             //
 
 }
 
-//////////////////////////////////
-void loop(){ //Do stuff here
-  degree = (encoder0Pos*2)%360 ;
-  revolution = encoder0Pos/180 ;
-  speed_req = 150; // input speed required. The max speed is only 60rpm
-  
+// Motor Speed controller function
+void motor_speed(int speed_desired)
+{
   // if the speed required is negative, then the motor rotate backwards
-  if (speed_req < 0)
+  if (speed_desired < 0)
   {
     motor_dc('b');
   }
@@ -146,12 +142,19 @@ void loop(){ //Do stuff here
   if((millis()-lastMilli) >= LOOPTIME)   {                                    // enter timed loop
     lastMilli = millis();
     getMotorData();                                                           // calculate speed
-    PWM_val= updatePid(PWM_val, speed_req, speed_act);                        // compute PWM value
+    PWM_val= updatePid(PWM_val, speed_desired, speed_act);                        // compute PWM value
     analogWrite(En1, PWM_val);                                               // send PWM to motor
   }
     
   Serial.print("Speed RPM: ");
   Serial.println(speed_act);
+
+}
+
+//////////////////////////////////
+void loop()
+{
+  motor_speed(100);  // motor speed controller, desired input in RPM units (Max 80)
 }
 
 
