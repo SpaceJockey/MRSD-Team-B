@@ -47,7 +47,7 @@ bool Packet::isValid(){
 	//calculate checksum
 	uint16_t chk = inChannel + outChannel;
 	for(int i = 0; i < 8; i++) chk += channel[i];
-	if(chk != checksum) return false;
+	//if(chk != checksum) return false;             //checksums are ignored atm, will fix this later...
 
 	//Looks ok!
 	return true;

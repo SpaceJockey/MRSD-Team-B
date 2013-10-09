@@ -35,10 +35,9 @@ uint8_t packetIndex; 	//points to the current packet, packetIndex ^
 #define lastPacketIndex (packetIndex ^ 0x01)
 #define currPacket 		packetBuffer[packetIndex]
 #define lastPacket 		packetBuffer[lastPacketIndex]
-#define PSIZE 		sizeof(Packet)
-#define PBUF_SIZE 	(PSIZE * 2) - 1 //worst case scenario, 1.99 packets in buffer
+#define PSIZE 			sizeof(Packet)
 
-char recvChars[PBUF_SIZE]; 
+char recvChars[PSIZE + 1]; 
 Packet recvPacket;
 
 //Output Channel Array
@@ -62,7 +61,6 @@ void setup() {
 	//Start Serial
 	Serial.begin(SERIAL_SPEED);
 	Serial.flush();
-	Serial.setTimeout(0);
 	
 	//Initialize Packet data structures
 	errorPacket.inChannel = 0xff;
@@ -91,24 +89,10 @@ void loop() {
 		inChannel[IN_TEST_CH].setValue(inChannel[IN_TEST_CH].getValue() + 0x0100);
 	
 	//Check Serial and parse packets
-	bool gotPacket = false;
+	//TODO: add findUntil to fix dropped characters
 	if (Serial.available() >= PSIZE) {
-		uint8_t end = Serial.readBytes(recvChars, PBUF_SIZE) - PSIZE;
+		Serial.readBytes((char *) recvPacket.chars, PSIZE);
 		
-		//scan to packet header
-		uint8_t i = 0;
-		while(i <= end){
-			if ((uint16_t) recvChars[i] == 0xDEAD) {
-				for(uint8_t n = 0; n < PSIZE; n++){
-					recvPacket.chars[n] = recvChars[i + n];
-				}
-				gotPacket = true;
-				break;
-			}
-		}
-	}
-	
-	if(gotPacket) {
 		if( recvPacket.isValid()){
 			if(recvPacket.isError()){ //recieved a request for retransmission
 				lastPacket.transmit();
@@ -137,7 +121,8 @@ void loop() {
 	packetIndex = lastPacketIndex;
 	
 	//update output channels
-	for(int i = 1; i < OUT_NUM_CHANS; i++) outChannel[i]->updateChannel();
+	//TODO: Re-enable LED Channel
+	for(int i = 2; i < OUT_NUM_CHANS; i++) outChannel[i]->updateChannel();
 	
 	//motor1.setDir(CCW);
 	
