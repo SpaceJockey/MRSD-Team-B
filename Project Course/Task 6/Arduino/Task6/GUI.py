@@ -6,7 +6,7 @@ import random
 from copy import copy
 
 # Open Serial Port
-port = "COM5"
+port = "COM14"
 baudRate= 9600
 ser = Serial(port, baudRate, timeout=0,writeTimeout=0)
 time.sleep(2)
