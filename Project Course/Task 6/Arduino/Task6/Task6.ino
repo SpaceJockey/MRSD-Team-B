@@ -130,29 +130,22 @@ void stateChange(){
 void loop() {
 	//update input channels
 		//analog input Channels
-
-		inChannel[IN_POT_CH].setValue(map(analogRead(POTENTIOMETER), 30, 950, 0, 0xffff));
-
+        
         ptotal = ptotal - pReadings[pindex];
-        pReadings[pindex] = analogRead(PRESSURE);
+        pReadings[pindex] = analogRead(POTENTIOMETER);
         ptotal = ptotal + pReadings[pindex];
         pindex = pindex+1;
         if (pindex>=pNumReadings)
             pindex = 0;
         paverage = ptotal/pNumReadings;
+		inChannel[IN_POT_CH].setValue(map(paverage, 30, 950, 0, 0xffff));
+
             
-		inChannel[IN_PRESSURE_CH].set10BitValue(paverage);
+		inChannel[IN_PRESSURE_CH].set10BitValue(analogRead(PRESSURE));
 
 
-        rtotal = rtotal - rReadings[rindex];
-        rReadings[rindex] = analogRead(RANGEFINDER);
-        rtotal = rtotal + rReadings[rindex];
-        rindex = rindex+1;
-        if (rindex>=rNumReadings)
-            rindex = 0;
-        raverage = rtotal/rNumReadings;
         
-		inChannel[IN_RANGE_CH].set10BitValue(raverage);
+		inChannel[IN_RANGE_CH].set10BitValue(analogRead(RANGEFINDER));
 
 		//Dummy Test Channel (Constant Triangle Wave)
 		inChannel[IN_TEST_CH].setValue(inChannel[IN_TEST_CH].getValue() + 0x0100);
