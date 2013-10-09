@@ -17,6 +17,7 @@
 #define IN_PRESSURE_CH 2
 #define IN_RANGE_CH 3
 
+#define IN_HIGH_CH 7 //Always on - Channel 7
 #define IN_TEST_CH 8 //steady triangle wave - Channel 8
 
 //Input Channel Array
@@ -73,9 +74,13 @@ void setup() {
 	//Init the servo motor
 	servo1.attach(SERVO1);
 	
+	//initialize channels
+	inChannel[IN_HIGH_CH].setValue(0xFFFF);
+	inChannel[9].setValue(0x8000);
+	
 	outChannel[OUT_LED_CH]->attachInput(&inChannel[IN_TEST_CH]);
 	outChannel[OUT_STEPPER_CH]->attachInput(&inChannel[IN_TEST_CH]);
-	outChannel[OUT_SERVO_CH]->attachInput(&inChannel[IN_POT_CH]);
+	outChannel[OUT_SERVO_CH]->attachInput(&inChannel[9]);
 }
 
 void loop() {
@@ -98,8 +103,8 @@ void loop() {
 				lastPacket.transmit();
 			}else{
 				//Parse packet
-				for(uint8_t i = 1; i <= 8; i++) {
-					inChannel[i + 8].setValue(recvPacket.channel[i - 1]);
+				for(uint8_t i = 0; i < 8; i++) {
+					inChannel[i + 9].setValue(recvPacket.channel[i]);
 				}
 				
 				if(recvPacket.outChannel) {
@@ -121,8 +126,7 @@ void loop() {
 	packetIndex = lastPacketIndex;
 	
 	//update output channels
-	//TODO: Re-enable LED Channel
-	for(int i = 2; i < OUT_NUM_CHANS; i++) outChannel[i]->updateChannel();
+	for(int i = 1; i < OUT_NUM_CHANS; i++) outChannel[i]->updateChannel();
 	
 	//motor1.setDir(CCW);
 	
