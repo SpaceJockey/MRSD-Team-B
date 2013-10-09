@@ -53,8 +53,8 @@ class Packet {
 	union {
 		struct {
 			uint16_t header;
-			uint8_t in_chan;
-			uint8_t out_chan;
+			uint8_t inChannel;
+			uint8_t outChannel;
 			uint16_t channel[8];
 			uint16_t checksum;
 			uint16_t footer;
@@ -62,8 +62,8 @@ class Packet {
 		uint8_t chars[24];
 	};
 
-	bool is_valid();
-	bool is_error();
+	bool isValid();
+	bool isError();
 	void pack();
 	void transmit();
 };

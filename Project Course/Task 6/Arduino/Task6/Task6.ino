@@ -35,6 +35,11 @@ uint8_t packetIndex; 	//points to the current packet, packetIndex ^
 #define lastPacketIndex (packetIndex ^ 0x01)
 #define currPacket 		packetBuffer[packetIndex]
 #define lastPacket 		packetBuffer[lastPacketIndex]
+#define PSIZE 		sizeof(Packet)
+#define PBUF_SIZE 	(PSIZE * 2) - 1 //worst case scenario, 1.99 packets in buffer
+
+char recvChars[PBUF_SIZE]; 
+Packet recvPacket;
 
 //Output Channel Array
 #define OUT_ZERO_CH 0 //nothing connected to Channel 0
@@ -56,11 +61,14 @@ void setup() {
 	
 	//Start Serial
 	Serial.begin(SERIAL_SPEED);
+	Serial.flush();
+	Serial.setTimeout(0);
 	
 	//Initialize Packet data structures
-	errorPacket.in_chan = 0xff;
-	errorPacket.out_chan = 0xff;
+	errorPacket.inChannel = 0xff;
+	errorPacket.outChannel = 0xff;
 	errorPacket.pack();
+	recvPacket.pack();
 	
 	//Init the stepper motor
 	stepper1.enable();
@@ -83,8 +91,42 @@ void loop() {
 		inChannel[IN_TEST_CH].setValue(inChannel[IN_TEST_CH].getValue() + 0x0100);
 	
 	//Check Serial and parse packets
-	//Serial.println(inChannel[IN_POT_CH].getValue());
-	//TODO: Implement this!
+	bool gotPacket = false;
+	if (Serial.available() >= PSIZE) {
+		uint8_t end = Serial.readBytes(recvChars, PBUF_SIZE) - PSIZE;
+		
+		//scan to packet header
+		uint8_t i = 0;
+		while(i <= end){
+			if ((uint16_t) recvChars[i] == 0xDEAD) {
+				for(uint8_t n = 0; n < PSIZE; n++){
+					recvPacket.chars[n] = recvChars[i + n];
+				}
+				gotPacket = true;
+				break;
+			}
+		}
+	}
+	
+	if(gotPacket) {
+		if( recvPacket.isValid()){
+			if(recvPacket.isError()){ //recieved a request for retransmission
+				lastPacket.transmit();
+			}else{
+				//Parse packet
+				for(uint8_t i = 1; i <= 8; i++) {
+					inChannel[i + 8].setValue(recvPacket.channel[i - 1]);
+				}
+				
+				if(recvPacket.outChannel) {
+					outChannel[recvPacket.outChannel]->attachInput(&inChannel[recvPacket.inChannel]);
+				}
+			}
+		}else{
+			//Got a bad packet, request re-transmit
+			errorPacket.transmit();
+		}
+	}
 	
 	//Output sensor data
 	for(int i = 1; i <= 8; i++) {

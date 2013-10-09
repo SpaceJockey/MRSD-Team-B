@@ -40,12 +40,12 @@ Packet::Packet() {
 }
 
 //Check a packet to verify no transmission errors
-bool Packet::is_valid(){
+bool Packet::isValid(){
 	//Check headers and footers
 	if ((header != 0xDEAD) || (footer != 0xBEEF)) return false;
 	
 	//calculate checksum
-	uint16_t chk = in_chan + out_chan;
+	uint16_t chk = inChannel + outChannel;
 	for(int i = 0; i < 8; i++) chk += channel[i];
 	if(chk != checksum) return false;
 
@@ -54,8 +54,8 @@ bool Packet::is_valid(){
 }
 
 //Check to see if this is an error packet
-bool Packet::is_error(){
-	return (in_chan == 0xFF) && (out_chan == 0xFF); 
+bool Packet::isError(){
+	return (inChannel == 0xFF) && (outChannel == 0xFF); 
 }
 
 //pack for transmission
@@ -65,7 +65,7 @@ void Packet::pack(){
 	footer = 0xBEEF;
 	
 	//calculate checksum
-	checksum = in_chan + out_chan;
+	checksum = inChannel + outChannel;
 	for(int i = 0; i < 8; i++) checksum += channel[i];
 }
 
