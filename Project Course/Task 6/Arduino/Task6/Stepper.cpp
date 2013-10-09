@@ -7,12 +7,19 @@
 #import <Arduino.h>
 
 //sets ths speed from an input channel
+//gets called once per loop
 void Stepper::setValue(uint16_t val) {
-	if(val > MID_16){
-		setDir(CW);
-	}else{
-		setDir(CCW);
-	}
+    desiredPos = map(val, 0, 0xFFFF, -400, 400); //+- 400 steps roughly equals 360 degrees
+    if (desiredPos != currPos) {
+        if( desiredPos < currPos) {
+            setDir(CCW);
+            currPos -= 4;
+        } else {
+            setDir(CW);
+            currPos += 4;
+        }
+        for(uint8_t  i = 0; i < 4; i++) step();
+    }
 } 
 
 //sets ths motor step size using the constants in Stepper.h

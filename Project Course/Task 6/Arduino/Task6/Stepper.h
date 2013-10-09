@@ -54,6 +54,8 @@ class Stepper : public OutputChannel
 
 		void step();
 	private:
+        int16_t currPos;
+        int16_t desiredPos;
 };
 
 #endif

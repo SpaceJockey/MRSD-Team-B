@@ -21,12 +21,12 @@
 // PID loop time every 100ms
 #define LOOPTIME 100           
 
-static volatile int16_t  encoderPosition; 
-static int16_t  lastPosition;
-static uint16_t lastMilli;
+volatile int16_t  encoderPosition; 
+int16_t  lastPosition;
+uint16_t lastMilli;
 
-static int motorSpeedCurr; // current speed
-static int motorDegCurr;   // current position           
+int motorSpeedCurr; // current speed
+int motorDegCurr;   // current position           
 
 
 

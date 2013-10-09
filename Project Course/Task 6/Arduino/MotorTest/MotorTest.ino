@@ -1,6 +1,6 @@
 #import <Arduino.h>
-#import "../Task6/Motor.h"
-#import "../Task6/Pinout.h"
+#import "Motor.h"
+#import "Pinout.h"
 
 void setup() {
     Serial.begin(9600);
@@ -11,9 +11,9 @@ void setup() {
 
 void loop() {
     calcMotorData();
-    print(encoderPosition);
-    print(" : ");
-    print(motorSpeedCurr); // current speed
-    print(" : ");
-    println(motorDegCurr);   // current position       
+    Serial.print(encoderPosition);
+    Serial.print(" : ");
+    Serial.print(motorSpeedCurr); // current speed
+    Serial.print(" : ");
+    Serial.println(motorDegCurr);   // current position       
 }
