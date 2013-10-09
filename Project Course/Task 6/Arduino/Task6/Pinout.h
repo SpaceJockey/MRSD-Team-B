@@ -13,7 +13,7 @@
 #define RANGEFINDER 	A0 //IR rangefinder	
 #define POTENTIOMETER 	A1 //Potentiometer dial
 #define PRESSURE 		A2 //Resistive Pressure sensors
-
+#define IN_BUTTON       A3 //Button
 
 //DC H-Bridge Motor Driver Pins
 #define EN1   10 	//Enable pin for motor 1

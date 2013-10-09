@@ -10,8 +10,6 @@
 #import "Stepper.h"
 #import "Motor.h"
 
-#define IN_BUTTON A3
-
 //Channel definitions
 #define IN_ZERO_CH 0 //Channel 0 is always 0 (like /dev/null)
 #define IN_POT_CH 1
@@ -138,13 +136,10 @@ void loop() {
         if (pindex>=pNumReadings)
             pindex = 0;
         paverage = ptotal/pNumReadings;
-		inChannel[IN_POT_CH].setValue(map(paverage, 30, 950, 0, 0xffff));
+		inChannel[IN_POT_CH].setValue(map(paverage, 35, 944, 0, 0xffff));
 
             
 		inChannel[IN_PRESSURE_CH].set10BitValue(analogRead(PRESSURE));
-
-
-        
 		inChannel[IN_RANGE_CH].set10BitValue(analogRead(RANGEFINDER));
 
 		//Dummy Test Channel (Constant Triangle Wave)

@@ -86,7 +86,8 @@ def processPacket(thetas):
     rangeVal = sensors[getChan('Range')]
     potVal = sensors[getChan('Potentiometer')]
     triVal = sensors[getChan('Triangle')]
-    encoderVal = sensors[getChan('Encoder')]
+    #encoderVal = sensors[getChan('Encoder')]
+    encoderVal = 0.0
     
 def getVal(name):
     global forceVal, rangeVal, potVal,triVal,encoderVal
