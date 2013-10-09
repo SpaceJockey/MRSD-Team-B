@@ -10,6 +10,8 @@
 #import "Stepper.h"
 #import "Motor.h"
 
+#define IN_BUTTON A3
+
 //Channel definitions
 #define IN_ZERO_CH 0 //Channel 0 is always 0 (like /dev/null)
 #define IN_POT_CH 1
@@ -39,6 +41,8 @@ uint8_t packetIndex; 	//points to the current packet, packetIndex ^
 
 char recvChars[PSIZE + 1]; 
 Packet recvPacket;
+volatile int state = 0;
+volatile int time = 0;
 
 //Output Channel Array
 #define OUT_ZERO_CH 0 //nothing connected to Channel 0
@@ -89,7 +93,24 @@ void setup() {
     outChannel[OUT_MOTOR_P_CH]->attachInput(&inChannel[10]);
     outChannel[OUT_STEPPER_CH]->attachInput(&inChannel[11]);
 
+    attachInterrupt(IN_BUTTON,stateChange, RISING);
 }
+
+ // Button one switches states
+void stateChange(){
+  if(millis()-time>=200){
+    time = millis();
+    if(state == 0){
+      state = 1;
+    }else if(state == 1){
+      state = 2;
+    }else if(state == 2){
+      state = 0;
+    }
+     Serial.print("Now in state ");
+     Serial.println(state);
+   }
+ }
 
 void loop() {
 	//update input channels
