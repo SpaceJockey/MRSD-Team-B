@@ -7,12 +7,9 @@
 #define LOOPTIME        100                     // PID loop time every 100ms
 unsigned long lastMilli = 0;                    // loop timing 
 unsigned long lastMilliPrint = 0;               // loop timing
-int degree_req = 0;                             // speed (Set Point)
-int degree_act = 0;                             // speed (actual value)
-int offset_degree = 0;                          // offset degree
 int PWM_val = 0;                                // (25% = 64; 50% = 127; 75% = 191; 100% = 255)
 volatile long count = 0;                        // rev counter
-float Kp =   .4;                                // PID proportional control Gain
+float Kp =   .2;                                // PID proportional control Gain
 float Kd =    1;                                // PID Derivitave control gain
 long encoder0Pos = 0;
 int degree = 0 ;                                // degree of DC motor shaft
@@ -21,9 +18,10 @@ float pidTerm = 0;                              // PID correction
 int error=0;                                    // error calculation = target value- actual value                     
 static int last_error=0;                        // Last error
 static long countAnt = 0;                       // last count
-int v;
-int offset = 50 ;                               // smallest PWM signal to move the motor
-int maxV = 150 ;                                // max PWM signal allowed for position control , we hope not too fast
+
+// variable for motor position
+int degree_req = 0;                             // speed (Set Point)
+int degree_act = 0;                             // speed (actual value)
 
 
 
@@ -119,15 +117,11 @@ void motor_dc(char c)
 }
 
 
-void getMotorData()  {                                                        // calculate speed
-
-//  degree_act = ((encoder0Pos - countAnt)*(60*(1000/LOOPTIME)))/(180);          // 180 pulse each revolution
-//  countAnt = encoder0Pos;               
+void getMotorData_position()  {                                                        // calculate speed              
   degree_act = (encoder0Pos) ;
-  
 }
 
-int updatePid(int command, int targetValue, int currentValue)   {             // compute PWM value
+int updatePid_position(int command, int targetValue, int currentValue)   {             // compute PWM value
                              
   error = abs(targetValue) - abs(currentValue); 
   if (error <0)
@@ -149,22 +143,21 @@ int updatePid(int command, int targetValue, int currentValue)   {             //
 
 }
 
-//////////////////////////////////
-void loop(){ //Do stuff here
+void motor_position(int degree_desired)
+{
   degree = (encoder0Pos)%360 ;
   revolution = encoder0Pos/360 ; // encoder counts 360 pulses each degree
-  //degree_req = (degree_req%360);
-    getMotorData();                                                           // calculate speed
-    PWM_val= updatePid(PWM_val, degree_req, degree_act);                        // compute PWM value
+    getMotorData_position();                                                           // calculate speed
+    PWM_val= updatePid_position(PWM_val, degree_desired, degree_act);                        // compute PWM value
     analogWrite(En1, PWM_val);                                               // send PWM to motor
     
   Serial.print("Degree: ");
-  Serial.print(degree_act);
-  Serial.print("Encoder count: ");
-  Serial.println(encoder0Pos);
+  Serial.println(degree_act);
+}
 
-  degree_req = 720; // input degree required
-
+//////////////////////////////////
+void loop(){ 
+  motor_position(120);
 }
 
 
