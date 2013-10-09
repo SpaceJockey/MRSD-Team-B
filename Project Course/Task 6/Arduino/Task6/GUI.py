@@ -1,4 +1,4 @@
-from Tkinter import *
+from tkinter import *
 from serial import *
 import time
 import struct
@@ -6,7 +6,7 @@ import random
 from copy import copy
 
 # Open Serial Port
-port = "COM14"
+port = "COM5"
 baudRate= 9600
 ser = Serial(port, baudRate, timeout=0,writeTimeout=0)
 time.sleep(1)
@@ -16,13 +16,11 @@ root = Tk()
 root.wm_title("MRSD Sensors and Motors Lab")
 root.config(background="#DDDDDD")
 
-thermalVal, forceVal, lightVal, rangeVal,potVal = (1.0,)*5
-sensor_options = ('Local','Thermal','Force','Light','Range','Potentiometer','Test')
+forceVal, rangeVal,potVal,triVal = (1.0,)*4
+sensor_options = ('Local','On','Off','Force','Range','Potentiometer','Triangle')
 data = [0.0,]*100
 
-thermalVar = StringVar()
 forceVar = StringVar()
-lightVar = StringVar()
 rangeVar = StringVar()
 potVar = StringVar()
 
@@ -74,53 +72,63 @@ def isValid(thetas):
         return True
                 
 def processPacket(thetas):         
-    global thermalVal, forceVal, lightVal, rangeVal, potVal, data, plotWin, wChan,old_plot
-    thermalVal = thetas[10]
-    potVal = thetas[3]
+    global forceVal, rangeVal, potVal, triVal
+    sensors = thetas[2:]
+    forceVal = sensors[getChan('Force')]
+    rangeVal = sensors[getChan('Range')]
+    potVal = sensors[getChan('Potentiometer')]
+    triVal = sensors[getChan('Triangle')]
     
 def getVal(name):
-    global thermalVal, forceVal, lightVal, rangeVal, potVal
+    global forceVal, rangeVal, potVal,triVal
     if name=="Local":
         return 0.0
-    elif name=="Thermal":
-        return thermalVal
+    elif name=="On":
+        return 100.0
+    elif name=="Off":
+        return 0.0
     elif name=="Force":
         return forceVal
-    elif name=="Light":
-        return lightVal
     elif name=="Range":
         return rangeVal
     elif name=="Potentiometer":
         return potVal   
-    elif name=="Test":
-        return 0.0
+    elif name=="Triangle":
+        return triVal
     
 def getChan(name):
     if name=="Local":
         return 0
-    elif name=="Thermal":
-        return 8
+    elif name=="On":
+        return 7
+    elif name=="Off":
+        return 0
     elif name=="Force":
-        return 8
-    elif name=="Light":
-        return 8
+        return 2
     elif name=="Range":
-        return 8
+        return 3
     elif name=="Potentiometer":
-        return 8   
-    elif name=="Test":
+        return 1  
+    elif name=="Triangle":
         return 8
+        
+def getChanOut(name):
+    if name=="Servo":
+        return 4
+    elif name=="DCPos":
+        return 2
+    elif name=="DCVel":
+        return 3
+    elif name=="Stepper":
+        return 5     
     
 def updateSensors():
-    global thermalVal, forceVal, lightVal, rangeVal, potVal, data, plotWin
-    global wChan, old_plot, servo_chan_val, old_servo, dc_chan_val, old_dc, stepper_chan_val, old_stepper
+    global wChan, old_plot, servo_chan_val, old_servo, dc_chan_val, old_dc, stepper_chan_val, old_stepper, control_type_val, old_type, data, plotWin
     
     # UPDATE SENSOR READOUTS
-    thermalVar.set("%4.3f" % thermalVal)
-    forceVar.set("%4.3f" % forceVal)
-    lightVar.set("%4.3f" % lightVal)
-    rangeVar.set("%4.3f" % rangeVal)
-    potVar.set("%4.3f" % potVal)
+    forceVar.set("%4.3f" % getVal('Force'))
+    rangeVar.set("%4.3f" % getVal('Range'))
+    potVar.set("%4.3f" % getVal('Potentiometer'))
 
     # UPDATE DATA BUFFER AND PLOT
     if old_plot != wChan.get():
@@ -137,25 +145,29 @@ def updateSensors():
     # SERVO MOTOR
     if old_servo != servo_chan_val.get():
         old_servo = servo_chan_val.get()
-        thetaL[2]=4
+        thetaL[2]=getChanOut('Servo')
         thetaL[1]=getChan(old_servo)
         sendPacket(thetaL)        
     
     # DC MOTOR
-    if old_dc != dc_chan_val.get():
+    if old_dc != dc_chan_val.get() or old_type != control_type_val.get():
         old_dc = dc_chan_val.get()
-        thetaL[2]=2
-        thetaL[1]=getChan(old_servo)
+        old_type = control_type_val.get()
+        
+        if old_type == 'Position Control':
+            thetaL[2]=getChanOut('DCPos')
+        elif old_type == 'Velocity Control':
+            thetaL[2]=getChanOut('DCVel')
+        thetaL[1]=getChan(old_dc)
         sendPacket(thetaL)
     
     # STEPPER MOTOR
     if old_stepper != stepper_chan_val.get():
         old_stepper = stepper_chan_val.get()
-        thetaL[2]=3
-        thetaL[1]=getChan(old_servo) 
+        thetaL[2]=getChanOut('Stepper')
+        thetaL[1]=getChan(old_stepper) 
         sendPacket(thetaL)        
 
-    
     root.after(100,updateSensors)
     
 def updatePlot(data,plotWin):
@@ -164,22 +176,43 @@ def updatePlot(data,plotWin):
     for i in range(1,100):
         plotWin.create_line((i-1)*2,d[i-1],i*2,d[i], fill="red")
     
-# 
+
 def servoSet():
-    print(servo_val.get());
+    global old_servo
+    if old_servo == "Local":
+        theta = [0,]*13
+        theta[2]=getChanOut('Servo')
+        theta[1]=9
+        theta[3]=int(int("0xFFFF",0)*servo_val.get()/90)
+        sendPacket(theta)
     
+
+# dcUpdate: Fires whenever the DC velocity slider is moved
+def dcUpdate(val):
+    global old_dc,old_type
+    if old_dc == "Local":
+        theta = [0,]*13
+        theta[1]=10 
+        if old_type == 'Position Control':
+            theta[2]=getChanOut('DCPos')
+            theta[4] = int(int("0xFFFF",0)*(int(val)+100)/200);
+        elif old_type == 'Velocity Control':
+            theta[2]=getChanOut('DCVel')
+            theta[4] = int(int("0xFFFF",0)*(int(val)+100)/200);
+           
+        
+        sendPacket(theta)
+        
+        
 # stepperMove: Fires whenever the "Move" button  is pressed in the stepper frame
 def stepperMove():
-    print (stepper_val.get());
-
-# dcUpdate: Fires whenever the dc velocity slider is moved
-def dcUpdate(val):
-    print (val);
-    
-# dcMove: Fires whenever the "Move" button is pressed in the dc frame
-def dcMove():
-    print ("");
-
+    global old_stepper
+    if old_stepper == "Local":
+        theta = [0,]*13
+        theta[2]=getChanOut('Stepper')
+        theta[1] = 11
+        theta[5] = int(int("0xFFFF",0)*stepper_val.get()/90)
+        sendPacket(theta)
  
 #########################################
 ########## SET UP GUI ELEMENTS ##########
@@ -193,17 +226,12 @@ leftFrame.grid(row=0, column=0, padx=10, pady=2)
 
 # Sensor Readouts
 Label(leftFrame, text="Sensor Outputs").grid(row=0, column=0, columnspan=2,padx=2, pady=2)
-Label(leftFrame, text="Thermal:").grid(row=1,column=0,padx=2,pady=1, sticky=E)
-Label(leftFrame, text="Force:").grid(row=2,column=0,padx=2,pady=1, sticky=E)
-Label(leftFrame, text="Light:").grid(row=3,column=0,padx=2,pady=1, sticky=E)
-Label(leftFrame, text="Range:").grid(row=4,column=0,padx=2,pady=1, sticky=E)
-Label(leftFrame, text="Potentiometer:").grid(row=5,column=0,padx=2,pady=1, sticky=E)
-
-Label(leftFrame, textvariable=thermalVar).grid(row=1,column=1,pady=1,stick=W)
-Label(leftFrame, textvariable=forceVar).grid(row=2,column=1,pady=1,stick=W)
-Label(leftFrame, textvariable=lightVar).grid(row=3,column=1,pady=1,stick=W)
-Label(leftFrame, textvariable=rangeVar).grid(row=4,column=1,pady=1,stick=W)
-Label(leftFrame, textvariable=potVar).grid(row=5,column=1,pady=1,stick=W)
+Label(leftFrame, text="Force:").grid(row=1,column=0,padx=2,pady=1, sticky=E)
+Label(leftFrame, textvariable=forceVar).grid(row=1,column=1,pady=1,stick=W)
+Label(leftFrame, text="Range:").grid(row=2,column=0,padx=2,pady=1, sticky=E)
+Label(leftFrame, textvariable=rangeVar).grid(row=2,column=1,pady=1,stick=W)
+Label(leftFrame, text="Potentiometer:").grid(row=3,column=0,padx=2,pady=1, sticky=E)
+Label(leftFrame, textvariable=potVar).grid(row=3,column=1,pady=1,stick=W)
 
 # Plot Window
 plotWin = Canvas(leftFrame, width=200, height=110,bg="#FFFFFF")
@@ -228,7 +256,7 @@ Label(rightFrame, text="Servo:").grid(row=1,column=0,padx=2,pady=1, sticky=E)
 servoFrame = Frame(rightFrame,bg="#DEDEDE")
 servoFrame.grid(row=1,column=1,columnspan=2,pady=10,sticky=W)
 Label(servoFrame,text="Move to position:").grid(row=0,column=0, pady=5, sticky=W,padx=2)
-servo_val = StringVar()
+servo_val = IntVar()
 servo_entry = Entry(servoFrame,textvariable=servo_val,width=6).grid(row=0,column=1)
 servo_set = Button(servoFrame,text="Move",command=servoSet).grid(row=0,column=2,padx=5)
 servo_chan_val = StringVar()
@@ -246,7 +274,8 @@ old_type = ''
 control_options = ('Position Control','Velocity Control')
 control_type = OptionMenu(dcFrame,control_type_val,*control_options).grid(row=0,column=0,columnspan=3,pady=2)
 control_type_val.set(control_options[0])
-dc_vel_val = DoubleVar()
+dc_vel_val = IntVar()
+dc_vel_val.set(-100)
 dc_scale = Scale(dcFrame, command=dcUpdate, variable=dc_vel_val,orient=HORIZONTAL, from_=-100.0, to=100.0, tickinterval=50, length=200,width=10)
 dc_scale.grid(row=1, column = 0, columnspan=3, padx=5,pady=2)
 dc_chan_val = StringVar()
@@ -260,8 +289,8 @@ Label(rightFrame, text="Stepper:",).grid(row=3,column=0,padx=2,pady=1, sticky=E)
 stepperFrame = Frame(rightFrame,bg="#DEDEDE")
 stepperFrame.grid(row=3,column=1,columnspan=2,pady=10,sticky=W)
 Label(stepperFrame,text="Move by # degrees:").grid(row=0,column=0, pady=5, sticky=W,padx=2)
-stepper_val = StringVar()
-stepper_entry = Entry(stepperFrame,textvariable=servo_val,width=6).grid(row=0,column=1,sticky=W)
+stepper_val = IntVar()
+stepper_entry = Entry(stepperFrame,textvariable=stepper_val,width=6).grid(row=0,column=1,sticky=W)
 stepper_set = Button(stepperFrame,text="Move",command=stepperMove).grid(row=0,column=2,padx=5,sticky=W)
 stepper_chan_val = StringVar()
 old_stepper = ''
