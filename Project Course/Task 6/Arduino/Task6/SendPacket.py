@@ -13,8 +13,8 @@ packet = b''
 
 thetaL = [0,]*13
 thetaL[2]=4
-thetaL[1]=0
-
+thetaL[1]=9
+thetaL[3]=0xffff
 thetaL[0]=0xDEAD
 thetaL[12] = 0xBEEF
 
@@ -24,13 +24,10 @@ txBuf = ctypes.create_string_buffer(24)
 struct.pack_into("=HBBHHHHHHHHHH", txBuf, 0, *tuple(thetaL))
 ser.write(txBuf)
 time.sleep(1);
-thetaL[1]=8
-print(thetaL);
-struct.pack_into("=HBBHHHHHHHHHH", txBuf, 0, *tuple(thetaL))
-ser.write(txBuf)
-time.sleep(1);
+
 thetaL[1]=7
 thetaL[2]=1
+thetaL[3]=0x0
 print(thetaL);
 struct.pack_into("=HBBHHHHHHHHHH", txBuf, 0, *tuple(thetaL))
 ser.write(txBuf)

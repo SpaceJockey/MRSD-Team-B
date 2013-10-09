@@ -1,4 +1,4 @@
-from Tkinter import *
+from tkinter import *
 from serial import *
 import time
 import struct
@@ -17,7 +17,7 @@ root.wm_title("MRSD Sensors and Motors Lab")
 root.config(background="#DDDDDD")
 
 thermalVal, forceVal, lightVal, rangeVal,potVal = (1.0,)*5
-sensor_options = ('Local','Thermal','Force','Light','Range','Potentiometer','Test')
+sensor_options = ('Local','On','Off','Force','Range','Potentiometer','Triangle')
 data = [0.0,]*100
 
 thermalVar = StringVar()
@@ -92,23 +92,23 @@ def getVal(name):
         return rangeVal
     elif name=="Potentiometer":
         return potVal   
-    elif name=="Test":
+    elif name=="Triangle":
         return 0.0
     
 def getChan(name):
     if name=="Local":
         return 0
-    elif name=="Thermal":
-        return 8
+    elif name=="On":
+        return 7
+    elif name=="Off":
+        return 0
     elif name=="Force":
-        return 8
-    elif name=="Light":
-        return 8
+        return 2
     elif name=="Range":
-        return 8
+        return 3
     elif name=="Potentiometer":
-        return 8   
-    elif name=="Test":
+        return 1  
+    elif name=="Triangle":
         return 8
     
 def updateSensors():

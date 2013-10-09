@@ -80,7 +80,7 @@ void setup() {
 	
 	outChannel[OUT_LED_CH]->attachInput(&inChannel[IN_TEST_CH]);
 	outChannel[OUT_STEPPER_CH]->attachInput(&inChannel[IN_TEST_CH]);
-	outChannel[OUT_SERVO_CH]->attachInput(&inChannel[9]);
+	//outChannel[OUT_SERVO_CH]->attachInput(&inChannel[9]);
 }
 
 void loop() {
