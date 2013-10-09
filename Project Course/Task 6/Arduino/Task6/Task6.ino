@@ -56,6 +56,18 @@ volatile int time = 0;
 //Array is size 8 to match out IO packets, additional channels can easily be added in future
 OutputChannel * outChannel[8] = {0, &led, 0, 0, &servo1, &stepper1, 0, 0}; 
 
+const int pNumReadings = 10;
+int pReadings[pNumReadings];
+int pindex = 0;
+int ptotal = 0;
+int paverage = 0;
+const int rNumReadings = 10;
+int rReadings[rNumReadings];
+int rindex = 0;
+int rtotal = 0;
+int raverage = 0;
+
+
 void setup() {
 	//signal Arduino reset (to watch for brownouts)
 	pinMode(STATUS_LED, OUTPUT);
@@ -93,7 +105,10 @@ void setup() {
     outChannel[OUT_MOTOR_P_CH]->attachInput(&inChannel[10]);
     outChannel[OUT_STEPPER_CH]->attachInput(&inChannel[11]);
 
-    attachInterrupt(IN_BUTTON,stateChange, RISING);
+    for(int i = 0; i<pNumReadings; i++)
+        pReadings[i] = 0;
+    for(int i = 0; i<rNumReadings; i++)
+        rReadings[i] = 0;
 }
 
  // Button one switches states
@@ -115,9 +130,29 @@ void stateChange(){
 void loop() {
 	//update input channels
 		//analog input Channels
+
 		inChannel[IN_POT_CH].setValue(map(analogRead(POTENTIOMETER), 30, 950, 0, 0xffff));
-		inChannel[IN_PRESSURE_CH].set10BitValue(analogRead(PRESSURE));
-		inChannel[IN_RANGE_CH].set10BitValue(analogRead(RANGEFINDER));
+
+        ptotal = ptotal - pReadings[pindex];
+        pReadings[pindex] = analogRead(PRESSURE);
+        ptotal = ptotal + pReadings[pindex];
+        pindex = pindex+1;
+        if (pindex>=pNumReadings)
+            pindex = 0;
+        paverage = ptotal/pNumReadings;
+            
+		inChannel[IN_PRESSURE_CH].set10BitValue(paverage);
+
+
+        rtotal = rtotal - rReadings[rindex];
+        rReadings[rindex] = analogRead(RANGEFINDER);
+        rtotal = rtotal + rReadings[rindex];
+        rindex = rindex+1;
+        if (rindex>=rNumReadings)
+            rindex = 0;
+        raverage = rtotal/rNumReadings;
+        
+		inChannel[IN_RANGE_CH].set10BitValue(raverage);
 
 		//Dummy Test Channel (Constant Triangle Wave)
 		inChannel[IN_TEST_CH].setValue(inChannel[IN_TEST_CH].getValue() + 0x0100);
