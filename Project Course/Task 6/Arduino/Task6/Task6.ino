@@ -69,7 +69,9 @@ void setup() {
 	recvPacket.pack();
     
     //init the DC Motor
-    //init_motor();
+    initMotor();
+    //digitalWrite(EN1, HIGH);
+    //digitalWrite(L11, HIGH);
 	
 	//Init the stepper motor
 	stepper1.enable();
