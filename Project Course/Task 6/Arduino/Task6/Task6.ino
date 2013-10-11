@@ -10,8 +10,6 @@
 #import "Stepper.h"
 #import "Motor.h"
 
-
-
 //Channel definitions
 #define IN_ZERO_CH 0 //Channel 0 is always 0 (like /dev/null)
 #define IN_POT_CH 1
@@ -50,8 +48,6 @@ uint16_t lastPacketSent;
 
 char recvChars[PSIZE + 1]; 
 Packet recvPacket;
-volatile int state = 0;
-volatile int time = 0;
 
 //Output Channel Array
 #define OUT_ZERO_CH 0 //nothing connected to Channel 0
@@ -64,6 +60,19 @@ volatile int time = 0;
 
 //Array is size 8 to match out IO packets, additional channels can easily be added in future
 OutputChannel * outChannel[8] = {&null1, &led, &null1, &null1, &servo1, &stepper1, &null1, &null1}; 
+
+//Sensor smoothing variables
+const int pNumReadings = 10;
+int pReadings[pNumReadings];
+int pindex = 0;
+int ptotal = 0;
+int paverage = 0;
+const int rNumReadings = 10;
+int rReadings[rNumReadings];
+int rindex = 0;
+int rtotal = 0;
+int raverage = 0;
+
 
 void setup() {
 	//signal Arduino reset (to watch for brownouts)
@@ -83,8 +92,6 @@ void setup() {
     
     //init the DC Motor
     initMotor();
-    //digitalWrite(EN1, HIGH);
-    //digitalWrite(L11, HIGH);
 	
 	//Init the stepper motor
 	stepper1.enable();
@@ -103,55 +110,56 @@ void setup() {
     outChannel[OUT_STEPPER_CH]->attachInput(&inChannel[11]);
     //outChannel[OUT_STEPPER_CH]->attachInput(&inChannel[IN_HIGH_CH]);
 
-    attachInterrupt(IN_BUTTON,stateChange, RISING);
+    for(int i = 0; i<pNumReadings; i++)
+        pReadings[i] = 0;
+    for(int i = 0; i<rNumReadings; i++)
+        rReadings[i] = 0;
 }
 
  // Button one switches states
-void stateChange(){
-  if(millis()-time>=200){
-    time = millis();
-    if(state == 0){
-      state = 1;
-    }else if(state == 1){
-      state = 2;
-    }else if(state == 2){
-      state = 0;
+void buttonPress(){
+    uint16_t timeMs = (uint16_t) millis();
+    if((timeMs - lastBounce) >= BUTTON_BOUNCE_MS){
+        lastBounce = timeMs;
+        if(testMode == 0){ //test mode
+            testMode = 1;
+            outChannel[OUT_LED_CH]->attachInput(&inChannel[IN_TEST_CH]);
+            outChannel[OUT_SERVO_CH]->attachInput(&inChannel[IN_TEST_CH]);
+            outChannel[OUT_MOTOR_V_CH]->attachInput(&inChannel[IN_TEST_CH]);
+            outChannel[OUT_MOTOR_P_CH]->attachInput(&inChannel[IN_TEST_CH]);
+            outChannel[OUT_STEPPER_CH]->attachInput(&inChannel[IN_TEST_CH]);
+        } else { //default mode
+            testMode = 0;
+            outChannel[OUT_LED_CH]->attachInput(&inChannel[IN_HIGH_CH]);
+            outChannel[OUT_SERVO_CH]->attachInput(&inChannel[9]);
+            outChannel[OUT_MOTOR_V_CH]->attachInput(&inChannel[10]);
+            outChannel[OUT_MOTOR_P_CH]->attachInput(&inChannel[10]);
+            outChannel[OUT_STEPPER_CH]->attachInput(&inChannel[11]);
+        }
     }
-   }
- }
+}
 
 void loop() {
 	//update input channels
-		//analog input Channels
-		inChannel[IN_POT_CH].setValue(map(analogRead(POTENTIOMETER), 30, 950, 0, 0xffff));
-		inChannel[IN_PRESSURE_CH].set10BitValue(analogRead(PRESSURE));
-		inChannel[IN_RANGE_CH].set10BitValue(analogRead(RANGEFINDER));
+    //should abstract this to the InputChannel Classes...
+    ptotal = ptotal - pReadings[pindex];
+    pReadings[pindex] = analogRead(POTENTIOMETER);
+    ptotal = ptotal + pReadings[pindex];
+    pindex = pindex+1;
+    if (pindex>=pNumReadings)
+        pindex = 0;
+    paverage = ptotal/pNumReadings;
+    
+    inChannel[IN_POT_CH].setValue(map(paverage, 35, 944, 0, 0xffff));    
+    inChannel[IN_PRESSURE_CH].set10BitValue(analogRead(PRESSURE));
+    inChannel[IN_RANGE_CH].set10BitValue(analogRead(RANGEFINDER));
 
-		//Dummy Test Channel (Constant Triangle Wave)
-		inChannel[IN_TEST_CH].setValue(inChannel[IN_TEST_CH].getValue() + 0x0004);
-	
+    //Dummy Test Channel (Constant Triangle Wave)
+    inChannel[IN_TEST_CH].setValue(inChannel[IN_TEST_CH].getValue() + 0x0004);
+
     //Poll Button State
     uint8_t buttonState = digitalRead(IN_BUTTON);
-    if(buttonState && !lastButton){
-        uint16_t ms = millis();
-        if((ms - lastBounce) > BUTTON_BOUNCE_MS){ //Button click handler
-            testMode = !testMode;
-            if(testMode){
-            	outChannel[OUT_LED_CH]->attachInput(&inChannel[IN_TEST_CH]);
-                outChannel[OUT_SERVO_CH]->attachInput(&inChannel[IN_TEST_CH]);
-                outChannel[OUT_MOTOR_V_CH]->attachInput(&inChannel[IN_TEST_CH]);
-                outChannel[OUT_MOTOR_P_CH]->attachInput(&inChannel[IN_TEST_CH]);
-                outChannel[OUT_STEPPER_CH]->attachInput(&inChannel[IN_TEST_CH]);
-            } else {
-                outChannel[OUT_LED_CH]->attachInput(&inChannel[IN_HIGH_CH]);
-                outChannel[OUT_SERVO_CH]->attachInput(&inChannel[9]);
-                outChannel[OUT_MOTOR_V_CH]->attachInput(&inChannel[10]);
-                outChannel[OUT_MOTOR_P_CH]->attachInput(&inChannel[10]);
-                outChannel[OUT_STEPPER_CH]->attachInput(&inChannel[11]);
-            }
-        }        
-        lastBounce = ms;
-    }
+    if(buttonState && !lastButton) buttonPress();
     lastButton = buttonState;
     
 	//Check Serial and parse packets
