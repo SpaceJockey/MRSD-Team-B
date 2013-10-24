@@ -31,6 +31,8 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define SERVOMIN  150 // this is the 'minimum' pulse length count (out of 4096)
 #define SERVOMAX  600 // this is the 'maximum' pulse length count (out of 4096)
 
+#define SERVO_HZ  300 // Digital Servos operate at 300 Hz
+
 // our servo # counter
 uint8_t servonum = 0;
 
@@ -49,7 +51,7 @@ void setServoPulse(uint8_t n, double pulse) {
   double pulselength;
   
   pulselength = 1000000;   // 1,000,000 us per second
-  pulselength /= 60;   // 60 Hz
+  pulselength /= 300;   // 300 Hz
   Serial.print(pulselength); Serial.println(" us per period"); 
   pulselength /= 4096;  // 12 bits of resolution
   Serial.print(pulselength); Serial.println(" us per bit"); 
