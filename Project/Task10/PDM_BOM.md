@@ -11,3 +11,5 @@
 	* [MIC29150 - 5.0V 1.5A](http://www.digikey.com/product-detail/en/MIC29150-5.0WT/576-1106-ND/771575)
 	* [MIC29500 - 5.0V 5.0A](http://www.digikey.com/product-detail/en/MIC29500-5.0WT/576-1143-ND/771612)
 	* etc...
+* Heatsinks
+	* [TO-220 Heatsink](http://www.digikey.com/product-detail/en/290-1AB/345-1020-ND/340318)
