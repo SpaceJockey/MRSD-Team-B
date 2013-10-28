@@ -13,3 +13,6 @@
 	* etc...
 * Heatsinks
 	* [TO-220 Heatsink](http://www.digikey.com/product-detail/en/290-1AB/345-1020-ND/340318)
+* [ATC/ATO Fuse Holder](http://www.digikey.com/product-detail/en/178.6165.0002/WK6265-ND/653477)
+* Switches
+	* [Main Power Switch] (http://www.digikey.com/product-detail/en/C1300AABBEN602A/1091-1013-ND/2747844)
