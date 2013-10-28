@@ -7994,29 +7994,6 @@ Source: AVX .. aphvc.pdf</description>
 <library name="MRSDTeamB">
 <description>Micrel devices for regulator purpose</description>
 <packages>
-<package name="TO220">
-<description>&lt;b&gt;Molded Package&lt;/b&gt;&lt;p&gt;
-grid 2.54 mm</description>
-<wire x1="5.08" y1="-1.143" x2="4.953" y2="-4.064" width="0.1524" layer="21"/>
-<wire x1="4.699" y1="-4.318" x2="4.953" y2="-4.064" width="0.1524" layer="21"/>
-<wire x1="4.699" y1="-4.318" x2="-4.699" y2="-4.318" width="0.1524" layer="21"/>
-<wire x1="-4.953" y1="-4.064" x2="-4.699" y2="-4.318" width="0.1524" layer="21"/>
-<wire x1="-4.953" y1="-4.064" x2="-5.08" y2="-1.143" width="0.1524" layer="21"/>
-<circle x="-4.4958" y="-3.7084" radius="0.254" width="0.1524" layer="21"/>
-<pad name="1" x="-2.54" y="-2.54" drill="1.016" shape="long" rot="R90"/>
-<pad name="2" x="0" y="-2.54" drill="1.016" shape="long" rot="R90"/>
-<pad name="3" x="2.54" y="-2.54" drill="1.016" shape="long" rot="R90"/>
-<text x="-5.08" y="-6.0452" size="1.27" layer="25" ratio="10">&gt;NAME</text>
-<text x="-5.08" y="-7.62" size="1.27" layer="27" ratio="10">&gt;VALUE</text>
-<rectangle x1="-5.334" y1="-0.762" x2="5.334" y2="0" layer="21"/>
-<rectangle x1="-5.334" y1="-1.27" x2="-3.429" y2="-0.762" layer="21"/>
-<rectangle x1="-1.651" y1="-1.27" x2="-0.889" y2="-0.762" layer="21"/>
-<rectangle x1="-3.429" y1="-1.27" x2="-1.651" y2="-0.762" layer="51"/>
-<rectangle x1="0.889" y1="-1.27" x2="1.651" y2="-0.762" layer="21"/>
-<rectangle x1="3.429" y1="-1.27" x2="5.334" y2="-0.762" layer="21"/>
-<rectangle x1="-0.889" y1="-1.27" x2="0.889" y2="-0.762" layer="51"/>
-<rectangle x1="1.651" y1="-1.27" x2="3.429" y2="-0.762" layer="51"/>
-</package>
 <package name="SMBG">
 <description>&lt;b&gt;DO-214AA GULL-WING&lt;/b&gt;&lt;p&gt;
 Source: www.rsonline.de .. SMBJ12/C/15/C/24/C/30/C/5.0/C/7.5/C Voltage Suppressor. Data Sheet</description>
@@ -8046,17 +8023,72 @@ Source: www.rsonline.de .. SMBJ12/C/15/C/24/C/30/C/5.0/C/7.5/C Voltage Suppresso
 <rectangle x1="2.25" y1="-1.1" x2="2.8" y2="1.1" layer="51"/>
 <wire x1="-0.762" y1="1.778" x2="-0.762" y2="-1.778" width="0.127" layer="21"/>
 </package>
+<package name="TO220H">
+<description>&lt;b&gt;TO 220 horizontal&lt;/b&gt;</description>
+<wire x1="-5.207" y1="-1.27" x2="5.207" y2="-1.27" width="0.127" layer="21"/>
+<wire x1="5.207" y1="14.605" x2="-5.207" y2="14.605" width="0.127" layer="21"/>
+<wire x1="5.207" y1="-1.27" x2="5.207" y2="11.176" width="0.127" layer="21"/>
+<wire x1="5.207" y1="11.176" x2="4.318" y2="11.176" width="0.127" layer="21"/>
+<wire x1="4.318" y1="11.176" x2="4.318" y2="12.7" width="0.127" layer="21"/>
+<wire x1="4.318" y1="12.7" x2="5.207" y2="12.7" width="0.127" layer="21"/>
+<wire x1="5.207" y1="12.7" x2="5.207" y2="14.605" width="0.127" layer="21"/>
+<wire x1="-5.207" y1="-1.27" x2="-5.207" y2="11.176" width="0.127" layer="21"/>
+<wire x1="-5.207" y1="11.176" x2="-4.318" y2="11.176" width="0.127" layer="21"/>
+<wire x1="-4.318" y1="11.176" x2="-4.318" y2="12.7" width="0.127" layer="21"/>
+<wire x1="-4.318" y1="12.7" x2="-5.207" y2="12.7" width="0.127" layer="21"/>
+<wire x1="-5.207" y1="12.7" x2="-5.207" y2="14.605" width="0.127" layer="21"/>
+<wire x1="-4.572" y1="-0.635" x2="4.572" y2="-0.635" width="0.0508" layer="21"/>
+<wire x1="4.572" y1="7.62" x2="4.572" y2="-0.635" width="0.0508" layer="21"/>
+<wire x1="4.572" y1="7.62" x2="-4.572" y2="7.62" width="0.0508" layer="21"/>
+<wire x1="-4.572" y1="-0.635" x2="-4.572" y2="7.62" width="0.0508" layer="21"/>
+<circle x="0" y="11.176" radius="1.8034" width="0.127" layer="21"/>
+<circle x="0" y="11.176" radius="4.191" width="0" layer="42"/>
+<circle x="0" y="11.176" radius="4.191" width="0" layer="43"/>
+<pad name="1" x="-2.54" y="-6.35" drill="1.1176" shape="long" rot="R90"/>
+<pad name="2" x="0" y="-6.35" drill="1.1176" shape="long" rot="R90"/>
+<pad name="3" x="2.54" y="-6.35" drill="1.1176" shape="long" rot="R90"/>
+<text x="-3.81" y="5.207" size="1.778" layer="25" ratio="10">&gt;NAME</text>
+<text x="-3.937" y="2.54" size="1.778" layer="27" ratio="10">&gt;VALUE</text>
+<text x="-4.445" y="7.874" size="0.9906" layer="21" ratio="12">A17,5mm</text>
+<text x="-3.175" y="0" size="1.27" layer="51" ratio="10">1</text>
+<text x="-0.635" y="0" size="1.27" layer="51" ratio="10">2</text>
+<text x="1.905" y="0" size="1.27" layer="51" ratio="10">3</text>
+<rectangle x1="2.159" y1="-4.699" x2="2.921" y2="-4.064" layer="21"/>
+<rectangle x1="-0.381" y1="-4.699" x2="0.381" y2="-4.064" layer="21"/>
+<rectangle x1="-2.921" y1="-4.699" x2="-2.159" y2="-4.064" layer="21"/>
+<rectangle x1="-3.175" y1="-4.064" x2="-1.905" y2="-1.27" layer="21"/>
+<rectangle x1="-0.635" y1="-4.064" x2="0.635" y2="-1.27" layer="21"/>
+<rectangle x1="1.905" y1="-4.064" x2="3.175" y2="-1.27" layer="21"/>
+<rectangle x1="-2.921" y1="-6.604" x2="-2.159" y2="-4.699" layer="51"/>
+<rectangle x1="-0.381" y1="-6.604" x2="0.381" y2="-4.699" layer="51"/>
+<rectangle x1="2.159" y1="-6.604" x2="2.921" y2="-4.699" layer="51"/>
+<hole x="0" y="11.176" drill="3.302"/>
+</package>
+<package name="TO220V">
+<description>&lt;b&gt;Molded Package&lt;/b&gt;&lt;p&gt;
+grid 2.54 mm</description>
+<wire x1="5.08" y1="-1.143" x2="4.953" y2="-4.064" width="0.1524" layer="21"/>
+<wire x1="4.699" y1="-4.318" x2="4.953" y2="-4.064" width="0.1524" layer="21"/>
+<wire x1="4.699" y1="-4.318" x2="-4.699" y2="-4.318" width="0.1524" layer="21"/>
+<wire x1="-4.953" y1="-4.064" x2="-4.699" y2="-4.318" width="0.1524" layer="21"/>
+<wire x1="-4.953" y1="-4.064" x2="-5.08" y2="-1.143" width="0.1524" layer="21"/>
+<circle x="-4.4958" y="-3.7084" radius="0.254" width="0.1524" layer="21"/>
+<pad name="1" x="-2.54" y="-2.54" drill="1.016" shape="long" rot="R90"/>
+<pad name="2" x="0" y="-2.54" drill="1.016" shape="long" rot="R90"/>
+<pad name="3" x="2.54" y="-2.54" drill="1.016" shape="long" rot="R90"/>
+<text x="-5.08" y="-6.0452" size="1.27" layer="25" ratio="10">&gt;NAME</text>
+<text x="-5.08" y="-7.62" size="1.27" layer="27" ratio="10">&gt;VALUE</text>
+<rectangle x1="-5.334" y1="-0.762" x2="5.334" y2="0" layer="21"/>
+<rectangle x1="-5.334" y1="-1.27" x2="-3.429" y2="-0.762" layer="21"/>
+<rectangle x1="-1.651" y1="-1.27" x2="-0.889" y2="-0.762" layer="21"/>
+<rectangle x1="-3.429" y1="-1.27" x2="-1.651" y2="-0.762" layer="51"/>
+<rectangle x1="0.889" y1="-1.27" x2="1.651" y2="-0.762" layer="21"/>
+<rectangle x1="3.429" y1="-1.27" x2="5.334" y2="-0.762" layer="21"/>
+<rectangle x1="-0.889" y1="-1.27" x2="0.889" y2="-0.762" layer="51"/>
+<rectangle x1="1.651" y1="-1.27" x2="3.429" y2="-0.762" layer="51"/>
+</package>
 </packages>
 <symbols>
-<symbol name="MIC29150/29300/29500">
-<pin name="IN" x="-15.24" y="2.54" length="middle"/>
-<pin name="GND" x="0" y="-7.62" length="middle" rot="R90"/>
-<pin name="OUT" x="15.24" y="2.54" length="middle" rot="R180"/>
-<wire x1="-10.16" y1="7.62" x2="-10.16" y2="-2.54" width="0.254" layer="94"/>
-<wire x1="-10.16" y1="-2.54" x2="10.16" y2="-2.54" width="0.254" layer="94"/>
-<wire x1="10.16" y1="-2.54" x2="10.16" y2="7.62" width="0.254" layer="94"/>
-<wire x1="10.16" y1="7.62" x2="-10.16" y2="7.62" width="0.254" layer="94"/>
-</symbol>
 <symbol name="SUPPRESSOR">
 <wire x1="1.27" y1="-1.27" x2="0" y2="1.27" width="0.254" layer="94"/>
 <wire x1="0" y1="1.27" x2="-1.27" y2="-1.27" width="0.254" layer="94"/>
@@ -8070,25 +8102,17 @@ Source: www.rsonline.de .. SMBJ12/C/15/C/24/C/30/C/5.0/C/7.5/C Voltage Suppresso
 <pin name="A" x="0" y="-2.54" visible="off" length="short" direction="pas" rot="R90"/>
 <pin name="C" x="0" y="2.54" visible="off" length="short" direction="pas" rot="R270"/>
 </symbol>
+<symbol name="MIC29150/29300/29500">
+<pin name="IN" x="-15.24" y="2.54" length="middle"/>
+<pin name="GND" x="0" y="-7.62" length="middle" rot="R90"/>
+<pin name="OUT" x="15.24" y="2.54" length="middle" rot="R180"/>
+<wire x1="-10.16" y1="7.62" x2="-10.16" y2="-2.54" width="0.254" layer="94"/>
+<wire x1="-10.16" y1="-2.54" x2="10.16" y2="-2.54" width="0.254" layer="94"/>
+<wire x1="10.16" y1="-2.54" x2="10.16" y2="7.62" width="0.254" layer="94"/>
+<wire x1="10.16" y1="7.62" x2="-10.16" y2="7.62" width="0.254" layer="94"/>
+</symbol>
 </symbols>
 <devicesets>
-<deviceset name="MIC29150/29300/29500">
-<gates>
-<gate name="G$1" symbol="MIC29150/29300/29500" x="30.48" y="-15.24"/>
-</gates>
-<devices>
-<device name="" package="TO220">
-<connects>
-<connect gate="G$1" pin="GND" pad="2"/>
-<connect gate="G$1" pin="IN" pad="1"/>
-<connect gate="G$1" pin="OUT" pad="3"/>
-</connects>
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-</devices>
-</deviceset>
 <deviceset name="SUPPRESSOR-" prefix="D" uservalue="yes">
 <description>&lt;b&gt;Suppressor diode&lt;/b&gt;</description>
 <gates>
@@ -8108,6 +8132,33 @@ Source: www.rsonline.de .. SMBJ12/C/15/C/24/C/30/C/5.0/C/7.5/C Voltage Suppresso
 <connects>
 <connect gate="G$1" pin="A" pad="A"/>
 <connect gate="G$1" pin="C" pad="C"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="MIC29150/29300/29500">
+<gates>
+<gate name="G$1" symbol="MIC29150/29300/29500" x="30.48" y="-15.24"/>
+</gates>
+<devices>
+<device name="HORIZONTAL" package="TO220H">
+<connects>
+<connect gate="G$1" pin="GND" pad="2"/>
+<connect gate="G$1" pin="IN" pad="1"/>
+<connect gate="G$1" pin="OUT" pad="3"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="VERTICAL" package="TO220V">
+<connects>
+<connect gate="G$1" pin="GND" pad="2"/>
+<connect gate="G$1" pin="IN" pad="1"/>
+<connect gate="G$1" pin="OUT" pad="3"/>
 </connects>
 <technologies>
 <technology name=""/>
@@ -8889,9 +8940,6 @@ diameter 3 mm, horizontal, grid 12.7 mm</description>
 <part name="C1" library="rcl" deviceset="C-US" device="C1206K" value="10uF"/>
 <part name="S2" library="switch" deviceset="255SB" device=""/>
 <part name="S3" library="switch" deviceset="255SB" device=""/>
-<part name="U$1" library="MRSDTeamB" deviceset="MIC29150/29300/29500" device=""/>
-<part name="U$3" library="MRSDTeamB" deviceset="MIC29150/29300/29500" device=""/>
-<part name="U$4" library="MRSDTeamB" deviceset="MIC29150/29300/29500" device=""/>
 <part name="SUPPLY10" library="supply2" deviceset="GND" device=""/>
 <part name="D1" library="MRSDTeamB" deviceset="SUPPRESSOR-" device="SMBJ" value="8.5V"/>
 <part name="D2" library="diode" deviceset="ZENER-DIODE" device="SMB" value="3.3V"/>
@@ -8899,6 +8947,9 @@ diameter 3 mm, horizontal, grid 12.7 mm</description>
 <part name="SERVO2" library="con-molex" deviceset="5566-2" device="" value=""/>
 <part name="BATT1" library="con-molex" deviceset="5566-2" device="" value=""/>
 <part name="BATT2" library="con-molex" deviceset="5566-2" device="" value=""/>
+<part name="U$1" library="MRSDTeamB" deviceset="MIC29150/29300/29500" device="HORIZONTAL"/>
+<part name="U$2" library="MRSDTeamB" deviceset="MIC29150/29300/29500" device="HORIZONTAL"/>
+<part name="U$3" library="MRSDTeamB" deviceset="MIC29150/29300/29500" device="HORIZONTAL"/>
 </parts>
 <sheets>
 <sheet>
@@ -8974,9 +9025,6 @@ All options pin compatible, TO-220-3 Packages </text>
 <instance part="C1" gate="G$1" x="149.86" y="170.18"/>
 <instance part="S2" gate="1" x="132.08" y="142.24" rot="R270"/>
 <instance part="S3" gate="1" x="132.08" y="111.76" rot="R270"/>
-<instance part="U$1" gate="G$1" x="256.54" y="177.8"/>
-<instance part="U$3" gate="G$1" x="256.54" y="147.32"/>
-<instance part="U$4" gate="G$1" x="256.54" y="114.3"/>
 <instance part="SUPPLY10" gate="GND" x="68.58" y="152.4"/>
 <instance part="D1" gate="G$1" x="68.58" y="162.56"/>
 <instance part="D2" gate="G$1" x="40.64" y="116.84" rot="R90"/>
@@ -8988,6 +9036,9 @@ All options pin compatible, TO-220-3 Packages </text>
 <instance part="BATT1" gate="-2" x="30.48" y="157.48" rot="MR0"/>
 <instance part="BATT2" gate="-1" x="30.48" y="167.64" rot="MR0"/>
 <instance part="BATT2" gate="-2" x="30.48" y="154.94" rot="MR0"/>
+<instance part="U$1" gate="G$1" x="256.54" y="177.8"/>
+<instance part="U$2" gate="G$1" x="256.54" y="147.32"/>
+<instance part="U$3" gate="G$1" x="256.54" y="114.3"/>
 </instances>
 <busses>
 </busses>
@@ -9009,9 +9060,9 @@ All options pin compatible, TO-220-3 Packages </text>
 <segment>
 <pinref part="C6" gate="G$1" pin="1"/>
 <wire x1="274.32" y1="180.34" x2="281.94" y2="180.34" width="0.1524" layer="91"/>
-<pinref part="U$1" gate="G$1" pin="OUT"/>
 <wire x1="274.32" y1="180.34" x2="271.78" y2="180.34" width="0.1524" layer="91"/>
 <junction x="274.32" y="180.34"/>
+<pinref part="U$1" gate="G$1" pin="OUT"/>
 </segment>
 </net>
 <net name="N$7" class="0">
@@ -9027,9 +9078,9 @@ All options pin compatible, TO-220-3 Packages </text>
 <segment>
 <pinref part="C7" gate="G$1" pin="1"/>
 <wire x1="274.32" y1="149.86" x2="281.94" y2="149.86" width="0.1524" layer="91"/>
-<pinref part="U$3" gate="G$1" pin="OUT"/>
 <wire x1="274.32" y1="149.86" x2="271.78" y2="149.86" width="0.1524" layer="91"/>
 <junction x="274.32" y="149.86"/>
+<pinref part="U$2" gate="G$1" pin="OUT"/>
 </segment>
 </net>
 <net name="N$10" class="0">
@@ -9072,7 +9123,7 @@ All options pin compatible, TO-220-3 Packages </text>
 <pinref part="C7" gate="G$1" pin="2"/>
 <pinref part="C8" gate="G$1" pin="2"/>
 <wire x1="238.76" y1="139.7" x2="238.76" y2="142.24" width="0.1524" layer="91"/>
-<pinref part="U$3" gate="G$1" pin="GND"/>
+<pinref part="U$2" gate="G$1" pin="GND"/>
 </segment>
 <segment>
 <pinref part="ACC1" gate="-2" pin="S"/>
@@ -9128,7 +9179,7 @@ All options pin compatible, TO-220-3 Packages </text>
 <pinref part="C10" gate="G$1" pin="2"/>
 <pinref part="C9" gate="G$1" pin="2"/>
 <wire x1="238.76" y1="106.68" x2="238.76" y2="109.22" width="0.1524" layer="91"/>
-<pinref part="U$4" gate="G$1" pin="GND"/>
+<pinref part="U$3" gate="G$1" pin="GND"/>
 </segment>
 <segment>
 <pinref part="ACC3" gate="-2" pin="S"/>
@@ -9215,9 +9266,9 @@ All options pin compatible, TO-220-3 Packages </text>
 <segment>
 <pinref part="C10" gate="G$1" pin="1"/>
 <wire x1="274.32" y1="116.84" x2="281.94" y2="116.84" width="0.1524" layer="91"/>
-<pinref part="U$4" gate="G$1" pin="OUT"/>
 <wire x1="274.32" y1="116.84" x2="271.78" y2="116.84" width="0.1524" layer="91"/>
 <junction x="274.32" y="116.84"/>
+<pinref part="U$3" gate="G$1" pin="OUT"/>
 </segment>
 </net>
 <net name="N$21" class="0">
@@ -9283,25 +9334,25 @@ All options pin compatible, TO-220-3 Packages </text>
 <label x="226.06" y="180.34" size="1.778" layer="95"/>
 <pinref part="C5" gate="G$1" pin="1"/>
 <wire x1="238.76" y1="180.34" x2="226.06" y2="180.34" width="0.1524" layer="91"/>
-<pinref part="U$1" gate="G$1" pin="IN"/>
 <wire x1="238.76" y1="180.34" x2="241.3" y2="180.34" width="0.1524" layer="91"/>
 <junction x="238.76" y="180.34"/>
+<pinref part="U$1" gate="G$1" pin="IN"/>
 </segment>
 <segment>
 <wire x1="226.06" y1="149.86" x2="238.76" y2="149.86" width="0.1524" layer="91"/>
 <label x="226.06" y="149.86" size="1.778" layer="95"/>
 <pinref part="C8" gate="G$1" pin="1"/>
-<pinref part="U$3" gate="G$1" pin="IN"/>
 <wire x1="238.76" y1="149.86" x2="241.3" y2="149.86" width="0.1524" layer="91"/>
 <junction x="238.76" y="149.86"/>
+<pinref part="U$2" gate="G$1" pin="IN"/>
 </segment>
 <segment>
 <label x="226.06" y="116.84" size="1.778" layer="95"/>
 <pinref part="C9" gate="G$1" pin="1"/>
 <wire x1="238.76" y1="116.84" x2="226.06" y2="116.84" width="0.1524" layer="91"/>
-<pinref part="U$4" gate="G$1" pin="IN"/>
 <wire x1="238.76" y1="116.84" x2="241.3" y2="116.84" width="0.1524" layer="91"/>
 <junction x="238.76" y="116.84"/>
+<pinref part="U$3" gate="G$1" pin="IN"/>
 </segment>
 <segment>
 <pinref part="S2" gate="1" pin="P"/>
