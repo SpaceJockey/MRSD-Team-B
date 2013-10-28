@@ -128,20 +128,6 @@ DIN A3, landscape with location and doc. field</description>
 <description>&lt;b&gt;Molex Connectors&lt;/b&gt;&lt;p&gt;
 &lt;author&gt;Created by librarian@cadsoft.de&lt;/author&gt;</description>
 <packages>
-<package name="22-23-2021">
-<description>.100" (2.54mm) Center Headers - 2 Pin</description>
-<wire x1="-2.54" y1="3.175" x2="2.54" y2="3.175" width="0.254" layer="21"/>
-<wire x1="2.54" y1="3.175" x2="2.54" y2="1.27" width="0.254" layer="21"/>
-<wire x1="2.54" y1="1.27" x2="2.54" y2="-3.175" width="0.254" layer="21"/>
-<wire x1="2.54" y1="-3.175" x2="-2.54" y2="-3.175" width="0.254" layer="21"/>
-<wire x1="-2.54" y1="-3.175" x2="-2.54" y2="1.27" width="0.254" layer="21"/>
-<wire x1="-2.54" y1="1.27" x2="-2.54" y2="3.175" width="0.254" layer="21"/>
-<wire x1="-2.54" y1="1.27" x2="2.54" y2="1.27" width="0.254" layer="21"/>
-<pad name="1" x="-1.27" y="0" drill="1" shape="long" rot="R90"/>
-<pad name="2" x="1.27" y="0" drill="1" shape="long" rot="R90"/>
-<text x="-2.54" y="3.81" size="1.016" layer="25" ratio="10">&gt;NAME</text>
-<text x="-2.54" y="-5.08" size="1.016" layer="27" ratio="10">&gt;VALUE</text>
-</package>
 <package name="5566-2">
 <description>&lt;b&gt;Mini FIT connector 2 pol&lt;/b&gt;&lt;p&gt;
 Source: http://www.molex.com</description>
@@ -321,29 +307,6 @@ Source: http://www.molex.com</description>
 </symbol>
 </symbols>
 <devicesets>
-<deviceset name="22-23-2021" prefix="X">
-<description>.100" (2.54mm) Center Header - 2 Pin</description>
-<gates>
-<gate name="-1" symbol="MV" x="0" y="0" addlevel="always" swaplevel="1"/>
-<gate name="-2" symbol="M" x="0" y="-2.54" addlevel="always" swaplevel="1"/>
-</gates>
-<devices>
-<device name="" package="22-23-2021">
-<connects>
-<connect gate="-1" pin="S" pad="1"/>
-<connect gate="-2" pin="S" pad="2"/>
-</connects>
-<technologies>
-<technology name="">
-<attribute name="MF" value="MOLEX" constant="no"/>
-<attribute name="MPN" value="22-23-2021" constant="no"/>
-<attribute name="OC_FARNELL" value="1462926" constant="no"/>
-<attribute name="OC_NEWARK" value="25C3832" constant="no"/>
-</technology>
-</technologies>
-</device>
-</devices>
-</deviceset>
 <deviceset name="5566-2" prefix="X">
 <description>&lt;b&gt;Mini FIT connector 2 pol&lt;/b&gt;&lt;p&gt;
 Source: http://www.molex.com</description>
@@ -8874,18 +8837,13 @@ diameter 3 mm, horizontal, grid 12.7 mm</description>
 </classes>
 <parts>
 <part name="FRAME1" library="frames" deviceset="A3L-LOC" device=""/>
-<part name="BATT_B" library="con-molex" deviceset="22-23-2021" device=""/>
 <part name="F_SUP" library="fuse" deviceset="GSH15" device="" value="20A"/>
 <part name="F_DUE" library="fuse" deviceset="GSH15" device="" value="2A"/>
-<part name="F_ACC_A" library="fuse" deviceset="GSH15" device="" value="5A"/>
 <part name="SUPPLY1" library="supply2" deviceset="GND" device=""/>
 <part name="SUPPLY3" library="supply2" deviceset="GND" device=""/>
 <part name="SUPPLY4" library="supply2" deviceset="GND" device=""/>
-<part name="F_ACC_B" library="fuse" deviceset="GSH15" device="" value="5A"/>
-<part name="SERVO2" library="con-molex" deviceset="5566-2" device="" value=""/>
 <part name="ACC2" library="con-molex" deviceset="5566-2" device="" value=""/>
 <part name="SUPPLY5" library="supply2" deviceset="GND" device=""/>
-<part name="DUE" library="con-molex" deviceset="C-GRID-02" device="-70553"/>
 <part name="ACC1" library="con-molex" deviceset="C-GRID-02" device="-70553"/>
 <part name="SUPPLY6" library="supply2" deviceset="GND" device=""/>
 <part name="SUPPLY7" library="supply2" deviceset="GND" device=""/>
@@ -8909,12 +8867,10 @@ diameter 3 mm, horizontal, grid 12.7 mm</description>
 <part name="C2" library="TinyGadget(1)" deviceset="CAPACITOR" device="TH_CAP" value=""/>
 <part name="C4" library="TinyGadget(1)" deviceset="CAPACITOR" device="TH_CAP"/>
 <part name="SUPPLY8" library="supply2" deviceset="GND" device=""/>
-<part name="F_ACC_C" library="fuse" deviceset="GSH15" device="" value="5A"/>
 <part name="ACC3" library="con-molex" deviceset="5566-2" device="" value=""/>
 <part name="SUPPLY17" library="supply2" deviceset="GND" device=""/>
 <part name="SUPPLY18" library="supply2" deviceset="GND" device=""/>
 <part name="LED3" library="led" deviceset="LED" device="SML1206"/>
-<part name="BATT_A" library="con-molex" deviceset="22-23-2021" device=""/>
 <part name="R1" library="rcl" deviceset="R-US_" device="R1206" value="1K"/>
 <part name="R2" library="rcl" deviceset="R-US_" device="R1206" value="1K"/>
 <part name="R3" library="rcl" deviceset="R-US_" device="R1206" value="1K"/>
@@ -8939,6 +8895,10 @@ diameter 3 mm, horizontal, grid 12.7 mm</description>
 <part name="SUPPLY10" library="supply2" deviceset="GND" device=""/>
 <part name="D1" library="MRSDTeamB" deviceset="SUPPRESSOR-" device="SMBJ" value="8.5V"/>
 <part name="D2" library="diode" deviceset="ZENER-DIODE" device="SMB" value="3.3V"/>
+<part name="DUE" library="con-molex" deviceset="5566-2" device="" value=""/>
+<part name="SERVO2" library="con-molex" deviceset="5566-2" device="" value=""/>
+<part name="BATT1" library="con-molex" deviceset="5566-2" device="" value=""/>
+<part name="BATT2" library="con-molex" deviceset="5566-2" device="" value=""/>
 </parts>
 <sheets>
 <sheet>
@@ -8952,42 +8912,30 @@ All options pin compatible, TO-220-3 Packages </text>
 </plain>
 <instances>
 <instance part="FRAME1" gate="G$1" x="-40.64" y="-10.16"/>
-<instance part="BATT_B" gate="-1" x="30.48" y="167.64" smashed="yes" rot="R180">
-<attribute name="NAME" x="27.94" y="168.402" size="1.524" layer="95" rot="R180"/>
-</instance>
-<instance part="BATT_B" gate="-2" x="33.02" y="157.48" rot="R180"/>
 <instance part="F_SUP" gate="1" x="60.96" y="170.18"/>
-<instance part="F_DUE" gate="1" x="147.32" y="182.88"/>
-<instance part="F_ACC_A" gate="1" x="287.02" y="180.34"/>
-<instance part="SUPPLY1" gate="GND" x="35.56" y="152.4"/>
+<instance part="F_DUE" gate="1" x="142.24" y="172.72"/>
+<instance part="SUPPLY1" gate="GND" x="33.02" y="152.4"/>
 <instance part="SUPPLY3" gate="GND" x="256.54" y="167.64"/>
 <instance part="SUPPLY4" gate="GND" x="256.54" y="137.16"/>
-<instance part="F_ACC_B" gate="1" x="287.02" y="149.86"/>
-<instance part="SERVO2" gate="-1" x="172.72" y="111.76"/>
-<instance part="SERVO2" gate="-2" x="172.72" y="109.22"/>
-<instance part="ACC2" gate="-1" x="307.34" y="149.86"/>
-<instance part="ACC2" gate="-2" x="307.34" y="147.32"/>
+<instance part="ACC2" gate="-1" x="297.18" y="149.86"/>
+<instance part="ACC2" gate="-2" x="297.18" y="147.32"/>
 <instance part="SUPPLY5" gate="GND" x="170.18" y="106.68"/>
-<instance part="DUE" gate="-2" x="170.18" y="180.34"/>
-<instance part="DUE" gate="-1" x="170.18" y="182.88" smashed="yes">
-<attribute name="NAME" x="172.72" y="182.118" size="1.524" layer="95"/>
+<instance part="ACC1" gate="-2" x="297.18" y="177.8"/>
+<instance part="ACC1" gate="-1" x="297.18" y="180.34" smashed="yes">
+<attribute name="NAME" x="299.72" y="179.578" size="1.524" layer="95"/>
 </instance>
-<instance part="ACC1" gate="-2" x="307.34" y="177.8"/>
-<instance part="ACC1" gate="-1" x="307.34" y="180.34" smashed="yes">
-<attribute name="NAME" x="309.88" y="179.578" size="1.524" layer="95"/>
-</instance>
-<instance part="SUPPLY6" gate="GND" x="167.64" y="177.8"/>
-<instance part="SUPPLY7" gate="GND" x="304.8" y="175.26"/>
-<instance part="SUPPLY9" gate="GND" x="304.8" y="144.78"/>
-<instance part="SUPPLY11" gate="GND" x="162.56" y="162.56"/>
-<instance part="SUPPLY12" gate="GND" x="297.18" y="160.02"/>
-<instance part="SUPPLY13" gate="GND" x="297.18" y="129.54"/>
+<instance part="SUPPLY6" gate="GND" x="170.18" y="167.64"/>
+<instance part="SUPPLY7" gate="GND" x="294.64" y="175.26"/>
+<instance part="SUPPLY9" gate="GND" x="294.64" y="144.78"/>
+<instance part="SUPPLY11" gate="GND" x="149.86" y="157.48"/>
+<instance part="SUPPLY12" gate="GND" x="287.02" y="160.02"/>
+<instance part="SUPPLY13" gate="GND" x="287.02" y="129.54"/>
 <instance part="F_SERVO2" gate="1" x="142.24" y="111.76"/>
 <instance part="SUPPLY14" gate="GND" x="149.86" y="99.06"/>
 <instance part="LED5" gate="G$1" x="157.48" y="101.6" rot="R270"/>
-<instance part="LED4" gate="G$1" x="162.56" y="170.18"/>
-<instance part="LED1" gate="G$1" x="297.18" y="167.64"/>
-<instance part="LED2" gate="G$1" x="297.18" y="137.16"/>
+<instance part="LED4" gate="G$1" x="157.48" y="162.56" rot="R270"/>
+<instance part="LED1" gate="G$1" x="287.02" y="167.64"/>
+<instance part="LED2" gate="G$1" x="287.02" y="137.16"/>
 <instance part="SERVO1" gate="-1" x="172.72" y="142.24"/>
 <instance part="SERVO1" gate="-2" x="172.72" y="139.7"/>
 <instance part="SUPPLY15" gate="GND" x="170.18" y="137.16"/>
@@ -9003,22 +8951,17 @@ All options pin compatible, TO-220-3 Packages </text>
 <attribute name="NAME" x="153.416" y="107.315" size="1.778" layer="95"/>
 </instance>
 <instance part="SUPPLY8" gate="GND" x="256.54" y="104.14"/>
-<instance part="F_ACC_C" gate="1" x="287.02" y="116.84"/>
-<instance part="ACC3" gate="-1" x="307.34" y="116.84"/>
-<instance part="ACC3" gate="-2" x="307.34" y="114.3"/>
-<instance part="SUPPLY17" gate="GND" x="304.8" y="111.76"/>
-<instance part="SUPPLY18" gate="GND" x="297.18" y="96.52"/>
-<instance part="LED3" gate="G$1" x="297.18" y="104.14"/>
-<instance part="BATT_A" gate="-1" x="30.48" y="170.18" smashed="yes" rot="R180">
-<attribute name="NAME" x="27.94" y="170.942" size="1.524" layer="95" rot="R180"/>
-</instance>
-<instance part="BATT_A" gate="-2" x="33.02" y="154.94" rot="R180"/>
+<instance part="ACC3" gate="-1" x="297.18" y="116.84"/>
+<instance part="ACC3" gate="-2" x="297.18" y="114.3"/>
+<instance part="SUPPLY17" gate="GND" x="294.64" y="111.76"/>
+<instance part="SUPPLY18" gate="GND" x="287.02" y="96.52"/>
+<instance part="LED3" gate="G$1" x="287.02" y="104.14"/>
 <instance part="R1" gate="G$1" x="162.56" y="137.16" rot="R90"/>
 <instance part="R2" gate="G$1" x="162.56" y="106.68" rot="R90"/>
-<instance part="R3" gate="G$1" x="162.56" y="177.8" rot="R90"/>
-<instance part="R4" gate="G$1" x="297.18" y="175.26" rot="R90"/>
-<instance part="R5" gate="G$1" x="297.18" y="144.78" rot="R90"/>
-<instance part="R6" gate="G$1" x="297.18" y="111.76" rot="R90"/>
+<instance part="R3" gate="G$1" x="162.56" y="167.64" rot="R90"/>
+<instance part="R4" gate="G$1" x="287.02" y="175.26" rot="R90"/>
+<instance part="R5" gate="G$1" x="287.02" y="144.78" rot="R90"/>
+<instance part="R6" gate="G$1" x="287.02" y="111.76" rot="R90"/>
 <instance part="R7" gate="G$1" x="27.94" y="127" rot="R90"/>
 <instance part="R8" gate="G$1" x="27.94" y="116.84" rot="R90"/>
 <instance part="S1" gate="1" x="50.8" y="170.18" rot="R270"/>
@@ -9028,7 +8971,7 @@ All options pin compatible, TO-220-3 Packages </text>
 <instance part="C8" gate="G$1" x="238.76" y="147.32"/>
 <instance part="C9" gate="G$1" x="238.76" y="114.3"/>
 <instance part="C10" gate="G$1" x="274.32" y="114.3"/>
-<instance part="C1" gate="G$1" x="152.4" y="175.26"/>
+<instance part="C1" gate="G$1" x="149.86" y="170.18"/>
 <instance part="S2" gate="1" x="132.08" y="142.24" rot="R270"/>
 <instance part="S3" gate="1" x="132.08" y="111.76" rot="R270"/>
 <instance part="U$1" gate="G$1" x="256.54" y="177.8"/>
@@ -9037,26 +8980,33 @@ All options pin compatible, TO-220-3 Packages </text>
 <instance part="SUPPLY10" gate="GND" x="68.58" y="152.4"/>
 <instance part="D1" gate="G$1" x="68.58" y="162.56"/>
 <instance part="D2" gate="G$1" x="40.64" y="116.84" rot="R90"/>
+<instance part="DUE" gate="-1" x="172.72" y="172.72"/>
+<instance part="DUE" gate="-2" x="172.72" y="170.18"/>
+<instance part="SERVO2" gate="-1" x="172.72" y="111.76"/>
+<instance part="SERVO2" gate="-2" x="172.72" y="109.22"/>
+<instance part="BATT1" gate="-1" x="30.48" y="170.18" rot="MR0"/>
+<instance part="BATT1" gate="-2" x="30.48" y="157.48" rot="MR0"/>
+<instance part="BATT2" gate="-1" x="30.48" y="167.64" rot="MR0"/>
+<instance part="BATT2" gate="-2" x="30.48" y="154.94" rot="MR0"/>
 </instances>
 <busses>
 </busses>
 <nets>
 <net name="N$4" class="0">
 <segment>
-<pinref part="F_DUE" gate="1" pin="2"/>
-<wire x1="152.4" y1="182.88" x2="162.56" y2="182.88" width="0.1524" layer="91"/>
-<pinref part="DUE" gate="-1" pin="S"/>
 <pinref part="R3" gate="G$1" pin="2"/>
-<wire x1="162.56" y1="182.88" x2="167.64" y2="182.88" width="0.1524" layer="91"/>
-<junction x="162.56" y="182.88"/>
+<wire x1="162.56" y1="172.72" x2="170.18" y2="172.72" width="0.1524" layer="91"/>
+<pinref part="DUE" gate="-1" pin="S"/>
+<pinref part="F_DUE" gate="1" pin="2"/>
+<wire x1="147.32" y1="172.72" x2="149.86" y2="172.72" width="0.1524" layer="91"/>
+<junction x="162.56" y="172.72"/>
 <pinref part="C1" gate="G$1" pin="1"/>
-<junction x="152.4" y="182.88"/>
-<wire x1="152.4" y1="182.88" x2="152.4" y2="177.8" width="0.1524" layer="91"/>
+<wire x1="149.86" y1="172.72" x2="162.56" y2="172.72" width="0.1524" layer="91"/>
+<junction x="149.86" y="172.72"/>
 </segment>
 </net>
 <net name="N$6" class="0">
 <segment>
-<pinref part="F_ACC_A" gate="1" pin="1"/>
 <pinref part="C6" gate="G$1" pin="1"/>
 <wire x1="274.32" y1="180.34" x2="281.94" y2="180.34" width="0.1524" layer="91"/>
 <pinref part="U$1" gate="G$1" pin="OUT"/>
@@ -9066,17 +9016,15 @@ All options pin compatible, TO-220-3 Packages </text>
 </net>
 <net name="N$7" class="0">
 <segment>
-<pinref part="F_ACC_A" gate="1" pin="2"/>
 <pinref part="ACC1" gate="-1" pin="S"/>
-<wire x1="292.1" y1="180.34" x2="297.18" y2="180.34" width="0.1524" layer="91"/>
+<wire x1="281.94" y1="180.34" x2="287.02" y2="180.34" width="0.1524" layer="91"/>
 <pinref part="R4" gate="G$1" pin="2"/>
-<wire x1="297.18" y1="180.34" x2="304.8" y2="180.34" width="0.1524" layer="91"/>
-<junction x="297.18" y="180.34"/>
+<wire x1="287.02" y1="180.34" x2="294.64" y2="180.34" width="0.1524" layer="91"/>
+<junction x="287.02" y="180.34"/>
 </segment>
 </net>
 <net name="N$9" class="0">
 <segment>
-<pinref part="F_ACC_B" gate="1" pin="1"/>
 <pinref part="C7" gate="G$1" pin="1"/>
 <wire x1="274.32" y1="149.86" x2="281.94" y2="149.86" width="0.1524" layer="91"/>
 <pinref part="U$3" gate="G$1" pin="OUT"/>
@@ -9086,23 +9034,23 @@ All options pin compatible, TO-220-3 Packages </text>
 </net>
 <net name="N$10" class="0">
 <segment>
-<pinref part="BATT_B" gate="-1" pin="S"/>
 <wire x1="33.02" y1="167.64" x2="35.56" y2="167.64" width="0.1524" layer="91"/>
-<pinref part="BATT_A" gate="-1" pin="S"/>
 <wire x1="35.56" y1="167.64" x2="45.72" y2="167.64" width="0.1524" layer="91"/>
 <wire x1="33.02" y1="170.18" x2="35.56" y2="170.18" width="0.1524" layer="91"/>
 <wire x1="35.56" y1="170.18" x2="35.56" y2="167.64" width="0.1524" layer="91"/>
 <junction x="35.56" y="167.64"/>
 <pinref part="S1" gate="1" pin="P"/>
+<pinref part="BATT1" gate="-1" pin="S"/>
+<pinref part="BATT2" gate="-1" pin="S"/>
 </segment>
 </net>
 <net name="GND" class="0">
 <segment>
-<pinref part="BATT_B" gate="-2" pin="S"/>
 <pinref part="SUPPLY1" gate="GND" pin="GND"/>
-<wire x1="35.56" y1="157.48" x2="35.56" y2="154.94" width="0.1524" layer="91"/>
-<pinref part="BATT_A" gate="-2" pin="S"/>
-<junction x="35.56" y="154.94"/>
+<wire x1="33.02" y1="157.48" x2="33.02" y2="154.94" width="0.1524" layer="91"/>
+<pinref part="BATT2" gate="-2" pin="S"/>
+<junction x="33.02" y="154.94"/>
+<pinref part="BATT1" gate="-2" pin="S"/>
 </segment>
 <segment>
 <wire x1="238.76" y1="172.72" x2="238.76" y2="170.18" width="0.1524" layer="91"/>
@@ -9127,14 +9075,6 @@ All options pin compatible, TO-220-3 Packages </text>
 <pinref part="U$3" gate="G$1" pin="GND"/>
 </segment>
 <segment>
-<pinref part="SERVO2" gate="-2" pin="S"/>
-<pinref part="SUPPLY5" gate="GND" pin="GND"/>
-</segment>
-<segment>
-<pinref part="DUE" gate="-2" pin="S"/>
-<pinref part="SUPPLY6" gate="GND" pin="GND"/>
-</segment>
-<segment>
 <pinref part="ACC1" gate="-2" pin="S"/>
 <pinref part="SUPPLY7" gate="GND" pin="GND"/>
 </segment>
@@ -9144,11 +9084,12 @@ All options pin compatible, TO-220-3 Packages </text>
 </segment>
 <segment>
 <pinref part="SUPPLY11" gate="GND" pin="GND"/>
-<pinref part="LED4" gate="G$1" pin="C"/>
 <pinref part="C1" gate="G$1" pin="2"/>
-<wire x1="152.4" y1="170.18" x2="152.4" y2="165.1" width="0.1524" layer="91"/>
-<wire x1="152.4" y1="165.1" x2="162.56" y2="165.1" width="0.1524" layer="91"/>
-<junction x="162.56" y="165.1"/>
+<wire x1="149.86" y1="165.1" x2="149.86" y2="162.56" width="0.1524" layer="91"/>
+<pinref part="LED4" gate="G$1" pin="C"/>
+<wire x1="149.86" y1="162.56" x2="149.86" y2="160.02" width="0.1524" layer="91"/>
+<wire x1="152.4" y1="162.56" x2="149.86" y2="162.56" width="0.1524" layer="91"/>
+<junction x="149.86" y="162.56"/>
 </segment>
 <segment>
 <pinref part="SUPPLY12" gate="GND" pin="GND"/>
@@ -9211,26 +9152,33 @@ All options pin compatible, TO-220-3 Packages </text>
 <wire x1="68.58" y1="154.94" x2="68.58" y2="160.02" width="0.1524" layer="91"/>
 <pinref part="D1" gate="G$1" pin="A"/>
 </segment>
+<segment>
+<pinref part="SUPPLY6" gate="GND" pin="GND"/>
+<pinref part="DUE" gate="-2" pin="S"/>
+</segment>
+<segment>
+<pinref part="SUPPLY5" gate="GND" pin="GND"/>
+<pinref part="SERVO2" gate="-2" pin="S"/>
+</segment>
 </net>
 <net name="N$2" class="0">
 <segment>
-<pinref part="F_ACC_B" gate="1" pin="2"/>
-<wire x1="304.8" y1="149.86" x2="297.18" y2="149.86" width="0.1524" layer="91"/>
+<wire x1="294.64" y1="149.86" x2="287.02" y2="149.86" width="0.1524" layer="91"/>
 <pinref part="ACC2" gate="-1" pin="S"/>
-<wire x1="297.18" y1="149.86" x2="292.1" y2="149.86" width="0.1524" layer="91"/>
+<wire x1="287.02" y1="149.86" x2="281.94" y2="149.86" width="0.1524" layer="91"/>
 <pinref part="R5" gate="G$1" pin="2"/>
-<junction x="297.18" y="149.86"/>
+<junction x="287.02" y="149.86"/>
 </segment>
 </net>
 <net name="N$1" class="0">
 <segment>
-<pinref part="SERVO2" gate="-1" pin="S"/>
 <pinref part="F_SERVO2" gate="1" pin="2"/>
 <wire x1="147.32" y1="111.76" x2="149.86" y2="111.76" width="0.1524" layer="91"/>
 <pinref part="C4" gate="G$1" pin="1"/>
 <wire x1="149.86" y1="111.76" x2="162.56" y2="111.76" width="0.1524" layer="91"/>
 <junction x="149.86" y="111.76"/>
 <pinref part="R2" gate="G$1" pin="2"/>
+<pinref part="SERVO2" gate="-1" pin="S"/>
 <wire x1="162.56" y1="111.76" x2="170.18" y2="111.76" width="0.1524" layer="91"/>
 <junction x="162.56" y="111.76"/>
 </segment>
@@ -9265,7 +9213,6 @@ All options pin compatible, TO-220-3 Packages </text>
 </net>
 <net name="N$19" class="0">
 <segment>
-<pinref part="F_ACC_C" gate="1" pin="1"/>
 <pinref part="C10" gate="G$1" pin="1"/>
 <wire x1="274.32" y1="116.84" x2="281.94" y2="116.84" width="0.1524" layer="91"/>
 <pinref part="U$4" gate="G$1" pin="OUT"/>
@@ -9275,12 +9222,11 @@ All options pin compatible, TO-220-3 Packages </text>
 </net>
 <net name="N$21" class="0">
 <segment>
-<pinref part="F_ACC_C" gate="1" pin="2"/>
-<wire x1="304.8" y1="116.84" x2="297.18" y2="116.84" width="0.1524" layer="91"/>
+<wire x1="294.64" y1="116.84" x2="287.02" y2="116.84" width="0.1524" layer="91"/>
 <pinref part="ACC3" gate="-1" pin="S"/>
-<wire x1="297.18" y1="116.84" x2="292.1" y2="116.84" width="0.1524" layer="91"/>
+<wire x1="287.02" y1="116.84" x2="281.94" y2="116.84" width="0.1524" layer="91"/>
 <pinref part="R6" gate="G$1" pin="2"/>
-<junction x="297.18" y="116.84"/>
+<junction x="287.02" y="116.84"/>
 </segment>
 </net>
 <net name="N$5" class="0">
@@ -9301,6 +9247,7 @@ All options pin compatible, TO-220-3 Packages </text>
 <segment>
 <pinref part="LED4" gate="G$1" pin="A"/>
 <pinref part="R3" gate="G$1" pin="1"/>
+<wire x1="160.02" y1="162.56" x2="162.56" y2="162.56" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$13" class="0">
@@ -9329,8 +9276,8 @@ All options pin compatible, TO-220-3 Packages </text>
 </segment>
 <segment>
 <pinref part="F_DUE" gate="1" pin="1"/>
-<wire x1="142.24" y1="182.88" x2="124.46" y2="182.88" width="0.1524" layer="91"/>
-<label x="124.46" y="182.88" size="1.778" layer="95"/>
+<wire x1="137.16" y1="172.72" x2="111.76" y2="172.72" width="0.1524" layer="91"/>
+<label x="111.76" y="172.72" size="1.778" layer="95"/>
 </segment>
 <segment>
 <label x="226.06" y="180.34" size="1.778" layer="95"/>
