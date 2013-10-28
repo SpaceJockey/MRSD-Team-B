@@ -8991,28 +8991,27 @@ All options pin compatible, TO-220-3 Packages </text>
 <net name="N$6" class="0">
 <segment>
 <pinref part="C6" gate="G$1" pin="1"/>
-<wire x1="274.32" y1="180.34" x2="281.94" y2="180.34" width="0.1524" layer="91"/>
 <wire x1="274.32" y1="180.34" x2="271.78" y2="180.34" width="0.1524" layer="91"/>
-<junction x="274.32" y="180.34"/>
 <pinref part="U$1" gate="G$1" pin="OUT"/>
-</segment>
-</net>
-<net name="N$7" class="0">
-<segment>
 <pinref part="ACC1" gate="-1" pin="S"/>
-<wire x1="281.94" y1="180.34" x2="287.02" y2="180.34" width="0.1524" layer="91"/>
 <pinref part="R4" gate="G$1" pin="2"/>
 <wire x1="287.02" y1="180.34" x2="294.64" y2="180.34" width="0.1524" layer="91"/>
+<wire x1="274.32" y1="180.34" x2="287.02" y2="180.34" width="0.1524" layer="91"/>
+<junction x="274.32" y="180.34"/>
 <junction x="287.02" y="180.34"/>
 </segment>
 </net>
 <net name="N$9" class="0">
 <segment>
 <pinref part="C7" gate="G$1" pin="1"/>
-<wire x1="274.32" y1="149.86" x2="281.94" y2="149.86" width="0.1524" layer="91"/>
 <wire x1="274.32" y1="149.86" x2="271.78" y2="149.86" width="0.1524" layer="91"/>
-<junction x="274.32" y="149.86"/>
 <pinref part="U$2" gate="G$1" pin="OUT"/>
+<wire x1="294.64" y1="149.86" x2="287.02" y2="149.86" width="0.1524" layer="91"/>
+<pinref part="ACC2" gate="-1" pin="S"/>
+<pinref part="R5" gate="G$1" pin="2"/>
+<wire x1="274.32" y1="149.86" x2="287.02" y2="149.86" width="0.1524" layer="91"/>
+<junction x="274.32" y="149.86"/>
+<junction x="287.02" y="149.86"/>
 </segment>
 </net>
 <net name="N$10" class="0">
@@ -9144,15 +9143,6 @@ All options pin compatible, TO-220-3 Packages </text>
 <pinref part="SERVO2" gate="-2" pin="S"/>
 </segment>
 </net>
-<net name="N$2" class="0">
-<segment>
-<wire x1="294.64" y1="149.86" x2="287.02" y2="149.86" width="0.1524" layer="91"/>
-<pinref part="ACC2" gate="-1" pin="S"/>
-<wire x1="287.02" y1="149.86" x2="281.94" y2="149.86" width="0.1524" layer="91"/>
-<pinref part="R5" gate="G$1" pin="2"/>
-<junction x="287.02" y="149.86"/>
-</segment>
-</net>
 <net name="N$1" class="0">
 <segment>
 <wire x1="147.32" y1="111.76" x2="149.86" y2="111.76" width="0.1524" layer="91"/>
@@ -9197,18 +9187,13 @@ All options pin compatible, TO-220-3 Packages </text>
 <net name="N$19" class="0">
 <segment>
 <pinref part="C10" gate="G$1" pin="1"/>
-<wire x1="274.32" y1="116.84" x2="281.94" y2="116.84" width="0.1524" layer="91"/>
 <wire x1="274.32" y1="116.84" x2="271.78" y2="116.84" width="0.1524" layer="91"/>
-<junction x="274.32" y="116.84"/>
 <pinref part="U$3" gate="G$1" pin="OUT"/>
-</segment>
-</net>
-<net name="N$21" class="0">
-<segment>
 <wire x1="294.64" y1="116.84" x2="287.02" y2="116.84" width="0.1524" layer="91"/>
 <pinref part="ACC3" gate="-1" pin="S"/>
-<wire x1="287.02" y1="116.84" x2="281.94" y2="116.84" width="0.1524" layer="91"/>
 <pinref part="R6" gate="G$1" pin="2"/>
+<wire x1="274.32" y1="116.84" x2="287.02" y2="116.84" width="0.1524" layer="91"/>
+<junction x="274.32" y="116.84"/>
 <junction x="287.02" y="116.84"/>
 </segment>
 </net>
@@ -9323,9 +9308,6 @@ All options pin compatible, TO-220-3 Packages </text>
 </sheets>
 <errors>
 <approved hash="113,1,152.931,119.911,FRAME1,,,,,"/>
-<approved hash="113,1,50.8,193.984,F_SUP,,,,,"/>
-<approved hash="113,1,175.582,179.07,LEDCPU,,,,,"/>
-<approved hash="113,1,173.042,121.453,LEDLIDAR,,,,,"/>
 </errors>
 </schematic>
 </drawing>
