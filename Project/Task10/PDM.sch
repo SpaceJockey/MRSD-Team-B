@@ -14984,8 +14984,8 @@ diameter 3 mm, horizontal, grid 12.7 mm</description>
 <part name="R4" library="rcl" deviceset="R-US_" device="R1206" value="1K"/>
 <part name="R5" library="rcl" deviceset="R-US_" device="R1206" value="1K"/>
 <part name="R6" library="rcl" deviceset="R-US_" device="R1206" value="1K"/>
-<part name="R7" library="rcl" deviceset="R-US_" device="R1206" value="3K"/>
-<part name="R8" library="rcl" deviceset="R-US_" device="R1206" value="2.2K"/>
+<part name="R7" library="rcl" deviceset="R-US_" device="R1206" value="15.4K"/>
+<part name="R8" library="rcl" deviceset="R-US_" device="R1206" value="10K"/>
 <part name="C5" library="rcl" deviceset="C-US" device="C1206K" value="10uF"/>
 <part name="C6" library="rcl" deviceset="C-US" device="C1206K" value="10uF"/>
 <part name="C8" library="rcl" deviceset="C-US" device="C1206K" value="10uF"/>
@@ -15007,9 +15007,9 @@ diameter 3 mm, horizontal, grid 12.7 mm</description>
 <part name="C3" library="rcl" deviceset="CPOL-US" device="TT5D11"/>
 <part name="BATT1_W" library="MRSDTeamB" deviceset="CON_XT60-" device="PIGTAIL" value=""/>
 <part name="BATT2_W" library="MRSDTeamB" deviceset="CON_XT60-" device="PIGTAIL" value=""/>
-<part name="U$1" library="MRSDTeamB" deviceset="MIC29150/29300/29500" device="VERTICAL"/>
-<part name="U$2" library="MRSDTeamB" deviceset="MIC29150/29300/29500" device="VERTICAL"/>
-<part name="U$3" library="MRSDTeamB" deviceset="MIC29150/29300/29500" device="VERTICAL"/>
+<part name="U1" library="MRSDTeamB" deviceset="MIC29150/29300/29500" device="VERTICAL" value=""/>
+<part name="U2" library="MRSDTeamB" deviceset="MIC29150/29300/29500" device="VERTICAL" value=""/>
+<part name="U3" library="MRSDTeamB" deviceset="MIC29150/29300/29500" device="VERTICAL" value=""/>
 <part name="BATT2" library="MRSDTeamB" deviceset="CON_XT60-" device="PCB_MOUNT" value=""/>
 <part name="BATT1" library="MRSDTeamB" deviceset="CON_XT60-" device="PCB_MOUNT" value=""/>
 </parts>
@@ -15087,9 +15087,9 @@ All options pin compatible, TO-220-3 Packages </text>
 <instance part="C3" gate="G$1" x="149.86" y="106.68"/>
 <instance part="BATT1_W" gate="G$1" x="43.18" y="167.64"/>
 <instance part="BATT2_W" gate="G$1" x="43.18" y="149.86"/>
-<instance part="U$1" gate="G$1" x="256.54" y="177.8"/>
-<instance part="U$2" gate="G$1" x="256.54" y="147.32"/>
-<instance part="U$3" gate="G$1" x="256.54" y="114.3"/>
+<instance part="U1" gate="G$1" x="256.54" y="177.8"/>
+<instance part="U2" gate="G$1" x="256.54" y="147.32"/>
+<instance part="U3" gate="G$1" x="256.54" y="114.3"/>
 <instance part="BATT2" gate="G$1" x="43.18" y="187.96"/>
 <instance part="BATT1" gate="G$1" x="43.18" y="205.74"/>
 </instances>
@@ -15119,7 +15119,7 @@ All options pin compatible, TO-220-3 Packages </text>
 <junction x="274.32" y="180.34"/>
 <junction x="287.02" y="180.34"/>
 <pinref part="ACC1" gate="-1" pin="S"/>
-<pinref part="U$1" gate="G$1" pin="OUT"/>
+<pinref part="U1" gate="G$1" pin="OUT"/>
 </segment>
 </net>
 <net name="N$9" class="0">
@@ -15132,7 +15132,7 @@ All options pin compatible, TO-220-3 Packages </text>
 <wire x1="274.32" y1="149.86" x2="287.02" y2="149.86" width="0.1524" layer="91"/>
 <junction x="274.32" y="149.86"/>
 <junction x="287.02" y="149.86"/>
-<pinref part="U$2" gate="G$1" pin="OUT"/>
+<pinref part="U2" gate="G$1" pin="OUT"/>
 </segment>
 </net>
 <net name="GND" class="0">
@@ -15145,7 +15145,7 @@ All options pin compatible, TO-220-3 Packages </text>
 <pinref part="SUPPLY3" gate="GND" pin="GND"/>
 <pinref part="C5" gate="G$1" pin="2"/>
 <pinref part="C6" gate="G$1" pin="2"/>
-<pinref part="U$1" gate="G$1" pin="GND"/>
+<pinref part="U1" gate="G$1" pin="GND"/>
 </segment>
 <segment>
 <wire x1="238.76" y1="139.7" x2="256.54" y2="139.7" width="0.1524" layer="91"/>
@@ -15156,7 +15156,7 @@ All options pin compatible, TO-220-3 Packages </text>
 <pinref part="C8" gate="G$1" pin="2"/>
 <pinref part="C7" gate="G$1" pin="2"/>
 <wire x1="238.76" y1="139.7" x2="238.76" y2="142.24" width="0.1524" layer="91"/>
-<pinref part="U$2" gate="G$1" pin="GND"/>
+<pinref part="U2" gate="G$1" pin="GND"/>
 </segment>
 <segment>
 <pinref part="ACC2" gate="-2" pin="S"/>
@@ -15206,7 +15206,7 @@ All options pin compatible, TO-220-3 Packages </text>
 <pinref part="C10" gate="G$1" pin="2"/>
 <pinref part="C9" gate="G$1" pin="2"/>
 <wire x1="238.76" y1="106.68" x2="238.76" y2="109.22" width="0.1524" layer="91"/>
-<pinref part="U$3" gate="G$1" pin="GND"/>
+<pinref part="U3" gate="G$1" pin="GND"/>
 </segment>
 <segment>
 <pinref part="ACC3" gate="-2" pin="S"/>
@@ -15313,7 +15313,7 @@ All options pin compatible, TO-220-3 Packages </text>
 <wire x1="274.32" y1="116.84" x2="287.02" y2="116.84" width="0.1524" layer="91"/>
 <junction x="274.32" y="116.84"/>
 <junction x="287.02" y="116.84"/>
-<pinref part="U$3" gate="G$1" pin="OUT"/>
+<pinref part="U3" gate="G$1" pin="OUT"/>
 </segment>
 </net>
 <net name="N$5" class="0">
@@ -15372,7 +15372,7 @@ All options pin compatible, TO-220-3 Packages </text>
 <wire x1="238.76" y1="180.34" x2="226.06" y2="180.34" width="0.1524" layer="91"/>
 <wire x1="238.76" y1="180.34" x2="241.3" y2="180.34" width="0.1524" layer="91"/>
 <junction x="238.76" y="180.34"/>
-<pinref part="U$1" gate="G$1" pin="IN"/>
+<pinref part="U1" gate="G$1" pin="IN"/>
 </segment>
 <segment>
 <wire x1="226.06" y1="149.86" x2="238.76" y2="149.86" width="0.1524" layer="91"/>
@@ -15380,7 +15380,7 @@ All options pin compatible, TO-220-3 Packages </text>
 <pinref part="C7" gate="G$1" pin="1"/>
 <wire x1="238.76" y1="149.86" x2="241.3" y2="149.86" width="0.1524" layer="91"/>
 <junction x="238.76" y="149.86"/>
-<pinref part="U$2" gate="G$1" pin="IN"/>
+<pinref part="U2" gate="G$1" pin="IN"/>
 </segment>
 <segment>
 <label x="226.06" y="116.84" size="1.778" layer="95"/>
@@ -15388,7 +15388,7 @@ All options pin compatible, TO-220-3 Packages </text>
 <wire x1="238.76" y1="116.84" x2="226.06" y2="116.84" width="0.1524" layer="91"/>
 <wire x1="238.76" y1="116.84" x2="241.3" y2="116.84" width="0.1524" layer="91"/>
 <junction x="238.76" y="116.84"/>
-<pinref part="U$3" gate="G$1" pin="IN"/>
+<pinref part="U3" gate="G$1" pin="IN"/>
 </segment>
 <segment>
 <wire x1="137.16" y1="142.24" x2="114.3" y2="142.24" width="0.1524" layer="91"/>
