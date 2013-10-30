@@ -14065,6 +14065,61 @@ Source: www.rsonline.de .. SMBJ12/C/15/C/24/C/30/C/5.0/C/7.5/C Voltage Suppresso
 <rectangle x1="2.25" y1="-1.1" x2="2.8" y2="1.1" layer="51"/>
 <wire x1="-0.762" y1="1.778" x2="-0.762" y2="-1.778" width="0.127" layer="21"/>
 </package>
+<package name="ATO">
+<pad name="B1" x="2.9" y="1.25" drill="1.4" shape="offset" rot="R90"/>
+<pad name="B2" x="6.4" y="1.25" drill="1.4" shape="offset" rot="R90"/>
+<pad name="B3" x="2.9" y="-1.25" drill="1.4" shape="offset" rot="R270"/>
+<pad name="B4" x="6.4" y="-1.35" drill="1.4" shape="offset" rot="R270"/>
+<pad name="A1" x="-6.4" y="1.25" drill="1.4" shape="offset" rot="R90"/>
+<pad name="A2" x="-2.9" y="1.25" drill="1.4" shape="offset" rot="R90"/>
+<pad name="A3" x="-6.4" y="-1.25" drill="1.4" shape="offset" rot="R270"/>
+<pad name="A4" x="-2.9" y="-1.35" drill="1.4" shape="offset" rot="R270"/>
+<hole x="0" y="0" drill="2.4"/>
+<wire x1="10" y1="3" x2="10" y2="-3" width="0.127" layer="21"/>
+<wire x1="-10" y1="-3" x2="-10" y2="3" width="0.127" layer="21"/>
+<wire x1="-1.7" y1="3.1" x2="1.7" y2="3.1" width="0.127" layer="21"/>
+<wire x1="-4.1" y1="3.1" x2="-5.2" y2="3.1" width="0.127" layer="21"/>
+<wire x1="-7.6" y1="3.1" x2="-10.1" y2="3.1" width="0.127" layer="21"/>
+<wire x1="-10.1" y1="3.1" x2="-10.1" y2="-3.1" width="0.127" layer="21"/>
+<wire x1="-10.1" y1="-3.1" x2="-7.6" y2="-3.1" width="0.127" layer="21"/>
+<wire x1="4.1" y1="3.1" x2="5.2" y2="3.1" width="0.127" layer="21"/>
+<wire x1="7.6" y1="3.1" x2="10.1" y2="3.1" width="0.127" layer="21"/>
+<wire x1="10.1" y1="3.1" x2="10.1" y2="-3.1" width="0.127" layer="21"/>
+<wire x1="10.1" y1="-3.1" x2="7.6" y2="-3.1" width="0.127" layer="21"/>
+<wire x1="5.2" y1="-3.1" x2="4.1" y2="-3.1" width="0.127" layer="21"/>
+<wire x1="1.7" y1="-3.1" x2="-1.7" y2="-3.1" width="0.127" layer="21"/>
+<wire x1="-5.2" y1="-3.1" x2="-4.1" y2="-3.1" width="0.127" layer="21"/>
+<text x="-3.3" y="-5.9" size="1.27" layer="21">&gt;VALUE</text>
+<text x="-3.4" y="4.6" size="1.27" layer="21">&gt;NAME</text>
+</package>
+<package name="CON_XT60_PCB_MOUNT">
+<pad name="V+" x="3.6" y="0" drill="4.2" shape="octagon"/>
+<pad name="V-" x="-3.6" y="0" drill="4.2" shape="octagon"/>
+<wire x1="7.8" y1="4.1" x2="-5.7" y2="4.1" width="0.127" layer="21"/>
+<wire x1="-5.7" y1="4.1" x2="-7.8" y2="2" width="0.127" layer="21"/>
+<wire x1="-7.8" y1="2" x2="-7.8" y2="-2" width="0.127" layer="21"/>
+<wire x1="-7.8" y1="-2" x2="-5.8" y2="-4" width="0.127" layer="21"/>
+<wire x1="-5.8" y1="-4" x2="7.8" y2="-4" width="0.127" layer="21"/>
+<wire x1="7.8" y1="-4" x2="7.8" y2="4.1" width="0.127" layer="21"/>
+<wire x1="5.8" y1="2.7" x2="6.8" y2="2.7" width="0.127" layer="21"/>
+<wire x1="6.3" y1="3.2" x2="6.3" y2="2.2" width="0.127" layer="21"/>
+<text x="-3.175" y="4.445" size="1.27" layer="25">&gt;NAME</text>
+<text x="-3.175" y="-5.715" size="1.27" layer="27">&gt;VALUE</text>
+</package>
+<package name="CON_XT60_PIGTAIL">
+<pad name="V-" x="-1.905" y="0" drill="1.3208"/>
+<pad name="V+" x="1.905" y="0" drill="1.3208"/>
+<wire x1="3.81" y1="1.5875" x2="-2.8575" y2="1.5875" width="0.127" layer="21"/>
+<wire x1="-2.8575" y1="1.5875" x2="-3.81" y2="0.635" width="0.127" layer="21"/>
+<wire x1="-3.81" y1="0.635" x2="-3.81" y2="-0.635" width="0.127" layer="21"/>
+<wire x1="-3.81" y1="-0.635" x2="-2.8575" y2="-1.5875" width="0.127" layer="21"/>
+<wire x1="-2.8575" y1="-1.5875" x2="3.81" y2="-1.5875" width="0.127" layer="21"/>
+<wire x1="3.81" y1="-1.5875" x2="3.81" y2="1.5875" width="0.127" layer="21"/>
+<text x="-3.175" y="1.905" size="1.27" layer="25">&gt;NAME</text>
+<text x="-3.175" y="-3.175" size="1.27" layer="27">&gt;VALUE</text>
+<wire x1="2.8575" y1="0.9525" x2="3.4925" y2="0.9525" width="0.127" layer="21"/>
+<wire x1="3.175" y1="0.635" x2="3.175" y2="1.27" width="0.127" layer="21"/>
+</package>
 <package name="TO220H">
 <description>&lt;b&gt;TO 220 horizontal&lt;/b&gt;</description>
 <wire x1="-5.207" y1="-1.27" x2="5.207" y2="-1.27" width="0.127" layer="21"/>
@@ -14129,61 +14184,6 @@ grid 2.54 mm</description>
 <rectangle x1="-0.889" y1="-1.27" x2="0.889" y2="-0.762" layer="51"/>
 <rectangle x1="1.651" y1="-1.27" x2="3.429" y2="-0.762" layer="51"/>
 </package>
-<package name="ATO">
-<pad name="B1" x="2.9" y="1.25" drill="1.4" shape="offset" rot="R90"/>
-<pad name="B2" x="6.4" y="1.25" drill="1.4" shape="offset" rot="R90"/>
-<pad name="B3" x="2.9" y="-1.25" drill="1.4" shape="offset" rot="R270"/>
-<pad name="B4" x="6.4" y="-1.35" drill="1.4" shape="offset" rot="R270"/>
-<pad name="A1" x="-6.4" y="1.25" drill="1.4" shape="offset" rot="R90"/>
-<pad name="A2" x="-2.9" y="1.25" drill="1.4" shape="offset" rot="R90"/>
-<pad name="A3" x="-6.4" y="-1.25" drill="1.4" shape="offset" rot="R270"/>
-<pad name="A4" x="-2.9" y="-1.35" drill="1.4" shape="offset" rot="R270"/>
-<hole x="0" y="0" drill="2.4"/>
-<wire x1="10" y1="3" x2="10" y2="-3" width="0.127" layer="21"/>
-<wire x1="-10" y1="-3" x2="-10" y2="3" width="0.127" layer="21"/>
-<wire x1="-1.7" y1="3.1" x2="1.7" y2="3.1" width="0.127" layer="21"/>
-<wire x1="-4.1" y1="3.1" x2="-5.2" y2="3.1" width="0.127" layer="21"/>
-<wire x1="-7.6" y1="3.1" x2="-10.1" y2="3.1" width="0.127" layer="21"/>
-<wire x1="-10.1" y1="3.1" x2="-10.1" y2="-3.1" width="0.127" layer="21"/>
-<wire x1="-10.1" y1="-3.1" x2="-7.6" y2="-3.1" width="0.127" layer="21"/>
-<wire x1="4.1" y1="3.1" x2="5.2" y2="3.1" width="0.127" layer="21"/>
-<wire x1="7.6" y1="3.1" x2="10.1" y2="3.1" width="0.127" layer="21"/>
-<wire x1="10.1" y1="3.1" x2="10.1" y2="-3.1" width="0.127" layer="21"/>
-<wire x1="10.1" y1="-3.1" x2="7.6" y2="-3.1" width="0.127" layer="21"/>
-<wire x1="5.2" y1="-3.1" x2="4.1" y2="-3.1" width="0.127" layer="21"/>
-<wire x1="1.7" y1="-3.1" x2="-1.7" y2="-3.1" width="0.127" layer="21"/>
-<wire x1="-5.2" y1="-3.1" x2="-4.1" y2="-3.1" width="0.127" layer="21"/>
-<text x="-3.3" y="-5.9" size="1.27" layer="21">&gt;VALUE</text>
-<text x="-3.4" y="4.6" size="1.27" layer="21">&gt;NAME</text>
-</package>
-<package name="CON_XT60_PCB_MOUNT">
-<pad name="V+" x="3.6" y="0" drill="4.2" shape="octagon"/>
-<pad name="V-" x="-3.6" y="0" drill="4.2" shape="octagon"/>
-<wire x1="7.8" y1="4.1" x2="-5.7" y2="4.1" width="0.127" layer="21"/>
-<wire x1="-5.7" y1="4.1" x2="-7.8" y2="2" width="0.127" layer="21"/>
-<wire x1="-7.8" y1="2" x2="-7.8" y2="-2" width="0.127" layer="21"/>
-<wire x1="-7.8" y1="-2" x2="-5.8" y2="-4" width="0.127" layer="21"/>
-<wire x1="-5.8" y1="-4" x2="7.8" y2="-4" width="0.127" layer="21"/>
-<wire x1="7.8" y1="-4" x2="7.8" y2="4.1" width="0.127" layer="21"/>
-<wire x1="5.8" y1="2.7" x2="6.8" y2="2.7" width="0.127" layer="21"/>
-<wire x1="6.3" y1="3.2" x2="6.3" y2="2.2" width="0.127" layer="21"/>
-<text x="-3.175" y="4.445" size="1.27" layer="25">&gt;NAME</text>
-<text x="-3.175" y="-5.715" size="1.27" layer="27">&gt;VALUE</text>
-</package>
-<package name="CON_XT60_PIGTAIL">
-<pad name="V-" x="-1.905" y="0" drill="1.3208"/>
-<pad name="V+" x="1.905" y="0" drill="1.3208"/>
-<wire x1="3.81" y1="1.5875" x2="-2.8575" y2="1.5875" width="0.127" layer="21"/>
-<wire x1="-2.8575" y1="1.5875" x2="-3.81" y2="0.635" width="0.127" layer="21"/>
-<wire x1="-3.81" y1="0.635" x2="-3.81" y2="-0.635" width="0.127" layer="21"/>
-<wire x1="-3.81" y1="-0.635" x2="-2.8575" y2="-1.5875" width="0.127" layer="21"/>
-<wire x1="-2.8575" y1="-1.5875" x2="3.81" y2="-1.5875" width="0.127" layer="21"/>
-<wire x1="3.81" y1="-1.5875" x2="3.81" y2="1.5875" width="0.127" layer="21"/>
-<text x="-3.175" y="1.905" size="1.27" layer="25">&gt;NAME</text>
-<text x="-3.175" y="-3.175" size="1.27" layer="27">&gt;VALUE</text>
-<wire x1="2.8575" y1="0.9525" x2="3.4925" y2="0.9525" width="0.127" layer="21"/>
-<wire x1="3.175" y1="0.635" x2="3.175" y2="1.27" width="0.127" layer="21"/>
-</package>
 </packages>
 <symbols>
 <symbol name="SUPPRESSOR">
@@ -14198,15 +14198,6 @@ grid 2.54 mm</description>
 <text x="2.794" y="-0.889" size="1.778" layer="96">&gt;VALUE</text>
 <pin name="A" x="0" y="-2.54" visible="off" length="short" direction="pas" rot="R90"/>
 <pin name="C" x="0" y="2.54" visible="off" length="short" direction="pas" rot="R270"/>
-</symbol>
-<symbol name="MIC29150/29300/29500">
-<pin name="IN" x="-15.24" y="2.54" length="middle"/>
-<pin name="GND" x="0" y="-7.62" length="middle" rot="R90"/>
-<pin name="OUT" x="15.24" y="2.54" length="middle" rot="R180"/>
-<wire x1="-10.16" y1="7.62" x2="-10.16" y2="-2.54" width="0.254" layer="94"/>
-<wire x1="-10.16" y1="-2.54" x2="10.16" y2="-2.54" width="0.254" layer="94"/>
-<wire x1="10.16" y1="-2.54" x2="10.16" y2="7.62" width="0.254" layer="94"/>
-<wire x1="10.16" y1="7.62" x2="-10.16" y2="7.62" width="0.254" layer="94"/>
 </symbol>
 <symbol name="FUSE">
 <wire x1="-2.54" y1="0" x2="0" y2="0" width="0.1524" layer="94"/>
@@ -14227,6 +14218,16 @@ grid 2.54 mm</description>
 <wire x1="-12.7" y1="5.08" x2="-20.32" y2="5.08" width="0.254" layer="94"/>
 <text x="-20.32" y="-7.62" size="1.778" layer="96">&gt;VALUE</text>
 <text x="-20.32" y="6.35" size="1.778" layer="95">&gt;NAME</text>
+</symbol>
+<symbol name="MIC29150/29300/29500">
+<pin name="IN" x="-15.24" y="2.54" length="middle"/>
+<pin name="GND" x="0" y="-7.62" length="middle" rot="R90"/>
+<pin name="OUT" x="15.24" y="2.54" length="middle" rot="R180"/>
+<wire x1="-10.16" y1="7.62" x2="-10.16" y2="-2.54" width="0.254" layer="94"/>
+<wire x1="-10.16" y1="-2.54" x2="10.16" y2="-2.54" width="0.254" layer="94"/>
+<wire x1="10.16" y1="-2.54" x2="10.16" y2="7.62" width="0.254" layer="94"/>
+<wire x1="10.16" y1="7.62" x2="-10.16" y2="7.62" width="0.254" layer="94"/>
+<text x="2.54" y="-5.08" size="1.778" layer="95">&gt;NAME</text>
 </symbol>
 </symbols>
 <devicesets>
@@ -14249,33 +14250,6 @@ grid 2.54 mm</description>
 <connects>
 <connect gate="G$1" pin="A" pad="A"/>
 <connect gate="G$1" pin="C" pad="C"/>
-</connects>
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-</devices>
-</deviceset>
-<deviceset name="MIC29150/29300/29500">
-<gates>
-<gate name="G$1" symbol="MIC29150/29300/29500" x="30.48" y="-15.24"/>
-</gates>
-<devices>
-<device name="HORIZONTAL" package="TO220H">
-<connects>
-<connect gate="G$1" pin="GND" pad="2"/>
-<connect gate="G$1" pin="IN" pad="1"/>
-<connect gate="G$1" pin="OUT" pad="3"/>
-</connects>
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-<device name="VERTICAL" package="TO220V">
-<connects>
-<connect gate="G$1" pin="GND" pad="2"/>
-<connect gate="G$1" pin="IN" pad="1"/>
-<connect gate="G$1" pin="OUT" pad="3"/>
 </connects>
 <technologies>
 <technology name=""/>
@@ -14321,6 +14295,33 @@ Library Part by Nate Chapman</description>
 <connects>
 <connect gate="G$1" pin="V+" pad="V+"/>
 <connect gate="G$1" pin="V-" pad="V-"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="MIC29150/29300/29500">
+<gates>
+<gate name="G$1" symbol="MIC29150/29300/29500" x="30.48" y="-15.24"/>
+</gates>
+<devices>
+<device name="HORIZONTAL" package="TO220H">
+<connects>
+<connect gate="G$1" pin="GND" pad="2"/>
+<connect gate="G$1" pin="IN" pad="1"/>
+<connect gate="G$1" pin="OUT" pad="3"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="VERTICAL" package="TO220V">
+<connects>
+<connect gate="G$1" pin="GND" pad="2"/>
+<connect gate="G$1" pin="IN" pad="1"/>
+<connect gate="G$1" pin="OUT" pad="3"/>
 </connects>
 <technologies>
 <technology name=""/>
@@ -15099,9 +15100,6 @@ diameter 3 mm, horizontal, grid 12.7 mm</description>
 <part name="D2" library="diode" deviceset="ZENER-DIODE" device="SMB" value="3.3V"/>
 <part name="DUE" library="con-molex" deviceset="5566-2" device="" value=""/>
 <part name="SERVO2" library="con-molex" deviceset="5566-2" device="" value=""/>
-<part name="U$1" library="MRSDTeamB" deviceset="MIC29150/29300/29500" device="HORIZONTAL"/>
-<part name="U$2" library="MRSDTeamB" deviceset="MIC29150/29300/29500" device="HORIZONTAL"/>
-<part name="U$3" library="MRSDTeamB" deviceset="MIC29150/29300/29500" device="HORIZONTAL"/>
 <part name="F_BATT" library="MRSDTeamB" deviceset="FUSE-" device="ATO" value="15A"/>
 <part name="F_DUE" library="MRSDTeamB" deviceset="FUSE-" device="ATO" value="2A"/>
 <part name="F_SERVO1" library="MRSDTeamB" deviceset="FUSE-" device="ATO" value="7.5A"/>
@@ -15111,6 +15109,9 @@ diameter 3 mm, horizontal, grid 12.7 mm</description>
 <part name="C4" library="rcl" deviceset="CPOL-US" device="TT5D11"/>
 <part name="U$4" library="MRSDTeamB" deviceset="CON_XT60-" device="PIGTAIL"/>
 <part name="U$5" library="MRSDTeamB" deviceset="CON_XT60-" device="PIGTAIL"/>
+<part name="U$1" library="MRSDTeamB" deviceset="MIC29150/29300/29500" device="VERTICAL"/>
+<part name="U$2" library="MRSDTeamB" deviceset="MIC29150/29300/29500" device="VERTICAL"/>
+<part name="U$3" library="MRSDTeamB" deviceset="MIC29150/29300/29500" device="VERTICAL"/>
 </parts>
 <sheets>
 <sheet>
@@ -15120,7 +15121,7 @@ Micrel 3915* Series for V &lt; 5V
 TI/Fairchild LM78** Series for V &gt;= 5V
 All options pin compatible, TO-220-3 Packages </text>
 <text x="236.22" y="187.96" size="1.778" layer="97">Filter capacitors use Kemet 1206 Tantalum</text>
-<text x="22.86" y="175.26" size="1.778" layer="97">7.4V LiPo</text>
+<text x="22.86" y="177.8" size="1.778" layer="97">7.4V LiPo</text>
 </plain>
 <instances>
 <instance part="FRAME1" gate="G$1" x="-40.64" y="-10.16"/>
@@ -15178,9 +15179,6 @@ All options pin compatible, TO-220-3 Packages </text>
 <instance part="DUE" gate="-2" x="172.72" y="170.18"/>
 <instance part="SERVO2" gate="-1" x="172.72" y="111.76"/>
 <instance part="SERVO2" gate="-2" x="172.72" y="109.22"/>
-<instance part="U$1" gate="G$1" x="256.54" y="177.8"/>
-<instance part="U$2" gate="G$1" x="256.54" y="147.32"/>
-<instance part="U$3" gate="G$1" x="256.54" y="114.3"/>
 <instance part="F_BATT" gate="G$1" x="60.96" y="170.18"/>
 <instance part="F_DUE" gate="G$1" x="142.24" y="172.72"/>
 <instance part="F_SERVO1" gate="G$1" x="142.24" y="142.24"/>
@@ -15191,6 +15189,9 @@ All options pin compatible, TO-220-3 Packages </text>
 <instance part="C4" gate="G$1" x="149.86" y="106.68"/>
 <instance part="U$4" gate="G$1" x="43.18" y="167.64"/>
 <instance part="U$5" gate="G$1" x="43.18" y="149.86"/>
+<instance part="U$1" gate="G$1" x="256.54" y="177.8"/>
+<instance part="U$2" gate="G$1" x="256.54" y="147.32"/>
+<instance part="U$3" gate="G$1" x="256.54" y="114.3"/>
 </instances>
 <busses>
 </busses>
@@ -15212,26 +15213,26 @@ All options pin compatible, TO-220-3 Packages </text>
 <segment>
 <pinref part="C6" gate="G$1" pin="1"/>
 <wire x1="274.32" y1="180.34" x2="271.78" y2="180.34" width="0.1524" layer="91"/>
-<pinref part="U$1" gate="G$1" pin="OUT"/>
 <pinref part="R4" gate="G$1" pin="2"/>
 <wire x1="287.02" y1="180.34" x2="294.64" y2="180.34" width="0.1524" layer="91"/>
 <wire x1="274.32" y1="180.34" x2="287.02" y2="180.34" width="0.1524" layer="91"/>
 <junction x="274.32" y="180.34"/>
 <junction x="287.02" y="180.34"/>
 <pinref part="ACC1" gate="-1" pin="S"/>
+<pinref part="U$1" gate="G$1" pin="OUT"/>
 </segment>
 </net>
 <net name="N$9" class="0">
 <segment>
 <pinref part="C7" gate="G$1" pin="1"/>
 <wire x1="274.32" y1="149.86" x2="271.78" y2="149.86" width="0.1524" layer="91"/>
-<pinref part="U$2" gate="G$1" pin="OUT"/>
 <wire x1="294.64" y1="149.86" x2="287.02" y2="149.86" width="0.1524" layer="91"/>
 <pinref part="ACC2" gate="-1" pin="S"/>
 <pinref part="R5" gate="G$1" pin="2"/>
 <wire x1="274.32" y1="149.86" x2="287.02" y2="149.86" width="0.1524" layer="91"/>
 <junction x="274.32" y="149.86"/>
 <junction x="287.02" y="149.86"/>
+<pinref part="U$2" gate="G$1" pin="OUT"/>
 </segment>
 </net>
 <net name="GND" class="0">
@@ -15398,13 +15399,13 @@ All options pin compatible, TO-220-3 Packages </text>
 <segment>
 <pinref part="C10" gate="G$1" pin="1"/>
 <wire x1="274.32" y1="116.84" x2="271.78" y2="116.84" width="0.1524" layer="91"/>
-<pinref part="U$3" gate="G$1" pin="OUT"/>
 <wire x1="294.64" y1="116.84" x2="287.02" y2="116.84" width="0.1524" layer="91"/>
 <pinref part="ACC3" gate="-1" pin="S"/>
 <pinref part="R6" gate="G$1" pin="2"/>
 <wire x1="274.32" y1="116.84" x2="287.02" y2="116.84" width="0.1524" layer="91"/>
 <junction x="274.32" y="116.84"/>
 <junction x="287.02" y="116.84"/>
+<pinref part="U$3" gate="G$1" pin="OUT"/>
 </segment>
 </net>
 <net name="N$5" class="0">
@@ -15529,17 +15530,17 @@ All options pin compatible, TO-220-3 Packages </text>
 </sheet>
 </sheets>
 <errors>
-<approved hash="113,1,152.931,119.911,FRAME1,,,,,"/>
+<approved hash="113,1,153.674,119.911,FRAME1,,,,,"/>
 <approved hash="113,1,156.21,101.278,LED5,,,,,"/>
 <approved hash="113,1,156.21,162.238,LED4,,,,,"/>
 <approved hash="113,1,287.342,166.37,LED1,,,,,"/>
 <approved hash="113,1,287.342,135.89,LED2,,,,,"/>
 <approved hash="113,1,156.21,131.758,LED6,,,,,"/>
 <approved hash="113,1,287.342,102.87,LED3,,,,,"/>
-<approved hash="113,1,135.539,143.121,SERVO1_PWR,,,,,"/>
-<approved hash="113,1,135.539,112.641,SERVO2_PWR,,,,,"/>
-<approved hash="113,1,150.955,135.89,C2,,,,,"/>
-<approved hash="113,1,150.955,105.41,C4,,,,,"/>
+<approved hash="113,1,135.901,143.121,SERVO1_PWR,,,,,"/>
+<approved hash="113,1,135.901,112.641,SERVO2_PWR,,,,,"/>
+<approved hash="113,1,151.004,135.89,C2,,,,,"/>
+<approved hash="113,1,151.004,105.41,C4,,,,,"/>
 </errors>
 </schematic>
 </drawing>
