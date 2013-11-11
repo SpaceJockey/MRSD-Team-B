@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="977.06104"
+   height="583.91193"
+   id="svg4422"
+   version="1.1"
+   inkscape:version="0.48.4 r9939"
+   sodipodi:docname="Planet_with_Rings_black_white_line_art_coloring_book_colouring.svg">
+  <title
+     id="title4457">Planet</title>
+  <defs
+     id="defs4424">
+    <linearGradient
+       id="linearGradient4118-5">
+      <stop
+         style="stop-color:#5588b4;stop-opacity:1;"
+         offset="0"
+         id="stop4120-8" />
+      <stop
+         id="stop4132-8"
+         offset="0.13721263"
+         style="stop-color:#ac5b00;stop-opacity:1;" />
+      <stop
+         id="stop4130-1"
+         offset="0.27442527"
+         style="stop-color:#b48c7f;stop-opacity:1;" />
+      <stop
+         id="stop4128-2"
+         offset="0.4511494"
+         style="stop-color:#558884;stop-opacity:0.80503142;" />
+      <stop
+         id="stop4126-1"
+         offset="0.71551722"
+         style="stop-color:#c58400;stop-opacity:0.9937107;" />
+      <stop
+         style="stop-color:#55428d;stop-opacity:1;"
+         offset="1"
+         id="stop4122-4" />
+    </linearGradient>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.35"
+     inkscape:cx="668.47571"
+     inkscape:cy="254.08922"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:window-width="779"
+     inkscape:window-height="486"
+     inkscape:window-x="496"
+     inkscape:window-y="153"
+     inkscape:window-maximized="0" />
+  <metadata
+     id="metadata4427">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <cc:license
+           rdf:resource="" />
+        <dc:title>Planet</dc:title>
+        <dc:date>22.05.2011</dc:date>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Andreas Preuss</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:publisher>
+          <cc:Agent>
+            <dc:title>Andreas Preuss</dc:title>
+          </cc:Agent>
+        </dc:publisher>
+        <dc:identifier>Andreas Preuss</dc:identifier>
+        <dc:source>www.apmedia.de</dc:source>
+        <dc:relation>www.apmedia.de</dc:relation>
+        <dc:language>deutsch</dc:language>
+        <dc:subject>
+          <rdf:Bag>
+            <rdf:li>planet</rdf:li>
+          </rdf:Bag>
+        </dc:subject>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Ebene 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-117.0466,36.750676)">
+    <g
+       id="g11073">
+      <path
+         transform="matrix(-0.26988298,9.0947695,-9.0947695,-0.26988298,551.71407,-857.03455)"
+         d="m 144.42282,-8.7587624 a 22.928442,22.664896 0 1 1 -45.856885,0 22.928442,22.664896 0 1 1 45.856885,0 z"
+         sodipodi:ry="22.664896"
+         sodipodi:rx="22.928442"
+         sodipodi:cy="-8.7587624"
+         sodipodi:cx="121.49438"
+         id="path4108-8"
+         style="fill:none;fill-opacity:1;stroke:#0000ff"
+         sodipodi:type="arc" />
+      <path
+         sodipodi:nodetypes="cccssscccsssscccccccccsssccccssscccccccccsscccccsccccccccc"
+         inkscape:connector-curvature="0"
+         id="path4108-2"
+         d="M 978.13389,-7.7436128 C 919.49312,-5.9841831 822.10368,24.126841 708.58274,74.998354 c 2.57113,1.578819 5.18467,3.151178 7.67709,4.833723 C 866.79002,14.225739 983.99469,-9.8289606 1004.5772,26.945459 1032.6002,77.013641 871.51165,220.67917 644.607,347.67721 417.70234,474.67522 211.15164,537.07032 183.1286,487.00217 161.96114,449.18271 248.8809,357.99238 390.41003,260.95453 c -0.14195,-2.80061 -0.25022,-5.71749 -0.28389,-8.5301 l -0.2948,0.21109 C 344.50087,282.59313 124.13216,449.33458 154.12663,502.92511 184.12119,556.51565 405.15168,489.86525 648.0194,353.9327 890.88722,218.00013 1063.5745,64.328951 1033.5799,10.738361 1026.0812,-2.6592185 1006.8951,-8.6064495 978.13426,-7.7435219 z M 390.41003,260.95453 c 0.009,0.18652 -0.009,0.38306 0,0.56867 0,0 -1.27866,-0.0455 0,-0.56867 z M 708.58274,74.998354 c -0.111,-0.07279 -0.17287,-0.216551 -0.28388,-0.283882 1.03089,0.690597 0.28388,0.283882 0.28388,0.283882 z M 932.07136,24.102093 c -46.74031,1.365362 -121.63777,22.968487 -209.55612,60.279371 3.362,2.460126 6.75302,5.030984 9.95178,7.67709 C 842.89965,47.796844 926.21548,33.959885 942.02314,62.203205 965.75128,104.59766 829.05769,226.21123 636.92991,333.74471 444.80213,441.2782 269.69506,494.13882 245.967,451.74442 c -16.41706,-29.33199 44.03509,-96.84603 146.43338,-171.17066 -0.54683,-3.7356 -1.07092,-7.59511 -1.42168,-11.37347 0,0 -3.43916,2.79023 0.94836,0.53319 C 390.08484,266.46156 180.32482,426.46386 206.72855,473.63862 233.13209,520.81338 427.97158,461.934 641.76363,342.27508 855.55568,222.61612 1007.381,87.484327 980.97726,40.309555 974.37637,28.515816 957.37441,23.363272 932.07136,24.102366 z M 392.40038,280.57376 c 0.0364,0.27614 -0.0455,0.57859 0,0.85301 -9.27183,6.94848 -14.73446,9.52243 0,-0.85301 z M 722.51524,84.381464 c -0.10646,-0.08189 -0.17743,-0.206542 -0.28388,-0.283882 z M 880.60642,59.359838 c -33.30269,0.976935 -83.39125,14.342851 -142.737,37.248102 2.53191,2.24212 4.24467,7.97999 7.39275,6.82408 0,0 120.50943,-52.236875 145.86471,-13.079486 C 911.40486,126.58276 794.86686,230.47309 630.6745,322.37125 466.48214,414.26931 316.85682,459.54098 296.57893,423.31076 c -12.56835,-22.45548 27.55257,-71.0367 98.94915,-126.52981 0.0182,1.13841 -1.82575,-3.99531 -2.25558,-9.20161 -0.25113,0.75738 -149.7921,113.07175 -127.40193,153.07595 22.39035,40.00421 187.20471,-9.70485 368.50031,-111.17563 C 815.66657,228.00878 944.50983,113.29655 922.11957,73.292334 916.52201,63.291327 902.07115,58.730112 880.60642,59.359838 z M 395.52808,296.78095 c 0.0919,0.37741 0.19472,0.76211 0.28389,1.13734 -2.67714,-3.7501 -0.28389,-1.13734 -0.28389,-1.13734 z M 737.86942,96.60794 c -0.101,-0.09099 -0.18289,-0.194714 -0.28388,-0.283882 z"
+         style="fill:none;fill-opacity:1;stroke:#0000ff;stroke-width:9.09877299999999960" />
+    </g>
+  </g>
+</svg>
