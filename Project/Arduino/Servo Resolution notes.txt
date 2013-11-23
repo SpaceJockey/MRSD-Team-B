@@ -1,0 +1,15 @@
+PWMRes = 4096
+
+@ 50 Hz = 204800 cycles/sec
+Min = 185 ~= .9 ms
+Mid = 307 ~= .15
+Max = 430 ~= .21 ms
+
+
+@300 Hz = 1228800 cycles/sec
+"Although the length of the
+pulses is reduced in a direct ratio to the higher frequency because the power 
+is being turned on/off to the motor more frequently, the motor has more
+incentive to turn."
+
+I.E. Should be the same settings exactly...
