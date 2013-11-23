@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<package>
+  <name>rqt_sj</name>
+  <version>0.0.1</version>
+  <description>The rqt_sj package</description>
+
+  <maintainer email="rusty@todo.todo">rusty</maintainer>
+
+  <license>TODO</license>
+
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>message_generation</build_depend>
+  <run_depend>message_runtime</run_depend>
+  <run_depend>python-rospkg</run_depend>
+  <run_depend>qt_ui</run_depend>
+  <run_depend>qt_ui_py_common</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>rqt_gui</run_depend>
+  <run_depend>rqt_gui_py</run_depend>
+
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <rqt_gui plugin="${prefix}/plugin.xml"/>
+  </export>
+</package>
