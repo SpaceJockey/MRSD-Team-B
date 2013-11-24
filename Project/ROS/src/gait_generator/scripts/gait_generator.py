@@ -25,6 +25,8 @@ class GaitGenerator():
     lift_res = 20
     xtend_res = 40
     max_xtend = 0.10
+    turn_res = 25
+    
     x_dist = sqrt((max_xtend + prism_len)*(max_xtend + prism_len) - clearance*clearance)
     
     dsb_joints = [0.0,]*12
@@ -32,15 +34,13 @@ class GaitGenerator():
     joint_msg.name = ['center_swivel','fore_base_pitch','aft_base_pitch','front_pitch','rear_pitch','fore_extend','aft_extend']
     joint_msg.position = dsb_joints[0:7]
     joint_msg.velocity=[0.0,]*7
-    
-    
-    
+
     schedPub = rospy.Publisher('sched_joints',JointState)
     jointPub = rospy.Publisher('joint_states',JointState)
     
     def __init__(self):
       self.listener()
-      print("Gait Generator online.")
+      print("Gait Generator Online.")
       rospy.spin()
       
     def command_receive(self,msg):
@@ -56,6 +56,8 @@ class GaitGenerator():
       elif data[0] == "maxextend":
         self.max_xtend = float(data[1])
         self.x_dist = sqrt((self.max_xtend + self.prism_len)*(self.max_xtend + self.prism_len) - self.clearance*self.clearance)
+      elif data[0] == "turnres":
+        self.turn_res = int(data[1])
       else:
         if data[1] == 'front' or data[1] == 'rear':
           if data[1] == 'front':
@@ -74,10 +76,15 @@ class GaitGenerator():
           elif data[0] == 'extend' or data[0] == 'retract':
             extend = data[0] == 'extend'
             self.execute_extend_retract(center_pitch,end_pitch,prism, extend)
+          elif data[0] == 'turn' or data[0] == 'straighten':
+            turn = data[0] == 'turn'
+            self.execute_turn_straighten(radians(float(data[2])), turn)
             
         elif data[1] == 'middle':
           if data[0] == 'lift' or data[0] == 'place':
-            self.execute_middle_lift_place(data[2], data[0]=='lift')        
+            self.execute_middle_lift_place(data[2], data[0]=='lift')  
+          elif data[0] == 'extend':
+            self.execute_middle_extend_retract(data[2])      
 
 
     
@@ -109,7 +116,6 @@ class GaitGenerator():
           else:
             dist = self.prism_len
           prism,ang = get_prism_ang(dist, c)
-          print(dist)
           self.dsb_joints[center_pitch] = ang
           self.dsb_joints[end_pitch] = -ang
           self.dsb_joints[center_prism] = (prism-self.prism_len)
@@ -171,50 +177,38 @@ class GaitGenerator():
           self.dsb_joints[CENTER_PRISMR] = prism - self.prism_len             
           
           self.updateJointState()  
+
       
-      
-      
-    def execute_middle_extend_retract(self):
-        if facing == 'forward':
-          xlen = self.x_dist
-          xlen2 = self.prism_len
-        elif facing == 'backward':
-          xlen = self.prism_len
-          xlen2 = self.x_dist
+    def execute_middle_extend_retract(self, facing):
+        c = self.clearance
         for t in range(1, self.xtend_res+1):
-          ang = 0
+          if facing == 'forward':
+            flen = self.prism_len + (self.x_dist-self.prism_len)*(self.xtend_res - t)/self.xtend_res
+            blen = self.prism_len + (self.x_dist-self.prism_len)*t/self.xtend_res
+          else:
+            flen = self.prism_len + (self.x_dist-self.prism_len)*t/self.xtend_res
+            blen = self.prism_len + (self.x_dist-self.prism_len)*(self.xtend_res - t)/self.xtend_res
           
-          prism, ang = get_prism_ang(xlen,c)          
+          prism, ang = get_prism_ang(flen,c)          
           self.dsb_joints[CENTER_PITCHF] = -ang
           self.dsb_joints[FRONT_PITCH] = ang
           self.dsb_joints[CENTER_PRISMF] = prism - self.prism_len
           
-          prism, ang = get_prism_ang(xlen2,c)
+          prism, ang = get_prism_ang(blen,c)
           self.dsb_joints[CENTER_PITCHR] = -ang
           self.dsb_joints[REAR_PITCH] = ang
           self.dsb_joints[CENTER_PRISMR] = prism - self.prism_len   
-            
-        ext = 0
-        xlen = 0.15
-        xlen2 = 0.3
-        clear = 0.05
-        dist = sqrt(xlen*xlen - clear*clear)
-        for t in range(0,50):
-          nlen = xlen + dist*(t/50.0)
-          prism, ang = get_prism_ang(nlen,clear)
-          self.center_pitchr_sld.setValue(-ang)
-          self.rear_pitch_sld.setValue(ang)
-          self.center_prismr_sld.setValue((prism-xlen)*1000)
-          
-          nlen = xlen + dist*((50-t)/50.0)
-          prism, ang = get_prism_ang(nlen,clear)
-          self.center_pitchf_sld.setValue(-ang)
-          self.front_pitch_sld.setValue(ang)
-          self.center_prismf_sld.setValue((prism-xlen)*1000)
           
           self.updateJointState()
-          #time.sleep(self.delay)
       
+    def execute_turn_straighten(self, angle, turn):
+      for t in range(1, self.turn_res + 1):
+        if turn:
+          ang = angle*t/self.turn_res
+        else:
+          ang = angle*(self.turn_res-t)/self.turn_res
+        self.dsb_joints[CENTER_SWIVEL] = ang
+        self.updateJointState()
       
 print("Gait Generator Initializing...")
 gaitgen = GaitGenerator()

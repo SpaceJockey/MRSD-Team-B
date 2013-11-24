@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import rospy, time
-from std_msgs.msg import String
+from std_msgs.msg import String, Empty, Float64MultiArray
 from sensor_msgs.msg import JointState
 
     
@@ -11,6 +11,8 @@ class Scheduler():
     
     # Pubisher for joint states
     jointPub = rospy.Publisher('joint_states',JointState)
+    serialPub = rospy.Publisher('serial_link',Float64MultiArray)
+    #emptyPub = rospy.Publisher('toggle_led',Empty)
     
     # Init: Set up listener
     def __init__(self):
@@ -52,6 +54,8 @@ while (True):
   if (not sched.pause):
     if (len(sched.queue) > 0):
       comm = sched.queue.pop()
-      print(str(comm))
       sched.jointPub.publish(comm)
+      posArray = Float64MultiArray()
+      posArray.data = comm.position
+      sched.serialPub.publish(posArray)
     print("Queue Size: " + str(len(sched.queue)))

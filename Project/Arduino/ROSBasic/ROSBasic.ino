@@ -2,22 +2,25 @@
 
 #include <ros.h>
 #include <sensor_msgs/JointState.h>
+#include <std_msgs/Empty.h>
+#include <std_msgs/Float64MultiArray.h>
 
 //General Debugging stuff
 #define STATUS_LED 13
 
 // Ros Initialization stuff
 ros::NodeHandle  nh;
-sensor_msgs::JointState pub_msg; //out
+std_msgs::Float64MultiArray pub_msg; //out
+//std_msgs::Empty pub_msg;
 
 int blink = 1;
 //Position Update Callback
-void jointstate_cb(const sensor_msgs::JointState& cmd_msg){
+void messageCb( const std_msgs::Float64MultiArray& toggle_msg){
   blink = 1-blink;
   digitalWrite(STATUS_LED, blink); 
 }
 
-ros::Subscriber<sensor_msgs::JointState> sub("serial_link", jointstate_cb);
+ros::Subscriber<std_msgs::Float64MultiArray> sub("serial_link", &messageCb );
 
 void setup() {
   pinMode(STATUS_LED, OUTPUT);

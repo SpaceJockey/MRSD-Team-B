@@ -42,6 +42,7 @@ class RqtSJWidget(QMainWindow):
     liftedf = False
     liftedr = False
     liftedm = False
+    turning = False
         
     
     def __init__(self, context):
@@ -65,6 +66,7 @@ class RqtSJWidget(QMainWindow):
         self._handle_max_extend_change(self.max_x_dsb.value())
         self._handle_lift_res_change(self.liftplace_res_sb.value())
         self._handle_x_res_change(self.x_res_sb.value())
+        self._handle_turn_res_change(self.turn_res_dsb.value())
         self._handle_delay_change(self.delay_dsb.value())
         
         
@@ -84,21 +86,18 @@ class RqtSJWidget(QMainWindow):
         self.rear_lift_button.clicked[bool].connect(self._handle_rear_lift_clicked)
         self.rear_extend_button.clicked[bool].connect(self._handle_rear_extend_clicked)
         self.rear_place_button.clicked[bool].connect(self._handle_rear_place_clicked)
+        self.front_turn_button.clicked[bool].connect(self._handle_front_turn_clicked)
+        self.rear_turn_button.clicked[bool].connect(self._handle_rear_turn_clicked)
         
         # Initial Button Setup to Restrict Permissible Motions
-        self.front_extend_button.setEnabled(False)
-        self.front_place_button.setEnabled(False)
-        self.rear_extend_button.setEnabled(False)
-        self.rear_extend_button.setText('Extend')
-        self.rear_place_button.setEnabled(False)   
-        self.middle_extend_button.setEnabled(False)
-        self.middle_place_button.setEnabled(False)     
+        self.set_button_states() 
         
         # Wiring up spinboxes for operational parameters
         self.clearance_dsb.valueChanged.connect(self._handle_clearance_change)
         self.max_x_dsb.valueChanged.connect(self._handle_max_extend_change)
         self.liftplace_res_sb.valueChanged.connect(self._handle_lift_res_change)
         self.x_res_sb.valueChanged.connect(self._handle_x_res_change)
+        self.turn_res_dsb.valueChanged.connect(self._handle_turn_res_change)
         self.delay_dsb.valueChanged.connect(self._handle_delay_change)
         
         # Wiring up sliders for joint values
@@ -123,17 +122,21 @@ class RqtSJWidget(QMainWindow):
     # Update all the gait segmet button states in the GUI
     def set_button_states(self):
         self.front_lift_button.setEnabled(not self.liftedf and not self.liftedr and not self.liftedm)
-        self.middle_lift_button.setEnabled(not self.liftedf and not self.liftedr and not self.liftedm)
+        self.middle_lift_button.setEnabled(not self.liftedf and not self.liftedr and not self.liftedm and not self.turning)
         self.rear_lift_button.setEnabled(not self.liftedf and not self.liftedr and not self.liftedm)
         self.front_place_button.setEnabled(self.liftedf)
         self.middle_place_button.setEnabled(self.liftedm)
         self.rear_place_button.setEnabled(self.liftedr)
-        self.front_extend_button.setEnabled(self.liftedf)
-        self.middle_extend_button.setEnabled(self.liftedm and ((self.extendedf and not self.extendedr)or(self.extendedr and not self.extendedf)))
-        self.rear_extend_button.setEnabled(self.liftedr)
+        self.front_extend_button.setEnabled(self.liftedf and not self.turning)
+        self.middle_extend_button.setEnabled(not self.turning and self.liftedm and ((self.extendedf and not self.extendedr)or(self.extendedr and not self.extendedf)))
+        self.rear_extend_button.setEnabled(self.liftedr and not self.turning)
+        self.front_turn_button.setEnabled(self.liftedf and not self.extendedf and not self.extendedr)
+        self.rear_turn_button.setEnabled(self.liftedr and not self.extendedf and not self.extendedr)
         
         self.front_extend_button.setText("Extend" if not self.extendedf else "Retract")
         self.rear_extend_button.setText("Extend" if not self.extendedr else "Retract")
+        self.front_turn_button.setText("Turn" if not self.turning else "Straighten")
+        self.rear_turn_button.setText("Turn" if not self.turning else "Straighten")
         self.middle_extend_button.setText(self.get_middle_movement())
         
         
@@ -156,13 +159,20 @@ class RqtSJWidget(QMainWindow):
     ########## UPDATING READOUTS ###########
     ########################################
     def jointCallback(self, msg):
-        self.center_swivel_lbl.setText("%.2f" % degrees(msg.position[0]))
-        self.center_fpitch_lbl.setText("%.2f" % degrees(msg.position[1]))
-        self.center_rpitch_lbl.setText("%.2f" % degrees(msg.position[2]))
-        self.front_pitch_lbl.setText("%.2f" % degrees(msg.position[3]))
-        self.rear_pitch_lbl.setText("%.2f" % degrees(msg.position[4]))
-        self.center_fprism_lbl.setText("%.2f" % msg.position[5]*100)
-        self.center_rprism_lbl.setText("%.2f" % msg.position[6]*100)
+        self.center_swivel_lbl.setText("%.3f" % degrees(msg.position[0]))
+        self.center_fpitch_lbl.setText("%.3f" % degrees(msg.position[1]))
+        self.center_rpitch_lbl.setText("%.3f" % degrees(msg.position[2]))
+        self.front_pitch_lbl.setText("%.3f" % degrees(msg.position[3]))
+        self.rear_pitch_lbl.setText("%.3f" % degrees(msg.position[4]))
+        self.center_fprism_lbl.setText("%.3f" % msg.position[5]*100)
+        self.center_rprism_lbl.setText("%.3f" % msg.position[6]*100)
+        self.center_swivel_sld.setValue(degrees(msg.position[0]))
+        self.center_pitchf_sld.setValue(degrees(msg.position[1]))
+        self.center_pitchr_sld.setValue(degrees(msg.position[2]))
+        self.front_pitch_sld.setValue(degrees(msg.position[3]))
+        self.rear_pitch_sld.setValue(degrees(msg.position[4]))
+        self.center_prismf_sld.setValue(msg.position[5]*1000)
+        self.center_prismr_sld.setValue(msg.position[6]*1000)
 
 
     ########################################
@@ -181,7 +191,13 @@ class RqtSJWidget(QMainWindow):
         self.center_prismf_sld.setValue(0)
         self.center_prismr_sld.setValue(0)
         time.sleep(0.1)
-        self.updateJointState()       
+        self.updateJointState() 
+        self.extendedf = False
+        self.extendedr = False
+        self.liftedf = False
+        self.liftedr = False
+        self.liftedm = False  
+        self.set_button_states()    
         
     def _handle_halt_all(self, checked):
         if not self.halted:
@@ -222,7 +238,13 @@ class RqtSJWidget(QMainWindow):
         self.lift_res = self.liftplace_res_sb.value()
         msg = String()
         msg.data = "liftres " + str(self.lift_res)
-        self.gaitPub.publish(msg.data)        
+        self.gaitPub.publish(msg.data)      
+          
+    def _handle_turn_res_change(self, val):
+        self.turn_res = self.turn_res_dsb.value()
+        msg = String()
+        msg.data = "turnres " + str(self.turn_res)
+        self.gaitPub.publish(msg.data)  
     
     def _handle_x_res_change(self, val):      
         self.xtend_res = self.x_res_sb.value()   
@@ -329,20 +351,16 @@ class RqtSJWidget(QMainWindow):
     def _handle_front_extend_clicked(self):
         if self.extendedf:
           self.gait_gen("retract front") 
-          self.front_extend_button.setText('Extend')
         else:
-          self.gait_gen("extend front") 
-          self.front_extend_button.setText('Retract')        
+          self.gait_gen("extend front")        
         self.extendedf = not self.extendedf
         self.set_button_states()
         
     def _handle_rear_extend_clicked(self):
         if self.extendedr:
           self.gait_gen("retract rear") 
-          self.rear_extend_button.setText('Extend')
         else:
-          self.gait_gen("extend rear") 
-          self.rear_extend_button.setText('Retract')        
+          self.gait_gen("extend rear")      
         self.extendedr = not self.extendedr   
         self.set_button_states()     
 
@@ -353,41 +371,31 @@ class RqtSJWidget(QMainWindow):
         
     def _handle_middle_extend_clicked(self): 
         mid = self.get_middle_movement() 
+        self.gait_gen("extend middle " + self.get_middle_movement().lower())
         self.extendedr = not self.extendedr
         self.extendedf = not self.extendedf
         self.set_button_states() 
-        #self.extend_middle()
         
     def _handle_middle_place_clicked(self):
         self.gait_gen("place middle " + self.get_middle_movement().lower())
         self.liftedm = False
-        self.set_button_states()     
-
-
-    def extend_middle(self):
-        ang = 0
-        ext = 0
-        xlen = 0.15
-        xlen2 = 0.3
-        clear = 0.05
-        dist = sqrt(xlen*xlen - clear*clear)
-        for t in range(0,50):
-          nlen = xlen + dist*(t/50.0)
-          prism, ang = get_prism_ang(nlen,clear)
-          self.center_pitchr_sld.setValue(-ang)
-          self.rear_pitch_sld.setValue(ang)
-          self.center_prismr_sld.setValue((prism-xlen)*1000)
-          
-          nlen = xlen + dist*((50-t)/50.0)
-          prism, ang = get_prism_ang(nlen,clear)
-          self.center_pitchf_sld.setValue(-ang)
-          self.front_pitch_sld.setValue(ang)
-          self.center_prismf_sld.setValue((prism-xlen)*1000)
-          
-          self.updateJointState()
-          #time.sleep(self.delay)
-          
-          
+        self.set_button_states()   
+        
+    def _handle_front_turn_clicked(self):
+        if self.turning:
+          self.gait_gen("straighten front " + str(self.turn_amt_dsb.value()))
+        else:
+          self.gait_gen("turn front " + str(self.turn_amt_dsb.value()))
+        self.turning = not self.turning
+        self.set_button_states()
+    
+    def _handle_rear_turn_clicked(self):  
+        if self.turning:
+          self.gait_gen("straighten rear " + str(self.turn_amt_dsb.value()))
+        else:
+          self.gait_gen("turn rear " + str(self.turn_amt_dsb.value()))
+        self.turning = not self.turning
+        self.set_button_states()
 
     def shutdown_all(self):
         rospy.loginfo("Shutting down...")
