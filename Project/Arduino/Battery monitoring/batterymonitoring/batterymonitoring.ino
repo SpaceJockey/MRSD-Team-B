@@ -1,30 +1,37 @@
-int analogPin = A0;     // potentiometer wiper (middle terminal) connected to analog pin 3
-                       // outside leads to ground and +5V
-int val = 0;           // variable to store the value read
+int analogPin = A0;    //pin bor battery monitoring
+int bat_led = 12 ;     //pin for led indicator for battery
+
+int val = 0; // variable to store the value read
+  // battery 6V  , val = 420
+  // battery 8.5V, val = 470
+  // battery 7.5V, val = 455
+
 int bat = 0; //battery percentage
+
 void setup()
 {
   Serial.begin(9600);          //  setup serial
+  pinMode(bat_led, OUTPUT);
 }
 
 void lowbat_alert(int x)
 {
-  if (x <= 20) // if battery less than 20%
+  if (x <= 455) // if battery less than 7.5V
   {
     Serial.println("Battery is Low!");
+    digitalWrite(bat_led, HIGH);
   }
-  
+  else
+  {
+    digitalWrite(bat_led, LOW);
+  }
+
 }
 void loop()
 {
   val = analogRead(analogPin);    // read the input pin
-  // 6V = 420
-  //8.5 = 470
-  // 50 / 100%
-  bat = (val - 420)*2;
-//  Serial.print(bat);             // debug value
-//  Serial.println("%");             // debug value
-//  delay(500);
-  lowbat_alert(bat);
+  lowbat_alert(val);
+
 
 }
+
