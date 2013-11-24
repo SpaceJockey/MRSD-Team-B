@@ -16,7 +16,8 @@ ROS Joint configs are indexed so...
 */
 
 #include <ros.h>
-#include <sensor_msgs/JointState.h>
+#include <std_msgs/Float64MultiArray.h>
+#include <std_msgs/Int32.h>
 
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
@@ -24,19 +25,32 @@ ROS Joint configs are indexed so...
 //General Debugging stuff
 #define STATUS_LED 13
 
+//Battery Monitoring LED
+#define BATT_PIN A0    //pin for battery monitoring
+#define BATT_LED 12    //pin for led indicator for battery
+
+//Battery Calibration Values
+#define BATT_6V   420 //6V = 0%
+#define BATT_85V  470 //8.5V = 100%
+int batt_mon = BATT_85V;
+
 // Ros Initialization stuff
 ros::NodeHandle  nh;
 
+std_msgs::Int32 batt_msg; //battery state output
+ros::Publisher batt_state("battery_state", &batt_msg);
+
 //Position Update Callback
 int blink = 1;
-void jointstate_cb(const sensor_msgs::JointState& cmd_msg){
+void jointstate_cb(const std_msgs::Float64MultiArray& cmd_msg){
   //blink LED to indicate CB is running...
   blink = 1-blink;
   digitalWrite(STATUS_LED, blink);
   
-  for(int c = 0; c < cmd_msg.position_length; c++) setServoPos(c, cmd_msg.position[c]); //Update servos
+  //
+  for(int c = 0; c < cmd_msg.data_length; c++) setServoPos(c, cmd_msg.data[c]); //Update servos
 }
-ros::Subscriber<sensor_msgs::JointState> serial_link("serial_link", jointstate_cb);
+ros::Subscriber<std_msgs::Float64MultiArray> serial_link("serial_link", jointstate_cb);
 
 Adafruit_PWMServoDriver hv_servo = Adafruit_PWMServoDriver();
 //Adafruit_PWMServoDriver hv_servo = Adafruit_PWMServoDriver(0x41);
@@ -51,9 +65,12 @@ Adafruit_PWMServoDriver hv_servo = Adafruit_PWMServoDriver();
 #define DIG_SERVO_HZ  300 // Digital Servos operate at 300 Hz
 #define ANA_SERVO_HZ  50 // Analog Servos operate at 50 Hz
 
-#define SERVOMIN  185 // this is the 'minimum' pulse length count (out of 4096)
 #define SERVOMID  307 // This is the Servo 'Middle Position'
+#define SERVOMIN  185 // this is the 'minimum' pulse length count (out of 4096)
 #define SERVOMAX  430 // this is the 'maximum' pulse length count (out of 4096)
+//#define SERVOMIN  SERVOMID - 123 // this is the 'minimum' pulse length count (out of 4096)
+//#define SERVOMAX  SERVOMID + 123 // this is the 'maximum' pulse length count (out of 4096)
+
 #define SERVORANGE ((float) (SERVOMAX - SERVOMIN))
 
 //These are the configuration values for the robot, they need to be tuned!
@@ -79,9 +96,11 @@ void setServoPos(unsigned int joint, float value){
 }
 
 void setup() {
-  //Set up status LED
+  //Set up status LEDS
   pinMode(STATUS_LED, OUTPUT);
   digitalWrite(STATUS_LED, LOW);
+  pinMode(BATT_LED, OUTPUT);
+  digitalWrite(BATT_LED, LOW);
   
   //Set up limit switch pins
   pinMode(limit_pin[5], INPUT);
@@ -93,15 +112,35 @@ void setup() {
   //nh.getHardware()->setBaud(115200); // Up Baud Rate
   nh.initNode();
   nh.subscribe(serial_link);
+  nh.advertise(batt_state);
   
   //initialize digital servo board
   hv_servo.begin();  
   hv_servo.setPWMFreq(ANA_SERVO_HZ);
+  
+  //reset all joints to default until input is recieved from ROS
+  //for(int c = 0; c < 7; c++) setServoPos(c, 0.0);
+  //for(int c = 0; c < 7; c++) hv_servo.setPWM(c, 0, SERVOMID);
+  //setServoPos(3, 0.0);
+  
     
 }
 
 void loop() {
-	//spin ROS
+	//Update battery voltage warning light
+	int batt_read = analogRead(BATT_PIN);
+	if(abs(batt_read - batt_mon) < 10) batt_mon = ((3 * batt_mon) + batt_read) / 4; 
+	batt_msg.data = map(batt_mon, BATT_6V, BATT_85V, 0, 100); //battery percentage
+	//TODO: skew percentage to match logarithmic batt discharge curve
+	
+	if (batt_msg.data <= 40) { //if battery level is less than 40%
+		digitalWrite(BATT_LED, HIGH); 
+	}else{
+		digitalWrite(BATT_LED, LOW);
+	}
+	batt_state.publish( &batt_msg );
+  
+  	//spin ROS
 	nh.spinOnce();
 	delay(1);
 }

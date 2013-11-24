@@ -27,6 +27,7 @@ void lowbat_alert(int x)
   }
 
 }
+
 void loop()
 {
   val = analogRead(analogPin);    // read the input pin

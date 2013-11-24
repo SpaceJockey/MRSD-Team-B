@@ -1,8 +1,6 @@
 
 
 #include <ros.h>
-#include <sensor_msgs/JointState.h>
-#include <std_msgs/Empty.h>
 #include <std_msgs/Float64MultiArray.h>
 
 //General Debugging stuff
