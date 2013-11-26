@@ -22,6 +22,8 @@ ROS Joint configs are indexed so...
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 
+#include <Scheduler.h>
+
 //General Debugging stuff
 #define STATUS_LED 13
 
@@ -32,7 +34,7 @@ ROS Joint configs are indexed so...
 //Battery Calibration Values
 #define BATT_6V   420 //6V = 0%
 #define BATT_85V  470 //8.5V = 100%
-int batt_mon = BATT_85V;
+int batt_mon;
 
 // Ros Initialization stuff
 ros::NodeHandle  nh;
@@ -112,7 +114,14 @@ void setup() {
   //nh.getHardware()->setBaud(115200); // Up Baud Rate
   nh.initNode();
   nh.subscribe(serial_link);
+  
+  //Set up Battery Monitoring
+  //TODO: analogReadResolution(12); add this and recalibrate to get less noise (hopefully)....
+  batt_mon = analogRead(BATT_PIN);
   nh.advertise(batt_state);
+  
+  //Start Battery monitoring loop
+  Scheduler.startLoop(battLoop);
   
   //initialize digital servo board
   hv_servo.begin();  
@@ -126,7 +135,15 @@ void setup() {
     
 }
 
-void loop() {
+//Main loop just spins ROS, everything else happens in its own loop using the Scheduler library
+void loop() {  
+  	//spin ROS
+	nh.spinOnce();
+	yield(); //or delay(1)
+}
+
+//update battery state every half second
+void battLoop() {
 	//Update battery voltage warning light
 	int batt_read = analogRead(BATT_PIN);
 	if(abs(batt_read - batt_mon) < 10) batt_mon = ((3 * batt_mon) + batt_read) / 4; 
@@ -139,8 +156,5 @@ void loop() {
 		digitalWrite(BATT_LED, LOW);
 	}
 	batt_state.publish( &batt_msg );
-  
-  	//spin ROS
-	nh.spinOnce();
-	delay(1);
+	delay(500);
 }
