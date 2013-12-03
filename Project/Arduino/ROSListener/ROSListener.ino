@@ -15,6 +15,8 @@ ROS Joint configs are indexed so...
 
 */
 
+#include <Scheduler.h>
+
 #include <ros.h>
 #include <std_msgs/Float64MultiArray.h>
 #include <std_msgs/Int32.h>
@@ -22,7 +24,8 @@ ROS Joint configs are indexed so...
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 
-#include <Scheduler.h>
+#include <SpaceJockey.h>
+#include <calibration/analogServo.h>
 
 //General Debugging stuff
 #define STATUS_LED 13
@@ -55,7 +58,7 @@ void jointstate_cb(const std_msgs::Float64MultiArray& cmd_msg){
 ros::Subscriber<std_msgs::Float64MultiArray> serial_link("serial_link", jointstate_cb);
 
 Adafruit_PWMServoDriver hv_servo = Adafruit_PWMServoDriver();
-//Adafruit_PWMServoDriver hv_servo = Adafruit_PWMServoDriver(0x41);
+//Adafruit_PWMServoDriver lv_servo = Adafruit_PWMServoDriver(0x41);
 
 //Radian values for us degree-centric folks
 #define M_PI 3.14159265
@@ -64,16 +67,7 @@ Adafruit_PWMServoDriver hv_servo = Adafruit_PWMServoDriver();
 #define DEG_45 (M_PI / 4)
 //float degtorad(float deg){return (deg * M_PI) / 180.0;}
 
-#define DIG_SERVO_HZ  300 // Digital Servos operate at 300 Hz
-#define ANA_SERVO_HZ  50 // Analog Servos operate at 50 Hz
 
-#define SERVOMID  307 // This is the Servo 'Middle Position'
-#define SERVOMIN  185 // this is the 'minimum' pulse length count (out of 4096)
-#define SERVOMAX  430 // this is the 'maximum' pulse length count (out of 4096)
-//#define SERVOMIN  SERVOMID - 123 // this is the 'minimum' pulse length count (out of 4096)
-//#define SERVOMAX  SERVOMID + 123 // this is the 'maximum' pulse length count (out of 4096)
-
-#define SERVORANGE ((float) (SERVOMAX - SERVOMIN))
 
 //These are the configuration values for the robot, they need to be tuned!
 //These are in radians or meters, depending on joint types
@@ -85,7 +79,7 @@ const unsigned int hv_servo_addr[] = {12, 2, 10, 3, 11, 0, 8};
 
 //To map things to our servo values
 int servoMap(float value, unsigned int joint)
-{return ((int) (((value - real_min[joint]) * SERVORANGE)  / (real_max[joint] - real_min[joint]))) + SERVOMIN;}
+{return ((int) (((value - real_min[joint]) * ((float) (SERVOMAX - SERVOMIN)))  / (real_max[joint] - real_min[joint]))) + SERVOMIN;}
 
 //Set the specified servo to the correct real-world position
 void setServoPos(unsigned int joint, float value){
@@ -117,14 +111,10 @@ void setup() {
   
   //initialize digital servo board
   hv_servo.begin();  
-  hv_servo.setPWMFreq(ANA_SERVO_HZ);
+  hv_servo.setPWMFreq(SERVO_HZ);
   
   //reset all joints to default until input is recieved from ROS
   for(int c = 0; c < 7; c++) setServoPos(c, 0.00);
-  //for(int c = 0; c < 16; c++) hv_servo.setPWM(c, 0, SERVOMID);
-  //setServoPos(3, 0.0);
-  
-    
 }
 
 //Main loop just spins ROS, everything else happens in its own loop using the Scheduler library
