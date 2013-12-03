@@ -28,12 +28,12 @@ ROS Joint configs are indexed so...
 #define STATUS_LED 13
 
 //Battery Monitoring LED
-#define BATT_PIN A0    //pin for battery monitoring
+#define BATT_PIN A8    //pin for battery monitoring
 #define BATT_LED 12    //pin for led indicator for battery
 
 //Battery Calibration Values
-#define BATT_6V   420 //6V = 0%
-#define BATT_85V  470 //8.5V = 100%
+#define BATT_6V   1700 //6V = 0%
+#define BATT_85V  1870 //8.5V = 100%
 int batt_mon;
 
 // Ros Initialization stuff
@@ -81,10 +81,7 @@ const float real_min[] = {-DEG_30, -DEG_30, -DEG_30, -DEG_45, -DEG_45,   0,   0}
 const float real_max[] = { DEG_30,  DEG_30,  DEG_30,  DEG_45,  DEG_45, .145, .145};
 
 //Servo addresses for the HV servo board
-const unsigned int hv_servo_addr[] = {12, 4, 8, 5, 9, 0, 1};
-
-//used only for linear joints where they have a limit switch
-const unsigned int limit_pin[] = {0, 0, 0, 0, 0, 52, 53};
+const unsigned int hv_servo_addr[] = {12, 2, 10, 3, 11, 0, 8};
 
 //To map things to our servo values
 int servoMap(float value, unsigned int joint)
@@ -104,19 +101,14 @@ void setup() {
   pinMode(BATT_LED, OUTPUT);
   digitalWrite(BATT_LED, LOW);
   
-  //Set up limit switch pins
-  pinMode(limit_pin[5], INPUT);
-  digitalWrite(limit_pin[5], HIGH); 
-  pinMode(limit_pin[6], INPUT);
-  digitalWrite(limit_pin[6], HIGH);
-  
   //Set up ROS node
   //nh.getHardware()->setBaud(115200); // Up Baud Rate
   nh.initNode();
   nh.subscribe(serial_link);
   
   //Set up Battery Monitoring
-  //TODO: analogReadResolution(12); add this and recalibrate to get less noise (hopefully)....
+  pinMode(BATT_LED, OUTPUT);
+  analogReadResolution(12);
   batt_mon = analogRead(BATT_PIN);
   nh.advertise(batt_state);
   
@@ -128,8 +120,8 @@ void setup() {
   hv_servo.setPWMFreq(ANA_SERVO_HZ);
   
   //reset all joints to default until input is recieved from ROS
-  //for(int c = 0; c < 7; c++) setServoPos(c, 0.0);
-  //for(int c = 0; c < 7; c++) hv_servo.setPWM(c, 0, SERVOMID);
+  for(int c = 0; c < 7; c++) setServoPos(c, 0.00);
+  //for(int c = 0; c < 16; c++) hv_servo.setPWM(c, 0, SERVOMID);
   //setServoPos(3, 0.0);
   
     
@@ -146,8 +138,14 @@ void loop() {
 void battLoop() {
 	//Update battery voltage warning light
 	int batt_read = analogRead(BATT_PIN);
-	if(abs(batt_read - batt_mon) < 10) batt_mon = ((3 * batt_mon) + batt_read) / 4; 
+	if(abs(batt_read - batt_mon) < 25) {
+		batt_mon = ((7 * batt_mon) + batt_read) / 8; 
+	} else {
+		batt_mon = ((15 * batt_mon) + batt_read) / 16; 
+	}
 	batt_msg.data = map(batt_mon, BATT_6V, BATT_85V, 0, 100); //battery percentage
+	if (batt_msg.data > 100) batt_msg.data = 100;
+	if (batt_msg.data < 0) batt_msg.data = 0;
 	//TODO: skew percentage to match logarithmic batt discharge curve
 	
 	if (batt_msg.data <= 40) { //if battery level is less than 40%
