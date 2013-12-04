@@ -25,7 +25,7 @@ ROS Joint configs are indexed so...
 #include <Adafruit_PWMServoDriver.h>
 
 #include <SpaceJockey.h>
-#include <calibration/analogServo.h>
+#include <calibration/digitalServo.h>
 
 //General Debugging stuff
 #define STATUS_LED 13

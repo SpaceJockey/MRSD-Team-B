@@ -1,7 +1,8 @@
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 
-Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x41);
+//Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x41);
+Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 // Depending on your servo make, the pulse width min and max may vary, you 
 // want these to be as small/large as possible without hitting the hard stop
@@ -9,7 +10,7 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x41);
 // have!
 #define SERVOMID  450
 
-#define FEEDBACK_CHAN 4
+#define FEEDBACK_CHAN 15
 #define FEEDBACK_PIN 22
 
 #define SERVO_CHAN 1
@@ -59,7 +60,7 @@ void findTarget(int tgt){
 	int pulselen = SERVOMID;
 	while (abs(error) > 1){
 		pwm.setPWM(FEEDBACK_CHAN, 0, pulselen);
-		pwm.setPWM(SERVO_CHAN, 0, pulselen);
+		//pwm.setPWM(SERVO_CHAN, 0, pulselen);
 		for(int i = 0; i < 2; i++) { //wait two pulses
 			while(gotPulse == false); //spin until pulse recieved
 			gotPulse = false;
