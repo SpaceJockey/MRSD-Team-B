@@ -5,6 +5,5 @@
 
 #define SERVOMIN 240
 #define SERVOMAX 562
-#define SERVOMID 400
 
 #endif

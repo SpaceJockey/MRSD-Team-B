@@ -1,8 +1,8 @@
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 
-Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x41);
-//Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+//Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x41);
+Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 #define SERVOMID  1900
 
@@ -32,22 +32,22 @@ int servomin = 0;
 int servomax = 9999;
 
 void setup() {
-	Serial.begin(9600);
-	Serial.println("Digital PWM calibration sketch");
 
 	pwm.begin();
-
-	pwm.setPWMFreq(300);  // Analog servos run at ~60 Hz updates
-
+	pwm.setPWMFreq(300);  // Digital servos run at 300 Hz updates
 	attachInterrupt(FEEDBACK_PIN, readPulse, CHANGE);
 	pwm.setPWM(FEEDBACK_CHAN, 0, SERVOMID);
-  
-  	Serial.println("Finding Minimum (900 us): ");
 	servomin = findTarget(900);
-	Serial.println("Finding Maximum (2100 us): ");
 	servomax = findTarget(2100);
-	Serial.println("Finding Middle (1500 us): ");
-	findTarget(1500);
+	detachInterrupt(FEEDBACK_PIN);
+
+	
+	Serial.begin(9600);
+	Serial.println("Digital PWM calibration sketch");
+	Serial.print("Minimum (900 us): ");
+	Serial.println(servomin);
+	Serial.print("Maximum (2100 us): ");
+	Serial.println(servomax);
 }
 
 int findTarget(int tgt){
@@ -56,7 +56,7 @@ int findTarget(int tgt){
 	int pulselen = SERVOMID;
 	while (error != 0){
 		pwm.setPWM(FEEDBACK_CHAN, 0, pulselen);
-		pwm.setPWM(SERVO_CHAN, 0, pulselen);
+		//pwm.setPWM(SERVO_CHAN, 0, pulselen);
 		for(int i = 0; i < 2; i++) { //wait two pulses
 			while(gotPulse == false); //spin until pulse recieved
 			gotPulse = false;
@@ -64,10 +64,12 @@ int findTarget(int tgt){
 		error = target - pulseus;
 		pulselen = pulselen + ((error *3) / 4);
 	}
+	/*
 	Serial.print("Found: ");
 	Serial.print(pulselen); //print the pulse length
 	Serial.print(" ==> ");
 	Serial.println(pulseus); //print the pulse length
+	*/
 	return pulselen;
 }
 
