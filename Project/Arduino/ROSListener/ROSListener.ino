@@ -95,33 +95,31 @@ void setup() {
   pinMode(BATT_LED, OUTPUT);
   digitalWrite(BATT_LED, LOW);
   
+    //initialize digital servo board
+  hv_servo.begin();  
+  hv_servo.setPWMFreq(SERVO_HZ);
+  //reset all joints to default until input is recieved from ROS
+  for(int c = 0; c < 7; c++) setServoPos(c, 0.00);
+  
   //Set up ROS node
   //nh.getHardware()->setBaud(115200); // Up Baud Rate
   nh.initNode();
   nh.subscribe(serial_link);
   
   //Set up Battery Monitoring
-  pinMode(BATT_LED, OUTPUT);
   analogReadResolution(12);
   batt_mon = analogRead(BATT_PIN);
   nh.advertise(batt_state);
   
   //Start Battery monitoring loop
   Scheduler.startLoop(battLoop);
-  
-  //initialize digital servo board
-  hv_servo.begin();  
-  hv_servo.setPWMFreq(SERVO_HZ);
-  
-  //reset all joints to default until input is recieved from ROS
-  for(int c = 0; c < 7; c++) setServoPos(c, 0.00);
 }
 
 //Main loop just spins ROS, everything else happens in its own loop using the Scheduler library
 void loop() {  
   	//spin ROS
 	nh.spinOnce();
-	yield(); //or delay(1)
+	delay(1);
 }
 
 //update battery state every half second
