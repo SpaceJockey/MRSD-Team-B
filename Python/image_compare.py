@@ -2,8 +2,8 @@ import pylab as P
 import numpy as N
 
 # read the images    
-im1 = P.imread('4Fsjx.jpg')
-im2 = P.imread('xUHhB.jpg')
+im1 = P.imread('salah_a.jpg')
+im2 = P.imread('salah_b.jpg')
 
 # do the crosscorrelation
 conv = N.convolve(im1, im2)
