@@ -1,6 +1,7 @@
 import math, operator
 import image
 import ImageChops
+
 def compare(file1, file2):
     image1 = Image.open(file1)
     image2 = Image.open(file2)

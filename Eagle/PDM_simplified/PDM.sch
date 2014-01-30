@@ -14953,13 +14953,10 @@ diameter 3 mm, horizontal, grid 12.7 mm</description>
 <part name="FRAME1" library="frames" deviceset="A3L-LOC" device=""/>
 <part name="SUPPLY1" library="supply2" deviceset="GND" device=""/>
 <part name="SUPPLY3" library="supply2" deviceset="GND" device=""/>
-<part name="SUPPLY5" library="supply2" deviceset="GND" device=""/>
 <part name="SUPPLY6" library="supply2" deviceset="GND" device=""/>
 <part name="SUPPLY7" library="supply2" deviceset="GND" device=""/>
 <part name="SUPPLY11" library="supply2" deviceset="GND" device=""/>
 <part name="SUPPLY12" library="supply2" deviceset="GND" device=""/>
-<part name="SUPPLY14" library="supply2" deviceset="GND" device=""/>
-<part name="LED2" library="led" deviceset="LED" device="SML1206"/>
 <part name="LED3" library="led" deviceset="LED" device="SML1206"/>
 <part name="LED4" library="led" deviceset="LED" device="SML1206"/>
 <part name="SERVO1" library="con-molex" deviceset="5566-2" device="" value=""/>
@@ -14969,7 +14966,6 @@ diameter 3 mm, horizontal, grid 12.7 mm</description>
 <part name="SUPPLY2" library="supply2" deviceset="GND" device=""/>
 <part name="BAT_MON" library="con-samtec" deviceset="TSW-101-02-S-S" device="" value=""/>
 <part name="R1" library="rcl" deviceset="R-US_" device="R1206" value="1K"/>
-<part name="R2" library="rcl" deviceset="R-US_" device="R1206" value="1K"/>
 <part name="R3" library="rcl" deviceset="R-US_" device="R1206" value="1K"/>
 <part name="R4" library="rcl" deviceset="R-US_" device="R1206" value="1K"/>
 <part name="R7" library="rcl" deviceset="R-US_" device="R1206" value="15.4K"/>
@@ -14981,14 +14977,11 @@ diameter 3 mm, horizontal, grid 12.7 mm</description>
 <part name="D1" library="MRSDTeamB" deviceset="SUPPRESSOR-" device="SMBJ" value="8.5V"/>
 <part name="D2" library="diode" deviceset="ZENER-DIODE" device="SMB" value="3.3V"/>
 <part name="DUE" library="con-molex" deviceset="5566-2" device="" value=""/>
-<part name="SERVO2" library="con-molex" deviceset="5566-2" device="" value=""/>
 <part name="F_BATT" library="MRSDTeamB" deviceset="FUSE-" device="ATO" value="15A"/>
 <part name="F_DUE" library="MRSDTeamB" deviceset="FUSE-" device="ATO" value="2A"/>
 <part name="F_SERVO1" library="MRSDTeamB" deviceset="FUSE-" device="ATO" value="7.5A"/>
-<part name="F_SERVO2" library="MRSDTeamB" deviceset="FUSE-" device="ATO" value="7.5A"/>
 <part name="ACC1" library="con-molex" deviceset="5566-2" device="" value=""/>
 <part name="C2" library="rcl" deviceset="CPOL-US" device="TT5D11"/>
-<part name="C3" library="rcl" deviceset="CPOL-US" device="TT5D11"/>
 <part name="BATT1_W" library="MRSDTeamB" deviceset="CON_XT60-" device="PIGTAIL" value=""/>
 <part name="U1" library="MRSDTeamB" deviceset="MIC29150/29300/29500" device="VERTICAL" value=""/>
 <part name="BATT1" library="MRSDTeamB" deviceset="CON_XT60-" device="PCB_MOUNT" value=""/>
@@ -15003,13 +14996,10 @@ diameter 3 mm, horizontal, grid 12.7 mm</description>
 <instance part="FRAME1" gate="G$1" x="-40.64" y="-10.16"/>
 <instance part="SUPPLY1" gate="GND" x="38.1" y="144.78"/>
 <instance part="SUPPLY3" gate="GND" x="256.54" y="167.64"/>
-<instance part="SUPPLY5" gate="GND" x="170.18" y="106.68"/>
 <instance part="SUPPLY6" gate="GND" x="170.18" y="167.64"/>
 <instance part="SUPPLY7" gate="GND" x="294.64" y="175.26"/>
 <instance part="SUPPLY11" gate="GND" x="149.86" y="157.48"/>
 <instance part="SUPPLY12" gate="GND" x="287.02" y="160.02"/>
-<instance part="SUPPLY14" gate="GND" x="149.86" y="99.06"/>
-<instance part="LED2" gate="G$1" x="157.48" y="101.6" rot="R270"/>
 <instance part="LED3" gate="G$1" x="157.48" y="162.56" rot="R270"/>
 <instance part="LED4" gate="G$1" x="287.02" y="167.64"/>
 <instance part="SERVO1" gate="-1" x="172.72" y="142.24"/>
@@ -15020,7 +15010,6 @@ diameter 3 mm, horizontal, grid 12.7 mm</description>
 <instance part="SUPPLY2" gate="GND" x="35.56" y="109.22"/>
 <instance part="BAT_MON" gate="-1" x="62.23" y="121.92"/>
 <instance part="R1" gate="G$1" x="162.56" y="137.16" rot="R90"/>
-<instance part="R2" gate="G$1" x="162.56" y="106.68" rot="R90"/>
 <instance part="R3" gate="G$1" x="162.56" y="167.64" rot="R90"/>
 <instance part="R4" gate="G$1" x="287.02" y="175.26" rot="R90"/>
 <instance part="R7" gate="G$1" x="27.94" y="127" rot="R90"/>
@@ -15033,16 +15022,12 @@ diameter 3 mm, horizontal, grid 12.7 mm</description>
 <instance part="D2" gate="G$1" x="40.64" y="116.84" rot="R90"/>
 <instance part="DUE" gate="-1" x="172.72" y="172.72"/>
 <instance part="DUE" gate="-2" x="172.72" y="170.18"/>
-<instance part="SERVO2" gate="-1" x="172.72" y="111.76"/>
-<instance part="SERVO2" gate="-2" x="172.72" y="109.22"/>
 <instance part="F_BATT" gate="G$1" x="60.96" y="170.18"/>
 <instance part="F_DUE" gate="G$1" x="142.24" y="172.72"/>
 <instance part="F_SERVO1" gate="G$1" x="142.24" y="142.24"/>
-<instance part="F_SERVO2" gate="G$1" x="142.24" y="111.76"/>
 <instance part="ACC1" gate="-1" x="297.18" y="180.34"/>
 <instance part="ACC1" gate="-2" x="297.18" y="177.8"/>
 <instance part="C2" gate="G$1" x="149.86" y="137.16"/>
-<instance part="C3" gate="G$1" x="149.86" y="106.68"/>
 <instance part="BATT1_W" gate="G$1" x="43.18" y="167.64"/>
 <instance part="U1" gate="G$1" x="256.54" y="177.8"/>
 <instance part="BATT1" gate="G$1" x="43.18" y="205.74"/>
@@ -15102,13 +15087,6 @@ diameter 3 mm, horizontal, grid 12.7 mm</description>
 <pinref part="LED4" gate="G$1" pin="C"/>
 </segment>
 <segment>
-<pinref part="SUPPLY14" gate="GND" pin="GND"/>
-<pinref part="LED2" gate="G$1" pin="C"/>
-<wire x1="152.4" y1="101.6" x2="149.86" y2="101.6" width="0.1524" layer="91"/>
-<pinref part="C3" gate="G$1" pin="-"/>
-<junction x="149.86" y="101.6"/>
-</segment>
-<segment>
 <pinref part="SERVO1" gate="-2" pin="S"/>
 <pinref part="SUPPLY15" gate="GND" pin="GND"/>
 </segment>
@@ -15138,10 +15116,6 @@ diameter 3 mm, horizontal, grid 12.7 mm</description>
 <pinref part="DUE" gate="-2" pin="S"/>
 </segment>
 <segment>
-<pinref part="SUPPLY5" gate="GND" pin="GND"/>
-<pinref part="SERVO2" gate="-2" pin="S"/>
-</segment>
-<segment>
 <pinref part="SUPPLY7" gate="GND" pin="GND"/>
 <pinref part="ACC1" gate="-2" pin="S"/>
 </segment>
@@ -15154,20 +15128,6 @@ diameter 3 mm, horizontal, grid 12.7 mm</description>
 <wire x1="35.56" y1="203.2" x2="38.1" y2="203.2" width="0.1524" layer="91"/>
 <junction x="38.1" y="165.1"/>
 <wire x1="38.1" y1="203.2" x2="38.1" y2="165.1" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="N$1" class="0">
-<segment>
-<pinref part="R2" gate="G$1" pin="2"/>
-<pinref part="SERVO2" gate="-1" pin="S"/>
-<wire x1="162.56" y1="111.76" x2="170.18" y2="111.76" width="0.1524" layer="91"/>
-<pinref part="F_SERVO2" gate="G$1" pin="2"/>
-<wire x1="162.56" y1="111.76" x2="149.86" y2="111.76" width="0.1524" layer="91"/>
-<junction x="162.56" y="111.76"/>
-<pinref part="C3" gate="G$1" pin="+"/>
-<wire x1="149.86" y1="111.76" x2="147.32" y2="111.76" width="0.1524" layer="91"/>
-<wire x1="149.86" y1="109.22" x2="149.86" y2="111.76" width="0.1524" layer="91"/>
-<junction x="149.86" y="111.76"/>
 </segment>
 </net>
 <net name="N$15" class="0">
@@ -15206,13 +15166,6 @@ diameter 3 mm, horizontal, grid 12.7 mm</description>
 <wire x1="160.02" y1="132.08" x2="162.56" y2="132.08" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$8" class="0">
-<segment>
-<pinref part="LED2" gate="G$1" pin="A"/>
-<pinref part="R2" gate="G$1" pin="1"/>
-<wire x1="160.02" y1="101.6" x2="162.56" y2="101.6" width="0.1524" layer="91"/>
-</segment>
-</net>
 <net name="N$11" class="0">
 <segment>
 <pinref part="LED3" gate="G$1" pin="A"/>
@@ -15249,11 +15202,6 @@ diameter 3 mm, horizontal, grid 12.7 mm</description>
 <wire x1="137.16" y1="142.24" x2="114.3" y2="142.24" width="0.1524" layer="91"/>
 <label x="114.3" y="142.24" size="1.778" layer="95"/>
 <pinref part="F_SERVO1" gate="G$1" pin="1"/>
-</segment>
-<segment>
-<wire x1="114.3" y1="111.76" x2="137.16" y2="111.76" width="0.1524" layer="91"/>
-<label x="114.3" y="111.76" size="1.778" layer="95"/>
-<pinref part="F_SERVO2" gate="G$1" pin="1"/>
 </segment>
 <segment>
 <wire x1="81.28" y1="170.18" x2="68.58" y2="170.18" width="0.1524" layer="91"/>
