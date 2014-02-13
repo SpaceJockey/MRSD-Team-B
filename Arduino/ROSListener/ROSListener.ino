@@ -13,6 +13,15 @@ ROS Joint configs are indexed so...
 5	Center Segment Front Prismatic
 6	Center Segment Rear Prismatic
 
+Servo Wiring Configs:
+12	Center Swivel
+2	Center Segment Front Pitch
+10	Center Segment Rear Pitch
+3	Front Segment Pitch
+11	Rear Segment Pitch
+0	Center Segment Front Prismatic
+8	Center Segment Rear Prismatic
+
 */
 
 #include <Scheduler.h>
