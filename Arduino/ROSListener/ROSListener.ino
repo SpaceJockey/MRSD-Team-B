@@ -35,6 +35,9 @@ Servo Wiring Configs:
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 
+//TODO: Override this for 400KHz frequency
+//static const uint32_t TWI_CLOCK = 100000;
+
 #include <SpaceJockey.h>
 #include <calibration/digitalServo.h>
 

@@ -60,12 +60,14 @@ class ArduinoHardware {
     }
     ArduinoHardware()
     {
+/* This is breaking Due Support!
 #if defined(USBCON) and !(defined(USE_USBCON))
-      /* Leonardo support */
+      /* Leonardo support * /
       iostream = &Serial1;
 #else
+*/
       iostream = &Serial;
-#endif
+//#endif
       baud_ = 57600;
     }
     ArduinoHardware(ArduinoHardware& h){
