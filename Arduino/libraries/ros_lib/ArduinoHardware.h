@@ -59,7 +59,7 @@ class ArduinoHardware {
     {
 #if defined(USBCON)
       /* Leonardo support */
-      iostream = &Serial;
+      iostream = &Serial;    //Changed, Known bug, see: https://github.com/ros-drivers/rosserial/issues/85 -Nate
 #else
       iostream = &Serial;
 #endif
