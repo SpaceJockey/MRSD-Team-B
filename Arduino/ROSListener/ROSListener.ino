@@ -13,16 +13,30 @@ ROS Joint configs are indexed so...
 5	Center Segment Front Prismatic
 6	Center Segment Rear Prismatic
 
+Servo Wiring Configs:
+12	Center Swivel
+2	Center Segment Front Pitch
+10	Center Segment Rear Pitch
+3	Front Segment Pitch
+11	Rear Segment Pitch
+0	Center Segment Front Prismatic
+8	Center Segment Rear Prismatic
 */
+
+#include <Arduino.h>
 
 #include <Scheduler.h>
 
 #include <ros.h>
 #include <std_msgs/Float64MultiArray.h>
+#include <std_msgs/String.h>
 #include <std_msgs/Int32.h>
 
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
+
+//TODO: Override this for 400KHz frequency
+//static const uint32_t TWI_CLOCK = 100000;
 
 #include <SpaceJockey.h>
 #include <calibration/digitalServo.h>
@@ -43,7 +57,9 @@ int batt_mon;
 ros::NodeHandle  nh;
 
 std_msgs::Int32 batt_msg; //battery state output
+std_msgs::String debug_msg;
 ros::Publisher batt_state("battery_state", &batt_msg);
+ros::Publisher debug_pub("arduino_debug", &debug_msg);
 
 //Position Update Callback
 int blink = 1;
@@ -88,6 +104,12 @@ void setServoPos(unsigned int joint, float value){
   hv_servo.setPWM(hv_servo_addr[joint], 0, servoMap(value, joint));
 }
 
+// Publish an incoming string to the debug topic
+void debug(char* s){
+       debug_msg.data = s;
+       debug_pub.publish( &debug_msg );
+}
+
 void setup() {
   //Set up status LEDS
   pinMode(STATUS_LED, OUTPUT);
@@ -113,6 +135,8 @@ void setup() {
   
   //Start Battery monitoring loop
   Scheduler.startLoop(battLoop);
+  
+  debug("Space Jockey setup complete.");
 }
 
 //Main loop just spins ROS, everything else happens in its own loop using the Scheduler library
@@ -144,3 +168,4 @@ void battLoop() {
 	batt_state.publish( &batt_msg );
 	delay(500);
 }
+
