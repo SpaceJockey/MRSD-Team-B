@@ -206,6 +206,31 @@ Source: www.rsonline.de .. SMBJ12/C/15/C/24/C/30/C/5.0/C/7.5/C Voltage Suppresso
 <wire x1="2.8575" y1="0.9525" x2="3.4925" y2="0.9525" width="0.127" layer="21"/>
 <wire x1="3.175" y1="0.635" x2="3.175" y2="1.27" width="0.127" layer="21"/>
 </package>
+<package name="MINI_ATO">
+<hole x="0" y="0" drill="3.7846"/>
+<pad name="P$2" x="2.032" y="3.81" drill="1.3" shape="offset" rot="R180"/>
+<pad name="P$3" x="-1.778" y="-3.556" drill="1.3" shape="offset"/>
+<wire x1="-3.81" y1="8.89" x2="3.81" y2="8.89" width="0.127" layer="21"/>
+<wire x1="3.81" y1="8.89" x2="3.81" y2="-8.89" width="0.127" layer="21"/>
+<wire x1="3.81" y1="-8.89" x2="-3.81" y2="-8.89" width="0.127" layer="21"/>
+<wire x1="-3.81" y1="-8.89" x2="-3.81" y2="8.89" width="0.127" layer="21"/>
+<text x="-5.08" y="-3.81" size="1.27" layer="25" rot="R90">&gt;NAME</text>
+<text x="6.35" y="-3.81" size="1.27" layer="27" rot="R90">&gt;VALUE</text>
+</package>
+<package name="CON_XT60_PCB_MALE">
+<pad name="V+" x="3.6" y="0" drill="4.445" shape="octagon"/>
+<pad name="V-" x="-3.6" y="0" drill="4.445" shape="octagon"/>
+<wire x1="7.8" y1="4.1" x2="-5.7" y2="4.1" width="0.127" layer="21"/>
+<wire x1="-5.7" y1="4.1" x2="-7.8" y2="2" width="0.127" layer="21"/>
+<wire x1="-7.8" y1="2" x2="-7.8" y2="-2" width="0.127" layer="21"/>
+<wire x1="-7.8" y1="-2" x2="-5.8" y2="-4" width="0.127" layer="21"/>
+<wire x1="-5.8" y1="-4" x2="7.8" y2="-4" width="0.127" layer="21"/>
+<wire x1="7.8" y1="-4" x2="7.8" y2="4.1" width="0.127" layer="21"/>
+<wire x1="5.8" y1="2.7" x2="6.8" y2="2.7" width="0.127" layer="21"/>
+<wire x1="6.3" y1="3.2" x2="6.3" y2="2.2" width="0.127" layer="21"/>
+<text x="-3.175" y="4.445" size="1.27" layer="25">&gt;NAME</text>
+<text x="-3.175" y="-5.715" size="1.27" layer="27">&gt;VALUE</text>
+</package>
 </packages>
 <symbols>
 <symbol name="MIC29150/29300/29500">
@@ -242,14 +267,14 @@ Source: www.rsonline.de .. SMBJ12/C/15/C/24/C/30/C/5.0/C/7.5/C Voltage Suppresso
 <wire x1="2.54" y1="0" x2="0" y2="0" width="0.254" layer="94" curve="-180"/>
 </symbol>
 <symbol name="CON_XT60">
-<pin name="V+" x="-7.62" y="2.54" length="middle" rot="R180"/>
-<pin name="V-" x="-7.62" y="-2.54" length="middle" rot="R180"/>
-<wire x1="-20.32" y1="5.08" x2="-20.32" y2="-5.08" width="0.254" layer="94"/>
-<wire x1="-20.32" y1="-5.08" x2="-12.7" y2="-5.08" width="0.254" layer="94"/>
-<wire x1="-12.7" y1="-5.08" x2="-12.7" y2="5.08" width="0.254" layer="94"/>
-<wire x1="-12.7" y1="5.08" x2="-20.32" y2="5.08" width="0.254" layer="94"/>
-<text x="-20.32" y="-7.62" size="1.778" layer="96">&gt;VALUE</text>
-<text x="-20.32" y="6.35" size="1.778" layer="95">&gt;NAME</text>
+<pin name="V+" x="5.08" y="2.54" length="middle" rot="R180"/>
+<pin name="V-" x="5.08" y="-2.54" length="middle" rot="R180"/>
+<wire x1="-7.62" y1="5.08" x2="-7.62" y2="-5.08" width="0.254" layer="94"/>
+<wire x1="-7.62" y1="-5.08" x2="0" y2="-5.08" width="0.254" layer="94"/>
+<wire x1="0" y1="-5.08" x2="0" y2="5.08" width="0.254" layer="94"/>
+<wire x1="0" y1="5.08" x2="-7.62" y2="5.08" width="0.254" layer="94"/>
+<text x="-7.62" y="-7.62" size="1.778" layer="96">&gt;VALUE</text>
+<text x="-7.62" y="6.35" size="1.778" layer="95">&gt;NAME</text>
 </symbol>
 <symbol name="E-SWITCH">
 <pin name="P$1" x="-12.7" y="0" length="middle"/>
@@ -317,10 +342,16 @@ Source: www.rsonline.de .. SMBJ12/C/15/C/24/C/30/C/5.0/C/7.5/C Voltage Suppresso
 </device>
 </devices>
 </deviceset>
-<deviceset name="FUSE-">
+<deviceset name="FUSE-" prefix="MINI">
 <description>Automotive Fuse, PCB Mount&lt;br&gt;
+
+Full Size:&lt;br&gt;
 &lt;a href = "http://www.digikey.com/product-detail/en/178.6165.0002/WK6265-ND/653477"&gt;Digikey&lt;/a&gt;&lt;br&gt;
 &lt;a href="http://www.littelfuse.com/data/en/Data_Sheets/Littelfuse_ATO-PCB-Fuse-holders-178.6765.pdf"&gt;Datasheet&lt;/a&gt;&lt;br&gt;
+&lt;br&gt;&lt;br&gt;
+Mini-ATO:&lt;br&gt;
+&lt;a href="http://www.digikey.com/product-detail/en/01530008Z/F065-ND/183334"&gt;DigiKey&lt;/a&gt;&lt;br&gt;
+&lt;br&gt;
 Library Part by Nate Chapman</description>
 <gates>
 <gate name="G$1" symbol="FUSE" x="0" y="0"/>
@@ -330,6 +361,15 @@ Library Part by Nate Chapman</description>
 <connects>
 <connect gate="G$1" pin="1" pad="A1 A2 A3 A4"/>
 <connect gate="G$1" pin="2" pad="B1 B2 B3 B4"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="" package="MINI_ATO">
+<connects>
+<connect gate="G$1" pin="1" pad="P$2"/>
+<connect gate="G$1" pin="2" pad="P$3"/>
 </connects>
 <technologies>
 <technology name=""/>
@@ -352,6 +392,15 @@ Library Part by Nate Chapman</description>
 </technologies>
 </device>
 <device name="PIGTAIL" package="CON_XT60_PIGTAIL">
+<connects>
+<connect gate="G$1" pin="V+" pad="V+"/>
+<connect gate="G$1" pin="V-" pad="V-"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="" package="CON_XT60_PCB_MALE">
 <connects>
 <connect gate="G$1" pin="V+" pad="V+"/>
 <connect gate="G$1" pin="V-" pad="V-"/>

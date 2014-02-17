@@ -41,10 +41,16 @@
   #include <WProgram.h>  // Arduino 0022
 #endif
 
-#ifdef _SAM3XA_
+#if defined(__MK20DX128__) || defined(__MK20DX256__)
+  #include <usb_serial.h>  // Teensy 3.0 and 3.1
+  #define SERIAL_CLASS usb_serial_class
+#elif defined(_SAM3XA_)
   #include <UARTClass.h>  // Arduino Due
   #define SERIAL_CLASS UARTClass
-#else
+#elif defined(USE_USBCON)
+  // Arduino Leonardo USB Serial Port
+  #define SERIAL_CLASS Serial_
+#else 
   #include <HardwareSerial.h>  // Arduino AVR
   #define SERIAL_CLASS HardwareSerial
 #endif
@@ -57,9 +63,9 @@ class ArduinoHardware {
     }
     ArduinoHardware()
     {
-#if defined(USBCON)
+#if defined(USBCON) and !(defined(USE_USBCON))
       /* Leonardo support */
-      iostream = &Serial;
+      iostream = &Serial;    //see: https://github.com/ros-drivers/rosserial/issues/85
 #else
       iostream = &Serial;
 #endif
@@ -77,6 +83,10 @@ class ArduinoHardware {
     int getBaud(){return baud_;}
 
     void init(){
+/*#if defined(USE_USBCON)
+      // Startup delay as a fail-safe to upload a new sketch
+      delay(3000); 
+#endif*/
       iostream->begin(baud_);
     }
 
