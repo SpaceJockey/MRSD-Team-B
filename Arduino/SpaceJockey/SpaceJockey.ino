@@ -5,12 +5,15 @@ MRSD Team B
 This Sketch listens to the ROS channel "serial_link" and updates joint positions accordingly
 */
 
+//All Arduino-specific libraries must be included here before they will work in headers
 #include <Arduino.h>
 #include <Scheduler.h>
+#include <Wire.h>
+#include <Adafruit_PWMServoDriver.h>
+#include <ros.h>
 #include "SpaceJockey.h"
 
 //ROS Stuff
-#include <ros.h>
 ros::NodeHandle nh;
 
 void setup() {
