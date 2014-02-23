@@ -51,4 +51,5 @@ class Robot {
 		uint16_t _servo_max;
 };
 
+Robot Servos;
 #endif

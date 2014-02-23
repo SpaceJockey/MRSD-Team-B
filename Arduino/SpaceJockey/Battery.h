@@ -10,14 +10,15 @@
 //Battery Calibration Values
 #define BATT_6V   1700 //6V = 0%
 #define BATT_85V  1870 //8.5V = 100%
-int batt_mon;
+
 
 //ROS Stuff
 #include <ros.h>
 #include <std_msgs/Int32.h>
 
-std_msgs::Int32 batt_msg; //battery state output
-ros::Publisher batt_state("battery_state", &batt_msg);
+static int batt_mon;
+static std_msgs::Int32 batt_msg; //battery state output //TODO: make this Int16??
+static ros::Publisher batt_state("battery_state", &batt_msg);
 
 //update battery state every half second
 static void battLoop() {
@@ -44,7 +45,7 @@ static void battLoop() {
 
 class Batt {
 	public:
-		void begin() {
+		void begin(ros::NodeHandle nh) {
 			//setup output pins
 			pinMode(BATT_LED, OUTPUT);
 			digitalWrite(BATT_LED, LOW);
@@ -54,8 +55,7 @@ class Batt {
 			batt_mon = analogRead(BATT_PIN);
 			nh.advertise(batt_state);
 			Scheduler.startLoop(battLoop);
-		}
-	private:	
+		}	
 };
 
 Batt Battery;

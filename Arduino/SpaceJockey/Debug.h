@@ -6,12 +6,12 @@
 #include <ros.h>
 #include <std_msgs/String.h>
 
-std_msgs::String debug_msg;
-ros::Publisher debug_pub("arduino_debug", &debug_msg);
+static std_msgs::String debug_msg;
+static ros::Publisher debug_pub("arduino_debug", &debug_msg);
 
 class Dbg {
 	public:
-		void begin() {
+		void begin(ros::NodeHandle nh) {
 			nh.advertise(debug_pub);
 			this->print("Space Jockey Online");
 		}

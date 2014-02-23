@@ -44,16 +44,12 @@ const unsigned int servo_addr[] = {12, 2, 10, 3, 11, 0, 8};
 
 #include <Arduino.h>
 #include <Scheduler.h>
-
-//ROS Stuff
 #include <ros.h>
-// ROS node handle declared in main sketch
-extern ros::NodeHandle  nh;
-
 
 //Subsystems
 #include "Debug.h"
 #include "Robot.h"
 #include "Battery.h"
+#include "JointSub.h"
 
 #endif

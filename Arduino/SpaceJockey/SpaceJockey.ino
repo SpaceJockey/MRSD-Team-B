@@ -23,9 +23,14 @@ void setup() {
 
   //Set up ROS node
   nh.initNode();
-  Battery.begin();
-  Debug.begin();
-
+  
+  //init monitoring threads
+  Battery.begin(nh);
+  Debug.begin(nh);
+  
+  //init Servo Driver and Subscriber
+  Servos.begin();
+  Joints.begin(nh, Servos);
 }
 
 //Main loop just spins ROS
