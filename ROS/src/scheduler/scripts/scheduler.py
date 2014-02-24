@@ -33,7 +33,7 @@ class Scheduler():
       print("Joint State pushed.")
       
     def print_queue_len(self):
-      print("Queue Size: " + str(len(sched.queue)))
+      print("Queue Size: " + str(len(self.queue)))
       
     # Receives commands from the main GUI
     def command_scheduler(self,msg):
