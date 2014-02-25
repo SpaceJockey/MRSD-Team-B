@@ -59,7 +59,8 @@ while (True):
   time.sleep(sched.delay)
   if (not sched.pause):
     if (len(sched.queue) > 0):
-      sched.jointPub.publish(sched.queue.pop())
+      comm = sched.queue.pop()
+      sched.jointPub.publish(comm)
       sched.posArray.data = comm.position
       sched.serialPub.publish(sched.posArray)
       sched.print_queue_len()

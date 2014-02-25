@@ -18,7 +18,7 @@ currconfig = np.array([[2.0,0,0],[0.0,0,0],[-2.0,0,0]])
 nextconfig = np.array([[2.0,0,0],[0.0,0,0],[-2.0,0,0]])
 drawconfig = np.array([[2.0,0,0],[0.0,0,0],[-2.0,0,0]])
 tau = 0.0
-dtau = 0.05
+dtau = 0.01
 ferr = 0.01 #floating point error correction term
 
 #Waypoint locations for the center foot in X,Y tuples (don't care about theta)
@@ -47,30 +47,35 @@ def isAtWaypoint(rconfig, wp):
 	return (rconfig[1][0] > wp[0] - ferr and rconfig[1][0] < wp[0] + ferr and rconfig[1][1] > wp[1] - ferr and rconfig[1][1] < wp[1] + ferr)
 	
 def getValidMove(rconfig, wp):
+	# Rconfig: Current Configuration
+	# wp: Waypoint 
+	
 	global max_extend, min_extend, max_angle, ferr
 	nconfig = deepcopy(rconfig) #new configuration
 	centerseg = rconfig[1];
 	targetAngle = math.atan2(wp[1] - centerseg[1], wp[0] - centerseg[0]) 
 	
 	#rotate the closest way... ToDo: test this
-	if(centerseg[2] -  targetAngle > np.pi):
+	if(centerseg[2] - targetAngle > np.pi):
 		targetAngle += 2*np.pi
 	elif(targetAngle - centerseg[2] > np.pi):
 		targetAngle -= 2*np.pi
 	
 	chassisAngle = math.atan2(rconfig[0,1] - rconfig[1,1], rconfig[0,0] - rconfig[1,0]) - math.atan2(rconfig[1,1] - rconfig[2,1], rconfig[1,0] - rconfig[2,0])
-	#print(targetAngle, chassisAngle)
-	targetDist = np.sqrt( np.square(wp[0] - centerseg[0]) + np.square(wp[1] - centerseg[1]))
 
+	targetDist = np.sqrt( np.square(wp[0] - centerseg[0]) + np.square(wp[1] - centerseg[1]))
+	print(targetAngle, chassisAngle)
 	if(targetAngle != rconfig[0,2] and chassisAngle < ferr): #front foot not pointing at the thing, so turn front foot and extend
+		print('C1')
 		angle = 0
 		if(rconfig[0,2] > targetAngle): #enforce angle limit
 			angle =  max(targetAngle, rconfig[0,2] - max_angle)
 		else:
 			angle =  min(targetAngle, rconfig[0,2] + max_angle)
-		nconfig[0] = [nconfig[1,0] + (max_extend * math.cos(angle)), nconfig[1,1] + (max_extend * math.sin(angle)), angle]
+		nconfig[0] = [nconfig[1,0] + (min_extend * math.cos(angle)), nconfig[1,1] + (min_extend * math.sin(angle)), angle]
 			
 	elif(targetAngle != rconfig[2,2]): #rear foot not pointing at the thing, so turn back foot and retract
+		print('C2')
 		angle = 0
 		if(rconfig[0,2] > targetAngle): #enforce angle limit
 			angle =  max(targetAngle, rconfig[0,2] - max_angle)
@@ -78,6 +83,7 @@ def getValidMove(rconfig, wp):
 			angle =  min(targetAngle, rconfig[0,2] + max_angle)
 		nconfig[2] = [nconfig[1][0] - (min_extend * math.cos(angle)), nconfig[1][1] - (min_extend * math.sin(angle)), angle]
 	else:
+		print('C3')
 		d1 = np.sqrt( np.square(nconfig[0,0] - nconfig[1,0]) + np.square(nconfig[0,1] - nconfig[1,1])) #distance between front and middle
 		d2 = np.sqrt( np.square(nconfig[1,0] - nconfig[2,0]) + np.square(nconfig[1,1] - nconfig[2,1])) #distance between middle and rear
 		if (d1 < (max_extend - ferr)): #extend front segment, accounting for error
