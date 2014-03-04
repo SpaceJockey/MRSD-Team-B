@@ -1,8 +1,8 @@
 /*
 SpaceJockey.ino
-Written by Nathaniel Chapman, 11/23/2013
-MRSD Team B
-This Sketch listens to the ROS channel "serial_link" and updates joint positions accordingly
+Written by Nathaniel Chapman, 3/4/2014
+CMU MRSD Team B
+This is the firmware sketch for the Space Jockey Robot
 */
 
 //All Arduino-specific libraries must be included here before they will work in headers
@@ -23,14 +23,17 @@ void setup() {
   //init monitoring threads
   Battery.begin();
 
-  //init Servo Driver and Subscriber
+  //init servo driver
   Servos.begin();
+  Servos.setHiSpeed(); //set i2c bus to 400 kHz updates
+  
+  //init control topic subscriber
   Joints.begin();
   
-  //wait until you are actually connected
+  //spin until rosserial connection is live
   while (!nh.connected()) nh.spinOnce();
   
-  nh.loginfo("Space Jockey Arduino online...");
+  nh.loginfo("Space Jockey Arduino Online.");
 }
 
 //Main loop just spins ROS
