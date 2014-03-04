@@ -1,3 +1,6 @@
 [submodule "ROS/src/rosserial"]
 	path = ROS/src/rosserial
 	url = https://github.com/Unchapped/rosserial.git
+[submodule "ROS/src/ar_track_alvar"]
+	path = ROS/src/ar_track_alvar
+	url = git@github.com:sniekum/ar_track_alvar.git
