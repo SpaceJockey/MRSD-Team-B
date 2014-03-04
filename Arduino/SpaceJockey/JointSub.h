@@ -17,7 +17,7 @@ static void joint_cb(const std_msgs::Float64MultiArray& cmd_msg){
 	//update servos
 	for(int c = 0; c < cmd_msg.data_length; c++) Servos.setServoPos(c, cmd_msg.data[c]);
 }
-static ros::Subscriber<std_msgs::Float64MultiArray> link_sub("serial_link", joint_cb);
+static ros::Subscriber<std_msgs::Float64MultiArray> link_sub("joint_ctl", joint_cb);
 
 class JointSub{
 	public:

@@ -12,7 +12,7 @@ class Scheduler():
 
     # Pubisher for joint states
     jointPub = rospy.Publisher('joint_states',JointState)
-    serialPub = rospy.Publisher('serial_link',Float64MultiArray)
+    serialPub = rospy.Publisher('joint_ctl',Float64MultiArray)
     
     # Init: Set up listener
     def __init__(self):
