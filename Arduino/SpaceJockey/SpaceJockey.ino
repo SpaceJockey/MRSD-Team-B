@@ -26,11 +26,15 @@ void setup() {
   
   //init monitoring threads
   Battery.begin(nh);
-  Debug.begin(nh);
-  
+
   //init Servo Driver and Subscriber
   Servos.begin();
   Joints.begin(nh, Servos);
+  
+  //wait until you are actually connected
+  while (!nh.connected()) nh.spinOnce();
+  
+  nh.loginfo("Space Jockey Arduino online...");
 }
 
 //Main loop just spins ROS

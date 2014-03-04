@@ -47,7 +47,6 @@ const unsigned int servo_addr[] = {12, 2, 10, 3, 11, 0, 8};
 #include <ros.h>
 
 //Subsystems
-#include "Debug.h"
 #include "Robot.h"
 #include "Battery.h"
 #include "JointSub.h"
