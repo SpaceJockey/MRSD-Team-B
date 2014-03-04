@@ -127,6 +127,7 @@ void setup() {
   //nh.getHardware()->setBaud(115200); // Up Baud Rate
   nh.initNode();
   nh.subscribe(serial_link);
+  nh.advertise(debug_pub);
   
   //Set up Battery Monitoring
   analogReadResolution(12);
