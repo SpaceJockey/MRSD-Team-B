@@ -14,22 +14,18 @@ This Sketch listens to the ROS channel "serial_link" and updates joint positions
 #include "SpaceJockey.h"
 
 //ROS Stuff
-ros::NodeHandle nh;
+ros::NodeHandle nh; //declared "extern" in SpaceJockey.h
 
 void setup() {
-  //Set up status LEDS
-  pinMode(STATUS_LED, OUTPUT);
-  digitalWrite(STATUS_LED, LOW);
-
   //Set up ROS node
   nh.initNode();
   
   //init monitoring threads
-  Battery.begin(nh);
+  Battery.begin();
 
   //init Servo Driver and Subscriber
   Servos.begin();
-  Joints.begin(nh, Servos);
+  Joints.begin();
   
   //wait until you are actually connected
   while (!nh.connected()) nh.spinOnce();

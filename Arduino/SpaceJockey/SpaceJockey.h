@@ -41,10 +41,11 @@ const float real_max[] = { DEG_30,  DEG_30,  DEG_30,  DEG_45,  DEG_45, .145, .14
 //Servo addresses for the HV servo board
 const unsigned int servo_addr[] = {12, 2, 10, 3, 11, 0, 8};
 
-
 #include <Arduino.h>
 #include <Scheduler.h>
 #include <ros.h>
+
+extern ros::NodeHandle nh;
 
 //Subsystems
 #include "Robot.h"

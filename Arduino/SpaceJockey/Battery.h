@@ -14,10 +14,10 @@
 
 //ROS Stuff
 #include <ros.h>
-#include <std_msgs/Int32.h>
+#include <std_msgs/Int16.h>
 
 static int batt_mon;
-static std_msgs::Int32 batt_msg; //battery state output //TODO: make this Int16??
+static std_msgs::Int16 batt_msg; //battery state output
 static ros::Publisher batt_state("battery_state", &batt_msg);
 
 //update battery state every half second
@@ -45,7 +45,7 @@ static void battLoop() {
 
 class Batt {
 	public:
-		void begin(ros::NodeHandle nh) {
+		void begin() { //ros::NodeHandle nh) {
 			//setup output pins
 			pinMode(BATT_LED, OUTPUT);
 			digitalWrite(BATT_LED, LOW);
