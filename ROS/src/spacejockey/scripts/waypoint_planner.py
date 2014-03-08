@@ -6,58 +6,87 @@ import numpy as np
 import IPython
 
 #robot configuration constants
-max_extend = 6
+max_extend = 6 #linear actuator reach
 min_extend = 2
-max_camera = 4 #maximum camera view range (60 degree downwards)
+max_angle = math.pi / 12.0 #maximum angle of center segment: 15 degrees
 
-#maximum angle of center segment
-max_angle = math.pi / 12.0 #15 degrees
+camera_foot_extend = 4 # where to put the foot when viewing
+max_camera = 8 #camera view range
+min_camera = 4
+view_radius = 4
+view_radius_square = view_radius * math.sqrt(2.0) #used for regional inspection tasks
 
-#foot locations are represented as (X,Y, theta) tuples theta is relative to the x axis
-currconfig = np.array([[2.0,0,0],[0.0,0,0],[-2.0,0,0]])
-nextconfig = np.array([[2.0,0,0],[0.0,0,0],[-2.0,0,0]])
-drawconfig = np.array([[2.0,0,0],[0.0,0,0],[-2.0,0,0]])
+#interpolation constants
 tau = 0.0
 dtau = 0.05
 ferr = 0.01 #floating point error correction term
 
 #major action number for planned moves
 all_major_action = 0
-view_radius = 4
-view_radius_square = view_radius * math.sqrt(2.0) #used for regional inspection tasks
-
-class Waypoint:
-    VIEW = 1
-    MOVE = 2
-    def __init__(self, x, y, action):
-    	self.x = x
-    	self.y = y
-    	self.action = action
-
-#Waypoint locations for the center foot in X,Y tuples (don't care about theta)
-waypoints = []
 
 #window Configs
 screensize = 600, 600
 screenscale = 6.0 / 100.0 #4 in = 100 px
 screenorigin = 300, 300 #location of the 0 point
 
-#x, y are screen coordinates outputs same values in inches relative to the world frame	
-def screenToIn(x, y):
-	global screenscale, screenorigin
-	n_x = (x - screenorigin[0]) * screenscale
-	n_y = (screenorigin[1] - y) * screenscale
-	return(n_x, n_y)
+class Point:
+	"""Point class stores and X,Y pair in inch coordinates, and provides scaling to/from the screen size, theta is optional"""
+	def __init__(self, x = 0, y = 0):
+		self.x = x
+		self.y = y
+
+	#x, y are screen coordinates 
+	def fromScreen(self, x, y):
+		global screenscale, screenorigin
+		self.x = (x - screenorigin[0]) * screenscale
+		self.y = (screenorigin[1] - y) * screenscale
 	
-def inToScreen(x, y):
-	global screenscale, screenorigin
-	n_x = (x  / screenscale) + screenorigin[0]
-	n_y = screenorigin[1] - (y / screenscale)
-	return(n_x, n_y)
+	#returns outputs same values in inches relative to the world frame	
+	def toScreen(self):
+		global screenscale, screenorigin
+		n_x = (self.x  / screenscale) + screenorigin[0]
+		n_y = screenorigin[1] - (self.y / screenscale)
+		return(n_x, n_y)
+
+		#returns the pythagorean distance between two points
+	def dist(self, other):
+		return math.sqrt((self.x-other.x)**2 + (self.y-other.y)**2)
+
+class AngledPoint(Point):
+	def __init__(self, x = 0, y = 0, theta = 0):
+		self.x = x
+		self.y = y
+		self.theta = theta
+	#TODO: add angle math functions here
+
+#robot configuration locations are represented as AngledPoints
+currconfig = [AngledPoint(2.0),AngledPoint(),AngledPoint(-2.0)]
+drawconfig = [AngledPoint(2.0),AngledPoint(),AngledPoint(-2.0)]
+nextconfig = [AngledPoint(2.0),AngledPoint(),AngledPoint(-2.0)]
+
+class Waypoint(Point):
+    VIEW = 1
+    MOVE = 2
+    def __init__(self, x = 0, y = 0, action = MOVE):
+		self.x = x
+		self.y = y
+		self.theta = 0
+		self.action = action
+
+#An ordered list of waypoint commands
+waypoints = []
+
+#returns the pythagorean distance between two points
+#TODO: Deprecate this!
+def pyDist(x1,y1,x2,y2):
+	return math.sqrt((x1-x2)**2 + (y1-y2)**2)
 	
 def isAtWaypoint(rconfig, wp):
 	global ferr
-	return (rconfig[1][0] > wp.x - ferr and rconfig[1][0] < wp.x + ferr and rconfig[1][1] > wp.y - ferr and rconfig[1][1] < wp.y + ferr)
+	if(wp.action == Waypoint.MOVE):
+		return (rconfig[1][0] > wp.x - ferr and rconfig[1][0] < wp.x + ferr and rconfig[1][1] > wp.y - ferr and rconfig[1][1] < wp.y + ferr)
+	else:
+		return pyDist(wp.x, wp.y, rconfig[1][0], rconfig[1][1])
 	
 def getValidMove(rconfig, wp):
 	# Rconfig: Current Configuration
@@ -135,7 +164,15 @@ class App:
 		
 		#update GUI every 20 ms
 		self.root.after(20, self.update)
-		
+
+	def drawPoint(self, p, color = "blue", tag = ""):
+		x,y = p.toScreen()
+		self.canvas.create_oval(x-3,y-3,x+3,y+3, outline=color, tags=tag)
+		if(isinstance(p, AngledPoint)):
+			cTh = 4 * math.cos(p.theta)
+			sTh = 4 * math.sin(p.theta)
+			self.canvas.create_line(x - cTh, y + sTh, x + cTh, y - sTh, fill=color, tags=tag)
+			
 	def update(self):
 		global waypoints, currconfig, nextconfig, drawconfig, tau, dtau
 		#self.canvas.delete(ALL) # remove all items
@@ -161,17 +198,14 @@ class App:
 		#redraw waypoints
 		self.canvas.delete("waypoint") # redraw the config every cycle
 		for w in waypoints:
-			dims = inToScreen(w.x, w.y)
 			color = "green" if w.action == Waypoint.MOVE else "red"
-			self.canvas.create_oval(dims[0]-2,dims[1]-2,dims[0]+2,dims[1]+2, outline=color, tags="waypoint")				
+			self.drawPoint(w,color,"waypoint")				
 			
 		#draw Robot config
 		self.canvas.delete("foot") # redraw the config every cycle
 		for f in drawconfig:
-			dims = inToScreen(f[0], f[1])
-			self.canvas.create_oval(dims[0]-4, dims[1]-4, dims[0]+4, dims[1]+4, outline="blue", tags="foot")
-			self.canvas.create_line(dims[0] - (6 * math.cos(f[2])), dims[1] + (6 * math.sin(f[2])), dims[0] + (6 * math.cos(f[2])), dims[1] - (6 * math.sin(f[2])), fill="blue", tags="foot")
-		
+			self.drawPoint(f,"blue","foot")
+
 		#reschedule task
 		self.root.after(15, self.update)
 	
