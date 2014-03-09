@@ -10,19 +10,21 @@ max_extend = 6 #linear actuator reach
 min_extend = 2
 max_angle = math.pi / 12.0 #maximum angle of center segment: 15 degrees
 
-camera_foot_extend = 4 # where to put the foot when viewing
+camera_extend = 4 # where to put the foot when viewing
 max_camera = 8 #camera view range
 min_camera = 4
+opt_camera = (max_camera + min_camera) / 2.0 # optimum camera viewing angle
 view_radius = 4
 view_radius_square = view_radius * math.sqrt(2.0) #used for regional inspection tasks
 
 #interpolation constants
 tau = 0.0
 dtau = 0.05
-ferr = 0.01 #floating point error correction term
+ferr = 0.0001 #floating point error correction term
+draw_view = False
 
 #major action number for planned moves
-all_major_action = 0
+major_action_id = 0
 
 #window Configs
 screensize = 600, 600
@@ -31,49 +33,57 @@ screenorigin = 300, 300 #location of the 0 point
 
 class Point:
 	"""Point class stores and X,Y pair in inch coordinates, and provides scaling to/from the screen size, theta is optional"""
-	def __init__(self, x = 0, y = 0):
-		self.x = x
-		self.y = y
-
-	#x, y are screen coordinates 
-	def fromScreen(self, x, y):
+	PX = 1
+	IN = 2
+	def __init__(self, x = 0, y = 0, units = IN):
 		global screenscale, screenorigin
-		self.x = (x - screenorigin[0]) * screenscale
-		self.y = (screenorigin[1] - y) * screenscale
-	
-	#returns outputs same values in inches relative to the world frame	
+		if (units == Point.PX):
+			self.x = (x - screenorigin[0]) * screenscale
+			self.y = (screenorigin[1] - y) * screenscale
+		else:
+			self.x = x
+			self.y = y
+
+	#returns output values in screen coordinates
 	def toScreen(self):
 		global screenscale, screenorigin
 		n_x = (self.x  / screenscale) + screenorigin[0]
 		n_y = screenorigin[1] - (self.y / screenscale)
 		return(n_x, n_y)
 
-		#returns the pythagorean distance between two points
-	def dist(self, other):
+	#returns the pythagorean distance between two points
+	def distTo(self, other):
 		return math.sqrt((self.x-other.x)**2 + (self.y-other.y)**2)
 
-class AngledPoint(Point):
-	def __init__(self, x = 0, y = 0, theta = 0):
-		self.x = x
-		self.y = y
-		self.theta = theta
-	#TODO: add angle math functions here
+	#returns the global bearing of the other point
+	def angleTo(self, other):
+		return math.atan2(other.y - self.y, other.x - self.x) 
 
-#robot configuration locations are represented as AngledPoints
-currconfig = [AngledPoint(2.0),AngledPoint(),AngledPoint(-2.0)]
-drawconfig = [AngledPoint(2.0),AngledPoint(),AngledPoint(-2.0)]
-nextconfig = [AngledPoint(2.0),AngledPoint(),AngledPoint(-2.0)]
+class AngledPoint(Point):
+	def __init__(self, x = 0, y = 0, theta = 0, units = Point.IN):
+		Point.__init__(self, x, y, units)
+		self.theta = theta
+
+	def __repr__(self):
+		return '[' + "{:.3f}".format(self.x) + ', ' + "{:.3f}".format(self.y) + ', ' + "{:.4f}".format(self.theta) + ']'
+
+
+#robot configuration locations are represented as tuples of AngledPoints representing each foot.
+#(front, middle, rear)
+currconfig = (AngledPoint(2.0),AngledPoint(),AngledPoint(-2.0))
+drawconfig = (AngledPoint(2.0),AngledPoint(),AngledPoint(-2.0))
+nextconfig = (AngledPoint(2.0),AngledPoint(),AngledPoint(-2.0))
 
 class Waypoint(Point):
     VIEW = 1
     MOVE = 2
-    def __init__(self, x = 0, y = 0, action = MOVE):
-		self.x = x
-		self.y = y
-		self.theta = 0
+
+    def __init__(self, x = 0, y = 0, action = MOVE, units = Point.IN):
+		Point.__init__(self, x,y,units)
 		self.action = action
 
-#An ordered list of waypoint commands
+#This is the FIFO queue of waypoints
+#implemented with a list
 waypoints = []
 
 #returns the pythagorean distance between two points
@@ -82,63 +92,69 @@ def pyDist(x1,y1,x2,y2):
 	return math.sqrt((x1-x2)**2 + (y1-y2)**2)
 	
 def isAtWaypoint(rconfig, wp):
-	global ferr
+	global ferr, min_camera, max_camera
 	if(wp.action == Waypoint.MOVE):
-		return (rconfig[1][0] > wp.x - ferr and rconfig[1][0] < wp.x + ferr and rconfig[1][1] > wp.y - ferr and rconfig[1][1] < wp.y + ferr)
+		return rconfig[1].distTo(wp) < ferr
 	else:
-		return pyDist(wp.x, wp.y, rconfig[1][0], rconfig[1][1])
+		return min_camera > rconfig[1].distTo(wp) < max_camera
 	
+#Returns the next major planning action
+#Rconfig: Current Configuration
+#wp: Waypoint 	
 def getValidMove(rconfig, wp):
-	# Rconfig: Current Configuration
-	# wp: Waypoint 
-	
-	global max_extend, min_extend, max_angle, all_major_action, ferr
-	nconfig = deepcopy(rconfig) #new configuration
-	centerseg = rconfig[1];
-	targetAngle = math.atan2(wp.y - centerseg[1], wp.x - centerseg[0]) 
-	
-	#rotate the closest way... TODO: test this
-	if(centerseg[2] - targetAngle > np.pi):
-		targetAngle += 2*np.pi
-	elif(targetAngle - centerseg[2] > np.pi):
-		targetAngle -= 2*np.pi
-	
-	chassisAngle = math.atan2(rconfig[0,1] - rconfig[1,1], rconfig[0,0] - rconfig[1,0]) - math.atan2(rconfig[1,1] - rconfig[2,1], rconfig[1,0] - rconfig[2,0])
+	global max_extend, min_extend, max_angle, major_action_id, ferr, draw_view, major_action_id
+	nconfig = deepcopy(rconfig) #copy new configuration from old
+	tgtAngle = rconfig[1].angleTo(wp)
+	tgtDist = rconfig[1].distTo(wp) if wp.action == Waypoint.MOVE else rconfig[1].distTo(wp) - opt_camera
+	chasAngle = rconfig[0].theta - rconfig[2].theta
+	action = "STEP"
+	draw_view = False
 
-	targetDist = np.sqrt( np.square(wp.x - centerseg[0]) + np.square(wp.y - centerseg[1]))
-	if(targetAngle != rconfig[0,2] and chassisAngle < ferr): #front foot not pointing at the thing, so turn front foot and extend
-		angle = 0
-		if(rconfig[0,2] > targetAngle): #enforce angle limit
-			angle =  max(targetAngle, rconfig[0,2] - max_angle)
-		else:
-			angle =  min(targetAngle, rconfig[0,2] + max_angle)
-		nconfig[0] = [nconfig[1,0] + (min_extend * math.cos(angle)), nconfig[1,1] + (min_extend * math.sin(angle)), angle]
+	if(tgtAngle != rconfig[0].theta): #front foot not pointing at the thing, so turn front foot
+		angle = tgtAngle
+		#TODO: enforce angle limits
+		#if(rconfig[0,2] > tgtAngle): #enforce angle limit
+		#	angle =  max(tgtAngle, rconfig[0,2] - max_angle)
+		#else:
+		#	angle =  min(tgtAngle, rconfig[0,2] + max_angle)
+		nconfig[0].x = rconfig[1].x + (min_extend * math.cos(angle))
+		nconfig[0].y = rconfig[1].y + (min_extend * math.sin(angle))
+		nconfig[0].theta = angle
 			
-	elif(targetAngle != rconfig[2,2]): #rear foot not pointing at the thing, so turn back foot and retract
-		angle = 0
-		if(rconfig[0,2] > targetAngle): #enforce angle limit
-			angle =  max(targetAngle, rconfig[0,2] - max_angle)
-		else:
-			angle =  min(targetAngle, rconfig[0,2] + max_angle)
-		nconfig[2] = [nconfig[1][0] - (min_extend * math.cos(angle)), nconfig[1][1] - (min_extend * math.sin(angle)), angle]
+	elif(tgtAngle != rconfig[2].theta): #rear foot not pointing at the thing, so turn back foot and retract
+		angle = tgtAngle
+		#TODO: enforce angle limits
+		#if(rconfig[0,2] > tgtAngle): #enforce angle limit
+		#	angle =  max(tgtAngle, rconfig[0,2] - max_angle)
+		#else:
+		#	angle =  min(tgtAngle, rconfig[0,2] + max_angle)
+		nconfig[2].x = rconfig[1].x + (min_extend * math.cos(angle))
+		nconfig[2].y = rconfig[1].y + (min_extend * math.sin(angle))
+		nconfig[2].theta = angle
 	else:
-		d1 = np.sqrt( np.square(nconfig[0,0] - nconfig[1,0]) + np.square(nconfig[0,1] - nconfig[1,1])) #distance between front and middle
-		d2 = np.sqrt( np.square(nconfig[1,0] - nconfig[2,0]) + np.square(nconfig[1,1] - nconfig[2,1])) #distance between middle and rear
-		if (d1 < (max_extend - ferr)): #extend front segment, accounting for error
-			nconfig[0] = [nconfig[1,0] + (max_extend * math.cos(targetAngle)), nconfig[1,1] + (max_extend * math.sin(targetAngle)), targetAngle]
+		d1 = nconfig[1].distTo(nconfig[0]) #distance between front and middle
+		d2 = nconfig[1].distTo(nconfig[2]) #distance between middle and rear
+		if(wp.action == Waypoint.VIEW and tgtDist < max_camera):	#view plan action
+			nconfig[0].x = nconfig[1].x + (camera_extend * math.cos(tgtAngle))
+			nconfig[0].y = nconfig[1].y + (camera_extend * math.sin(tgtAngle))
+			draw_view = True
+			action = "VIEW"
+		elif (d1 < (max_extend - ferr)): #extend front segment, accounting for error
+			nconfig[0].x = nconfig[1].x + (max_extend * math.cos(tgtAngle))
+			nconfig[0].y = nconfig[1].y + (max_extend * math.sin(tgtAngle))
 		elif (d2 > min_extend + ferr): #retract rear foot
-			nconfig[2] = [nconfig[1][0] - (min_extend * math.cos(targetAngle)), nconfig[1][1] - (min_extend * math.sin(targetAngle)), targetAngle]
+			nconfig[2].x = nconfig[1].x - (min_extend * math.cos(tgtAngle))
+			nconfig[2].y = nconfig[1].y - (min_extend * math.sin(tgtAngle))
 		else: #extend middle segment
-			movDist = min(targetDist, max_extend - min_extend)
-			nconfig[1] = [nconfig[1,0] + (movDist * math.cos(targetAngle)), nconfig[1,1] + (movDist * math.sin(targetAngle)), targetAngle]
-
-			
+			movDist = min(tgtDist, max_extend - min_extend)
+			nconfig[1].x = nconfig[1].x + (movDist * math.cos(tgtAngle))
+			nconfig[1].y = nconfig[1].y + (movDist * math.sin(tgtAngle))
 	#set middle foot angle to the average of the other two
-	nconfig[1,2] = (nconfig[0,2] + nconfig[2,2]) / 2.0 
+	nconfig[1].theta = (nconfig[0].theta + nconfig[2].theta) / 2.0 
+
+	print("Major action #", major_action_id, ": ", action, " ", nconfig) #TODO: output this to a ROS topic
+	major_action_id = major_action_id + 1
 	return nconfig
-	
-def interpolateconfigs(pconfig, nconfig, val):
-	return pconfig * (1.0 - val) + nconfig * val
 
 #main application class
 class App:
@@ -169,60 +185,61 @@ class App:
 		x,y = p.toScreen()
 		self.canvas.create_oval(x-3,y-3,x+3,y+3, outline=color, tags=tag)
 		if(isinstance(p, AngledPoint)):
-			cTh = 4 * math.cos(p.theta)
-			sTh = 4 * math.sin(p.theta)
+			cTh = 6 * math.cos(p.theta)
+			sTh = 6 * math.sin(p.theta)
 			self.canvas.create_line(x - cTh, y + sTh, x + cTh, y - sTh, fill=color, tags=tag)
 			
 	def update(self):
-		global waypoints, currconfig, nextconfig, drawconfig, tau, dtau
-		#self.canvas.delete(ALL) # remove all items
+		global waypoints, currconfig, nextconfig, drawconfig, tau, dtau, draw_view
+
+		#reschedule task
+		self.root.after(15, self.update)
+		
+		#update robot movement plan
 		if(len(waypoints) == 0):
-			self.status.set("IDLE")
-		else: #Update robot motion 
-			self.status.set("MOVING")
+			self.status.set("Idle")
+		else:
+			self.status.set("Moving")
 			if isAtWaypoint(currconfig, waypoints[0]):
 				waypoints.pop(0)
-				tau = 0.0
-				self.root.after(20, self.update)
-				return
-			elif (tau >= 1.0): #get next move
+			elif (tau < (1.0 - ferr)):
+				tau += dtau
+				#drawconfig = interpolateconfigs(currconfig, nextconfig, tau) TODO: fix this
+			else:
 				currconfig = nextconfig
 				nextconfig = getValidMove(currconfig, waypoints[0])
 				drawconfig = currconfig
 				tau = 0.0
-			else:
-				tau += dtau
-				drawconfig = interpolateconfigs(currconfig, nextconfig, tau)
-			
+				
+		#redraw everything
+		self.canvas.delete(ALL) 
 
 		#redraw waypoints
-		self.canvas.delete("waypoint") # redraw the config every cycle
 		for w in waypoints:
 			color = "green" if w.action == Waypoint.MOVE else "red"
 			self.drawPoint(w,color,"waypoint")				
 			
 		#draw Robot config
-		self.canvas.delete("foot") # redraw the config every cycle
 		for f in drawconfig:
 			self.drawPoint(f,"blue","foot")
 
-		#reschedule task
-		self.root.after(15, self.update)
-	
+		#TODO: add camera view drawing and pause code
+		#if (draw_view):
+		#	print("viewing...")
+			
 	#on mouse clicks, add a waypoint
 	def clickCB(self, event):
 		global waypoints
 		canvas = event.widget
 		x = canvas.canvasx(event.x)
 		y = canvas.canvasy(event.y)
-		x,y = screenToIn(x,y)
 		action = Waypoint.MOVE if event.num == 1 else Waypoint.VIEW
-		waypoints.append(Waypoint(x,y,action))
+		waypoints.append(Waypoint(x, y, action, Point.PX))
 
 #set up window
 root = Tk()   
 root.wm_title("Planner Prototype")
-root.config(background="#000000")
+root.config(background="black")
 app = App(root)
 
 #open a terminal to mess around with stuff
