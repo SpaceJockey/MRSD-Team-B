@@ -42,7 +42,7 @@
     "extruderTemp1": 230,
     "platformTemp": 130,
 
-    "numberOfShells": 2,
+    "numberOfShells": 3,
     "infillShellSpacingMultiplier": 0.7,
     "insetDistanceMultiplier": 1.0,
 
@@ -55,8 +55,8 @@
     "coarseness": 0.0001,
 
     "sparseInfillPattern": "linear",
-    "infillDensity": 0.2,
-    "infillOrientationOffset": 30,
+    "infillDensity": 0.15,
+    "infillOrientationOffset": 0,
     "infillOrientationInterval": 60,
     "infillOrientationRange": 120,
 
@@ -127,7 +127,7 @@
     "doSupportUnderBridges": false,
     "supportAligned": true,
     "supportLeakyConnections": true,
-    "supportDensity": 0.2,
+    "supportDensity": 0.18,
     "supportExtraDistance": 0.5,
     "supportAngle": 45.0,
     "supportModelSpacing": 0.4,
