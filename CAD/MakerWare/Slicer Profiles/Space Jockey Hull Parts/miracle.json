@@ -128,8 +128,8 @@
     "supportAligned": true,
     "supportLeakyConnections": true,
     "supportDensity": 0.18,
-    "supportExtraDistance": 0.5,
-    "supportAngle": 45.0,
+    "supportExtraDistance": 0.0,
+    "supportAngle": 60.0,
     "supportModelSpacing": 0.4,
     "supportExcessive": false,
 
