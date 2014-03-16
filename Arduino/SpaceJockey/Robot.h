@@ -32,8 +32,8 @@ Servo Wiring Configs:
 10	Center Segment Rear Pitch
 3	Front Segment Pitch
 11	Rear Segment Pitch
-0	Center Segment Front Prismatic
-8	Center Segment Rear Prismatic
+0	Front Prismatic
+8	Rear Prismatic
 
 */
 
