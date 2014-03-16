@@ -2,20 +2,17 @@
 from Tkinter import *
 from copy import deepcopy
 import math
-import numpy as np
 import IPython
 
-#robot configuration constants
-max_extend = 6 #linear actuator reach
-min_extend = 2
-max_angle = math.pi / 12.0 #maximum angle of center segment: 15 degrees
+#ROS Imports
+import roslib
+#roslib.load_manifest('spacejockey')
+import rospy
+import sys
+from spacejockey.msg import PlannerAction
 
-camera_extend = 4 # where to put the foot when viewing
-max_camera = 8 #camera view range
-min_camera = 4
-opt_camera = (max_camera + min_camera) / 2.0 # optimum camera viewing angle
-view_radius = 4
-view_radius_square = view_radius * math.sqrt(2.0) #used for regional inspection tasks
+#get configuration constants from the param server
+config = rospy.get_param("/planner")
 
 #interpolation constants
 tau = 0.0
@@ -92,20 +89,20 @@ def pyDist(x1,y1,x2,y2):
 	return math.sqrt((x1-x2)**2 + (y1-y2)**2)
 	
 def isAtWaypoint(rconfig, wp):
-	global ferr, min_camera, max_camera
+	global ferr, config
 	if(wp.action == Waypoint.MOVE):
 		return rconfig[1].distTo(wp) < ferr
 	else:
-		return min_camera > rconfig[1].distTo(wp) < max_camera
+		return config['min_camera'] > rconfig[1].distTo(wp) < config['max_camera']
 	
 #Returns the next major planning action
 #Rconfig: Current Configuration
 #wp: Waypoint 	
 def getValidMove(rconfig, wp):
-	global max_extend, min_extend, max_angle, major_action_id, ferr, draw_view, major_action_id
+	global config, major_action_id, ferr, draw_view
 	nconfig = deepcopy(rconfig) #copy new configuration from old
 	tgtAngle = rconfig[1].angleTo(wp)
-	tgtDist = rconfig[1].distTo(wp) if wp.action == Waypoint.MOVE else rconfig[1].distTo(wp) - opt_camera
+	tgtDist = rconfig[1].distTo(wp) if wp.action == Waypoint.MOVE else rconfig[1].distTo(wp) - config['opt_camera']
 	chasAngle = rconfig[0].theta - rconfig[2].theta
 	action = "STEP"
 	draw_view = False
@@ -114,45 +111,45 @@ def getValidMove(rconfig, wp):
 		angle = tgtAngle
 		#TODO: enforce angle limits
 		#if(rconfig[0,2] > tgtAngle): #enforce angle limit
-		#	angle =  max(tgtAngle, rconfig[0,2] - max_angle)
+		#	angle =  max(tgtAngle, rconfig[0,2] - config['max_angle'])
 		#else:
-		#	angle =  min(tgtAngle, rconfig[0,2] + max_angle)
-		nconfig[0].x = rconfig[1].x + (min_extend * math.cos(angle))
-		nconfig[0].y = rconfig[1].y + (min_extend * math.sin(angle))
+		#	angle =  min(tgtAngle, rconfig[0,2] + config['max_angle'])
+		nconfig[0].x = rconfig[1].x + (config['min_extend'] * math.cos(angle))
+		nconfig[0].y = rconfig[1].y + (config['min_extend'] * math.sin(angle))
 		nconfig[0].theta = angle
 			
 	elif(tgtAngle != rconfig[2].theta): #rear foot not pointing at the thing, so turn back foot and retract
 		angle = tgtAngle
 		#TODO: enforce angle limits
 		#if(rconfig[0,2] > tgtAngle): #enforce angle limit
-		#	angle =  max(tgtAngle, rconfig[0,2] - max_angle)
+		#	angle =  max(tgtAngle, rconfig[0,2] - config['max_angle'])
 		#else:
-		#	angle =  min(tgtAngle, rconfig[0,2] + max_angle)
-		nconfig[2].x = rconfig[1].x + (min_extend * math.cos(angle))
-		nconfig[2].y = rconfig[1].y + (min_extend * math.sin(angle))
+		#	angle =  min(tgtAngle, rconfig[0,2] + config['max_angle'])
+		nconfig[2].x = rconfig[1].x + (config['min_extend'] * math.cos(angle))
+		nconfig[2].y = rconfig[1].y + (config['min_extend'] * math.sin(angle))
 		nconfig[2].theta = angle
 	else:
 		d1 = nconfig[1].distTo(nconfig[0]) #distance between front and middle
 		d2 = nconfig[1].distTo(nconfig[2]) #distance between middle and rear
-		if(wp.action == Waypoint.VIEW and tgtDist < max_camera):	#view plan action
-			nconfig[0].x = nconfig[1].x + (camera_extend * math.cos(tgtAngle))
-			nconfig[0].y = nconfig[1].y + (camera_extend * math.sin(tgtAngle))
+		if(wp.action == Waypoint.VIEW and tgtDist < config['max_camera']):	#view plan action
+			nconfig[0].x = nconfig[1].x + (config['camera_extend'] * math.cos(tgtAngle))
+			nconfig[0].y = nconfig[1].y + (config['camera_extend'] * math.sin(tgtAngle))
 			draw_view = True
 			action = "VIEW"
-		elif (d1 < (max_extend - ferr)): #extend front segment, accounting for error
-			nconfig[0].x = nconfig[1].x + (max_extend * math.cos(tgtAngle))
-			nconfig[0].y = nconfig[1].y + (max_extend * math.sin(tgtAngle))
-		elif (d2 > min_extend + ferr): #retract rear foot
-			nconfig[2].x = nconfig[1].x - (min_extend * math.cos(tgtAngle))
-			nconfig[2].y = nconfig[1].y - (min_extend * math.sin(tgtAngle))
+		elif (d1 < (config['max_extend'] - ferr)): #extend front segment, accounting for error
+			nconfig[0].x = nconfig[1].x + (config['max_extend'] * math.cos(tgtAngle))
+			nconfig[0].y = nconfig[1].y + (config['max_extend'] * math.sin(tgtAngle))
+		elif (d2 > config['min_extend'] + ferr): #retract rear foot
+			nconfig[2].x = nconfig[1].x - (config['min_extend'] * math.cos(tgtAngle))
+			nconfig[2].y = nconfig[1].y - (config['min_extend'] * math.sin(tgtAngle))
 		else: #extend middle segment
-			movDist = min(tgtDist, max_extend - min_extend)
+			movDist = min(tgtDist, config['max_extend'] - config['min_extend'])
 			nconfig[1].x = nconfig[1].x + (movDist * math.cos(tgtAngle))
 			nconfig[1].y = nconfig[1].y + (movDist * math.sin(tgtAngle))
 	#set middle foot angle to the average of the other two
 	nconfig[1].theta = (nconfig[0].theta + nconfig[2].theta) / 2.0 
 
-	print("Major action #", major_action_id, ": ", action, " ", nconfig) #TODO: output this to a ROS topic
+	print("Major action #" + `major_action_id` + ": " + action + " " + `nconfig`) #TODO: output this to a ROS topic
 	major_action_id = major_action_id + 1
 	return nconfig
 

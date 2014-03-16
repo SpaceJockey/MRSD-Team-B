@@ -1,0 +1,10 @@
+#Soft constraints for major planning actions
+max_extend: 6 #linear actuator reach
+min_extend: 2
+max_angle: deg(15) #maximum angle of center segment: 15 degrees
+
+camera_extend: 4 # where to put the foot when viewing
+max_camera: 8 #camera view range
+min_camera: 4
+opt_camera: 6 # optimum camera viewing angle
+view_radius: 4
