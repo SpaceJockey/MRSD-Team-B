@@ -55,7 +55,7 @@ sched = Scheduler()
 # Scheduler loop. While not paused, continually print queue size every (delay) seconds.
 # If queue larger than zero, pop a joint configuration each cycle
 #   and publish it to joint_states to be received by rViz and/or the orbot
-while (True):
+while not rospy.is_shutdown():
   time.sleep(sched.delay)
   if (not sched.pause):
     if (len(sched.queue) > 0):
