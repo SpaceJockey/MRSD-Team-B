@@ -11,7 +11,7 @@ uint32 major_id
 uint16 action_type
 
 #which frame to move/target, and where to go
-uint16 node_id
+string node_name
 float32 x
 float32 y
 float32 theta
