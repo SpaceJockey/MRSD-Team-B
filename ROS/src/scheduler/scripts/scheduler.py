@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import rospy, time
-from std_msgs.msg import String, Empty, Float64MultiArray
+from std_msgs.msg import String, Empty, Float32MultiArray
 from sensor_msgs.msg import JointState
 
     
@@ -8,11 +8,11 @@ class Scheduler():
     delay = 1       # Default delay between queue pops
     pause = False   # Not-paused by default
     queue = []      # Joint configuration queue
-    posArray = Float64MultiArray()    
+    posArray = Float32MultiArray()    
 
     # Pubisher for joint states
     jointPub = rospy.Publisher('joint_states',JointState)
-    serialPub = rospy.Publisher('joint_ctl',Float64MultiArray)
+    serialPub = rospy.Publisher('joint_ctl',Float32MultiArray)
     
     # Init: Set up listener
     def __init__(self):
