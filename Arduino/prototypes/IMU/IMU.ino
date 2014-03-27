@@ -1,50 +1,40 @@
 // MPU-6050 Accelerometer + Gyro
 // -----------------------------
 
-
+#include <Arduino.h>
 #include <Wire.h>
 #include "MPU6050.h"
 
+//ROS stuff
+#include <ros.h>
+#include <std_msgs/Int16MultiArray.h>
+//#include <std_msgs/Float32.h>
+
+//ROS Stuff
+ros::NodeHandle nh; //declared "extern" in SpaceJockey.h
+static std_msgs::Int16MultiArray imu_msg; //imu state output
+static ros::Publisher imu_state("imu_data", &imu_msg);
+
+/*
+should we have separate topics for temperature and such, or just dump everything, and let others cherry-pick upstream
+static std_msgs::Float32 temp_msg; //imu temperature output, in degrees C
+static ros::Publisher temp_state("temperature_data", &temp_msg);
+*/
+
+MPU6050 IMU = MPU6050(&Wire);
+
 void setup()
-{      
-  int error;
-  uint8_t c;
+{ 
+  //Set up ROS node
+  nh.initNode();
+  nh.advertise(imu_state);
+  //nh.advertise(temp_state);
 
+  //spin until rosserial connection is live
+  while (!nh.connected()) nh.spinOnce();
+  nh.loginfo("IMU Dumper Arduino Connected.");
 
-  Serial.begin(9600);
-  Serial.println(F("InvenSense MPU-6050"));
-  Serial.println(F("June 2012"));
-
-  // Initialize the 'Wire' class for the I2C-bus.
-  Wire.begin();
-
-
-  // default at power-up:
-  //    Gyro at 250 degrees second
-  //    Acceleration at 2g
-  //    Clock source at internal 8MHz
-  //    The device is in sleep mode.
-  //
-
-  error = MPU6050_read (MPU6050_WHO_AM_I, &c, 1);
-  Serial.print(F("WHO_AM_I : "));
-  Serial.print(c,HEX);
-  Serial.print(F(", error = "));
-  Serial.println(error,DEC);
-
-  // According to the datasheet, the 'sleep' bit
-  // should read a '1'.
-  // That bit has to be cleared, since the sensor
-  // is in sleep mode at power-up. 
-  error = MPU6050_read (MPU6050_PWR_MGMT_1, &c, 1);
-  Serial.print(F("PWR_MGMT_1 : "));
-  Serial.print(c,HEX);
-  Serial.print(F(", error = "));
-  Serial.println(error,DEC);
-
-
-  // Clear the 'sleep' bit to start the sensor.
-  MPU6050_write_reg (MPU6050_PWR_MGMT_1, 0);
+  IMU.begin();
 }
 
 
@@ -54,25 +44,11 @@ void loop()
   double dT;
   accel_t_gyro_union accel_t_gyro;
 
+  //Read IMU data
+  error = IMU.read (MPU6050_ACCEL_XOUT_H, (uint8_t *) &accel_t_gyro, sizeof(accel_t_gyro));
+  //TODO: fix this: if(error != 0) nh.logerror("IMU Read Error: " + itos(error));
 
-  Serial.println(F(""));
-  Serial.println(F("MPU-6050"));
-
-  // Read the raw values.
-  // Read 14 bytes at once, 
-  // containing acceleration, temperature and gyro.
-  // With the default settings of the MPU-6050,
-  // there is no filter enabled, and the values
-  // are not very stable.
-  error = MPU6050_read (MPU6050_ACCEL_XOUT_H, (uint8_t *) &accel_t_gyro, sizeof(accel_t_gyro));
-  Serial.print(F("Read accel, temp and gyro, error = "));
-  Serial.println(error,DEC);
-
-
-  // Swap all high and low bytes.
-  // After this, the registers values are swapped, 
-  // so the structure name like x_accel_l does no 
-  // longer contain the lower byte.
+  // Swap all high and low bytes to low byte first.
   uint8_t swap;
   #define SWAP(x,y) swap = x; x = y; y = swap
 
@@ -85,15 +61,10 @@ void loop()
   SWAP (accel_t_gyro.reg.z_gyro_h, accel_t_gyro.reg.z_gyro_l);
 
 
-  // Print the raw acceleration values
-
-  Serial.print(F("accel x,y,z: "));
-  Serial.print(accel_t_gyro.value.x_accel, DEC);
-  Serial.print(F(", "));
-  Serial.print(accel_t_gyro.value.y_accel, DEC);
-  Serial.print(F(", "));
-  Serial.print(accel_t_gyro.value.z_accel, DEC);
-  Serial.println(F(""));
+  //Dump the raw IMU data
+  imu_msg.data_length = sizeof(accel_t_gyro);
+  imu_msg.data = (int16_t *) &accel_t_gyro;
+  imu_state.publish(&imu_msg);
 
 
   // The temperature sensor is -40 to +85 degrees Celsius.
@@ -101,25 +72,10 @@ void loop()
   // According to the datasheet: 
   //   340 per degrees Celsius, -512 at 35 degrees.
   // At 0 degrees: -512 - (340 * 35) = -12412
-
-  Serial.print(F("temperature: "));
-  dT = ( (double) accel_t_gyro.value.temperature + 12412.0) / 340.0;
-  Serial.print(dT, 3);
-  Serial.print(F(" degrees Celsius"));
-  Serial.println(F(""));
-
-
-  // Print the raw gyro values.
-
-  Serial.print(F("gyro x,y,z : "));
-  Serial.print(accel_t_gyro.value.x_gyro, DEC);
-  Serial.print(F(", "));
-  Serial.print(accel_t_gyro.value.y_gyro, DEC);
-  Serial.print(F(", "));
-  Serial.print(accel_t_gyro.value.z_gyro, DEC);
-  Serial.print(F(", "));
-  Serial.println(F(""));
-
+  /*
+  temp_msg.data = ((float) accel_t_gyro.value.temperature + 12412.0) / 340.0;
+  temp_state.publish( &temp_msg );
+  */
   delay(1000);
 }
 
