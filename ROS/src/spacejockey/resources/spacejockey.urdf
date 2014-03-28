@@ -1,0 +1,147 @@
+<?xml version="1.0"?>
+<robot name="spacejockey">
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <cylinder length="0.05" radius="0.2"/>
+      </geometry>
+      <material name="teal">
+        <color rgba="0 .8 .8 1"/>
+      </material>
+    </visual>
+  </link>
+
+  <link name="center_aft">
+    <visual>
+      <geometry>
+        <cylinder length="0.05" radius="0.2"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 -0.2 0"/>
+      <material name="teal"/>
+    </visual>
+  </link>
+
+  <joint name="center_swivel" type="revolute">
+    <axis xyz="0 0 -1"/>
+    <limit effort="1000.0" lower="-.8" upper=".8" velocity="0.5"/>
+    <origin rpy="0 0 0" xyz="0 -0.2 0"/>
+    <parent link="base_link"/>
+    <child link="center_aft"/>
+  </joint>
+
+  <link name="fore_base_pole">
+    <visual>
+      <geometry>
+        <cylinder length="0.15" radius=".02"/>
+      </geometry>
+      <origin rpy="-1.57075 0 0 " xyz="0 0.075 0"/>
+      <material name="Gray">
+        <color rgba=".7 .7 .7 1"/>
+      </material>
+    </visual>
+  </link>
+
+  <joint name="fore_base_pitch" type="revolute">
+    <axis xyz="1 0 0"/>
+    <limit effort="1000.0" lower="-.6" upper=".6" velocity="0.5"/>
+    <origin rpy="0 0 0" xyz="0 .2 0"/>
+    <parent link="base_link"/>
+    <child link="fore_base_pole"/>
+  </joint>
+  
+  <link name="fore_base_prism">
+    <visual>
+      <geometry>
+        <cylinder length="0.15" radius=".018"/>
+      </geometry>
+      <origin rpy="0 1.57075 0 " xyz=".075 0 0"/>
+      <material name="cyan">
+	<color rgba=".8 0 .8 1"/>
+      </material>
+    </visual>
+  </link>
+
+  <joint name="fore_extend" type="prismatic">
+    <parent link="fore_base_pole"/>
+    <child link="fore_base_prism"/>
+    <limit effort="1000.0" lower="0" upper="0.15" velocity="0.5"/>
+    <origin rpy="0 0 1.57075" xyz="0 0.0 0"/>
+  </joint>
+
+  <link name="front_seg">
+    <visual>
+      <geometry>
+        <cylinder length="0.04" radius="0.15"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0.15 0 0"/>
+      <material name="teal"/>
+    </visual>
+  </link>
+
+  <joint name="front_pitch" type="revolute">
+    <axis xyz="0 -1 0"/>
+    <limit effort="1000.0" lower="-1.2" upper="1.2" velocity="0.5"/>
+    <origin rpy="0 0 0" xyz="0.15 0 0"/>
+    <parent link="fore_base_prism"/>
+    <child link="front_seg"/>
+  </joint>
+
+  <link name="aft_base_pole">
+    <visual>
+      <geometry>
+        <cylinder length="0.15" radius=".02"/>
+      </geometry>
+      <origin rpy="-1.57075 0 0 " xyz="0 -0.075 0"/>
+      <material name="Gray">
+        <color rgba=".7 .7 .7 1"/>
+      </material>
+    </visual>
+  </link>
+
+  <joint name="aft_base_pitch" type="revolute">
+    <axis xyz="-1 0 0"/>
+    <limit effort="1000.0" lower="-.6" upper=".6" velocity="0.5"/>
+    <origin rpy="0 0 0" xyz="0 -.4 0"/>
+    <parent link="center_aft"/>
+    <child link="aft_base_pole"/>
+  </joint>
+
+  <link name="aft_base_prism">
+    <visual>
+      <geometry>
+        <cylinder length="0.15" radius=".018"/>
+      </geometry>
+      <origin rpy="0 -1.57075 0 " xyz="0.075 0 0"/>
+      <material name="cyan">
+	<color rgba=".8 0 .8 1"/>
+      </material>
+    </visual>
+  </link>
+
+  <joint name="aft_extend" type="prismatic">
+    <parent link="aft_base_pole"/>
+    <child link="aft_base_prism"/>
+    <limit effort="1000.0" lower="0" upper="0.15" velocity="0.5"/>
+    <origin rpy="0 0 -1.57075" xyz="0 0.0 0"/>
+  </joint>
+
+  <link name="rear_seg">
+    <visual>
+      <geometry>
+        <cylinder length="0.04" radius="0.15"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0.15 0 0"/>
+      <material name="teal"/>
+    </visual>
+  </link>
+
+  <joint name="rear_pitch" type="revolute">
+    <axis xyz="0 -1 0"/>
+    <limit effort="1000.0" lower="-1.2" upper="1.2" velocity="0.5"/>
+    <origin rpy="0 0 0" xyz="0.15 0 0"/>
+    <parent link="aft_base_prism"/>
+    <child link="rear_seg"/>
+  </joint>
+
+</robot>
+
