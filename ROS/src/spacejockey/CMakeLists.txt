@@ -4,13 +4,15 @@ project(spacejockey)
 find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
+  geometry_msgs
   message_generation
 )
 
 ## Generate messages in the 'msg' folder
 add_message_files(
 	FILES
-	PlannerAction.msg
+  MajorPlanAction.msg
+  MinorPlanAction.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -31,6 +33,7 @@ add_message_files(
 generate_messages(
 	DEPENDENCIES
 	std_msgs
+  geometry_msgs
 )
 
 ###################################
@@ -85,7 +88,6 @@ include_directories(
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
 
 install(PROGRAMS
-  scripts/waypoint_planner.py
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 

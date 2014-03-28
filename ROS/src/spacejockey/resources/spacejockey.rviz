@@ -7,7 +7,7 @@ Panels:
         - /Global Options1
         - /Status1
         - /RobotModel1
-        - /RobotModel1/Status1
+        - /TF1
       Splitter Ratio: 0.651007
     Tree Height: 406
   - Class: rviz/Selection
@@ -111,26 +111,150 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        front_foot:
+        plan/0/front_foot:
           Value: true
-        middle_foot:
+        plan/1/rear_foot:
           Value: true
-        rear_foot:
+        plan/10/middle_foot:
+          Value: true
+        plan/11/front_foot:
+          Value: true
+        plan/12/rear_foot:
+          Value: true
+        plan/13/middle_foot:
+          Value: true
+        plan/14/front_foot:
+          Value: true
+        plan/15/rear_foot:
+          Value: true
+        plan/16/front_foot:
+          Value: true
+        plan/17/rear_foot:
+          Value: true
+        plan/18/front_foot:
+          Value: true
+        plan/19/rear_foot:
+          Value: true
+        plan/2/front_foot:
+          Value: true
+        plan/20/front_foot:
+          Value: true
+        plan/21/rear_foot:
+          Value: true
+        plan/22/front_foot:
+          Value: true
+        plan/23/front_foot:
+          Value: true
+        plan/24/middle_foot:
+          Value: true
+        plan/25/front_foot:
+          Value: true
+        plan/26/rear_foot:
+          Value: true
+        plan/27/middle_foot:
+          Value: true
+        plan/28/front_foot:
+          Value: true
+        plan/29/rear_foot:
+          Value: true
+        plan/3/rear_foot:
+          Value: true
+        plan/30/middle_foot:
+          Value: true
+        plan/31/front_foot:
+          Value: true
+        plan/32/rear_foot:
+          Value: true
+        plan/33/middle_foot:
+          Value: true
+        plan/4/front_foot:
+          Value: true
+        plan/5/rear_foot:
+          Value: true
+        plan/6/front_foot:
+          Value: true
+        plan/7/middle_foot:
+          Value: true
+        plan/8/front_foot:
+          Value: true
+        plan/9/rear_foot:
           Value: true
         world:
           Value: true
-      Marker Scale: 1
+      Marker Scale: 0.4
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: true
       Tree:
         world:
-          front_foot:
+          plan/0/front_foot:
             {}
-          middle_foot:
+          plan/1/rear_foot:
             {}
-          rear_foot:
+          plan/10/middle_foot:
+            {}
+          plan/11/front_foot:
+            {}
+          plan/12/rear_foot:
+            {}
+          plan/13/middle_foot:
+            {}
+          plan/14/front_foot:
+            {}
+          plan/15/rear_foot:
+            {}
+          plan/16/front_foot:
+            {}
+          plan/17/rear_foot:
+            {}
+          plan/18/front_foot:
+            {}
+          plan/19/rear_foot:
+            {}
+          plan/2/front_foot:
+            {}
+          plan/20/front_foot:
+            {}
+          plan/21/rear_foot:
+            {}
+          plan/22/front_foot:
+            {}
+          plan/23/front_foot:
+            {}
+          plan/24/middle_foot:
+            {}
+          plan/25/front_foot:
+            {}
+          plan/26/rear_foot:
+            {}
+          plan/27/middle_foot:
+            {}
+          plan/28/front_foot:
+            {}
+          plan/29/rear_foot:
+            {}
+          plan/3/rear_foot:
+            {}
+          plan/30/middle_foot:
+            {}
+          plan/31/front_foot:
+            {}
+          plan/32/rear_foot:
+            {}
+          plan/33/middle_foot:
+            {}
+          plan/4/front_foot:
+            {}
+          plan/5/rear_foot:
+            {}
+          plan/6/front_foot:
+            {}
+          plan/7/middle_foot:
+            {}
+          plan/8/front_foot:
+            {}
+          plan/9/rear_foot:
             {}
       Update Interval: 0
       Value: true
@@ -158,7 +282,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 2.85221
+      Distance: 0.967934
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
