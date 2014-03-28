@@ -5,4 +5,6 @@
 	<node name="scheduler" pkg="scheduler" type="scheduler.py" />
 	<node name="SerialUSB" pkg="rosserial_python" type="serial_node.py" />
 	<node name="gui" pkg="rqt_sj" type="rqt_sj" />
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find spacejockey)/resources/spacejockey.rviz" required="true" />
+	<node pkg="tf" type="static_transform_publisher" name="world" args="0 0 0 0 0 0 /world /base_link 100"/>
 </launch>
