@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <robot name="spacejockey">
-  <link name="base_link">
+  <link name="center_foot">
     <visual>
       <geometry>
         <cylinder length="0.05" radius="0.2"/>
@@ -25,7 +25,7 @@
     <axis xyz="0 0 -1"/>
     <limit effort="1000.0" lower="-.8" upper=".8" velocity="0.5"/>
     <origin rpy="0 0 0" xyz="0 -0.2 0"/>
-    <parent link="base_link"/>
+    <parent link="center_foot"/>
     <child link="center_aft"/>
   </joint>
 
@@ -45,7 +45,7 @@
     <axis xyz="1 0 0"/>
     <limit effort="1000.0" lower="-.6" upper=".6" velocity="0.5"/>
     <origin rpy="0 0 0" xyz="0 .2 0"/>
-    <parent link="base_link"/>
+    <parent link="center_foot"/>
     <child link="fore_base_pole"/>
   </joint>
   
@@ -68,7 +68,7 @@
     <origin rpy="0 0 1.57075" xyz="0 0.0 0"/>
   </joint>
 
-  <link name="front_seg">
+  <link name="front_foot">
     <visual>
       <geometry>
         <cylinder length="0.04" radius="0.15"/>
@@ -83,7 +83,7 @@
     <limit effort="1000.0" lower="-1.2" upper="1.2" velocity="0.5"/>
     <origin rpy="0 0 0" xyz="0.15 0 0"/>
     <parent link="fore_base_prism"/>
-    <child link="front_seg"/>
+    <child link="front_foot"/>
   </joint>
 
   <link name="aft_base_pole">
@@ -125,7 +125,7 @@
     <origin rpy="0 0 -1.57075" xyz="0 0.0 0"/>
   </joint>
 
-  <link name="rear_seg">
+  <link name="rear_foot">
     <visual>
       <geometry>
         <cylinder length="0.04" radius="0.15"/>
@@ -140,7 +140,7 @@
     <limit effort="1000.0" lower="-1.2" upper="1.2" velocity="0.5"/>
     <origin rpy="0 0 0" xyz="0.15 0 0"/>
     <parent link="aft_base_prism"/>
-    <child link="rear_seg"/>
+    <child link="rear_foot"/>
   </joint>
 
 </robot>
