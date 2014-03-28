@@ -3,5 +3,6 @@
 	<param name="robot_description" textfile="$(find spacejockey)/resources/spacejockey.urdf" />
 	<node name="waypoint_planner" pkg="spacejockey" type="waypoint_planner.py" required="true" />
 	<node name="planner_broadcaster" pkg="spacejockey" type="planner_broadcaster.py"/>
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find spacejockey)/resources/spacejockey.rviz" required="true" />
 	<node pkg="tf" type="static_transform_publisher" name="camera" args=".2 0 .1 0 .3 0 /front_foot /camera 100"/>
 </launch>
