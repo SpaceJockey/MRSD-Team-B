@@ -29,6 +29,8 @@ add_message_files(
 #   Action2.action
 # )
 
+#catkin_python_setup()
+
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
 	DEPENDENCIES
@@ -79,6 +81,7 @@ include_directories(
 # target_link_libraries(spacejockey_node
 #   ${catkin_LIBRARIES}
 # )
+
 
 #############
 ## Install ##

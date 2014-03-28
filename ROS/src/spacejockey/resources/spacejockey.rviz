@@ -127,45 +127,11 @@ Visualization Manager:
           Value: true
         plan/15/rear_foot:
           Value: true
-        plan/16/front_foot:
-          Value: true
-        plan/17/rear_foot:
-          Value: true
-        plan/18/front_foot:
-          Value: true
-        plan/19/rear_foot:
+        plan/16/middle_foot:
           Value: true
         plan/2/front_foot:
           Value: true
-        plan/20/front_foot:
-          Value: true
-        plan/21/rear_foot:
-          Value: true
-        plan/22/front_foot:
-          Value: true
-        plan/23/front_foot:
-          Value: true
-        plan/24/middle_foot:
-          Value: true
-        plan/25/front_foot:
-          Value: true
-        plan/26/rear_foot:
-          Value: true
-        plan/27/middle_foot:
-          Value: true
-        plan/28/front_foot:
-          Value: true
-        plan/29/rear_foot:
-          Value: true
         plan/3/rear_foot:
-          Value: true
-        plan/30/middle_foot:
-          Value: true
-        plan/31/front_foot:
-          Value: true
-        plan/32/rear_foot:
-          Value: true
-        plan/33/middle_foot:
           Value: true
         plan/4/front_foot:
           Value: true
@@ -183,7 +149,7 @@ Visualization Manager:
           Value: true
       Marker Scale: 0.4
       Name: TF
-      Show Arrows: true
+      Show Arrows: false
       Show Axes: true
       Show Names: true
       Tree:
@@ -204,45 +170,11 @@ Visualization Manager:
             {}
           plan/15/rear_foot:
             {}
-          plan/16/front_foot:
-            {}
-          plan/17/rear_foot:
-            {}
-          plan/18/front_foot:
-            {}
-          plan/19/rear_foot:
+          plan/16/middle_foot:
             {}
           plan/2/front_foot:
             {}
-          plan/20/front_foot:
-            {}
-          plan/21/rear_foot:
-            {}
-          plan/22/front_foot:
-            {}
-          plan/23/front_foot:
-            {}
-          plan/24/middle_foot:
-            {}
-          plan/25/front_foot:
-            {}
-          plan/26/rear_foot:
-            {}
-          plan/27/middle_foot:
-            {}
-          plan/28/front_foot:
-            {}
-          plan/29/rear_foot:
-            {}
           plan/3/rear_foot:
-            {}
-          plan/30/middle_foot:
-            {}
-          plan/31/front_foot:
-            {}
-          plan/32/rear_foot:
-            {}
-          plan/33/middle_foot:
             {}
           plan/4/front_foot:
             {}
@@ -282,7 +214,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 0.967934
+      Distance: 0.803769
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1

@@ -10,21 +10,10 @@ import roslib
 roslib.load_manifest('spacejockey')
 import rospy
 import sys
+import spacejockey
 from spacejockey.msg import MajorPlanAction
 
-
-#ROS Global stuff
-
-#get configuration constants from the param server
-#this class recursively parses configuration attributes into properties, letting us use the easy . syntax
-#TODO: roll this into the spacejockey __init__.py
-class ParamNode:
-    def __init__(self, **entries): 
-        self.__dict__.update(entries)
-        for key in self.__dict__:
-        	if type(self.__dict__[key]) is dict:
-        		self.__dict__[key] = ParamNode(**self.__dict__[key])
-config = ParamNode(**rospy.get_param("/planner"))
+config = spacejockey.config("/planner")
 
 #ROS publisher
 actionPub = rospy.Publisher('major_actions', MajorPlanAction)
