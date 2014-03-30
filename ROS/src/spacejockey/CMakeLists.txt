@@ -6,7 +6,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   geometry_msgs
   message_generation
-  # urdf_parser_py
+  urdfdom_py
 )
 
 ## Generate messages in the 'msg' folder

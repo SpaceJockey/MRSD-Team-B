@@ -1,0 +1,8 @@
+<launch>
+	<rosparam command="load" file="$(find spacejockey)/config/joints.yaml" ns="joints" />
+	<rosparam command="load" file="$(find spacejockey)/config/planner.yaml" ns="planner" />
+	<param name="robot_description" textfile="$(find spacejockey)/resources/spacejockey.urdf" />
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find spacejockey)/resources/spacejockey.rviz" required="true" />
+	<node pkg="tf" type="static_transform_publisher" name="world" args="0 0 0 0 0 0 /world /center_foot 100"/>
+	<node pkg="tf" type="static_transform_publisher" name="camera" args=".2 0 .1 0 .3 0 /front_foot /camera 100"/>
+</launch>
