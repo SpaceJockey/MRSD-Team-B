@@ -89,6 +89,8 @@
     </visual>
   </link>
 
+  <link name="camera" />
+
 
 
   <joint name="center_swivel" type="revolute">
@@ -144,5 +146,12 @@
     <parent link="aft_base_prism"/>
     <child link="rear_foot"/>
   </joint>
+
+  <joint name="camera_fixed" type="fixed">
+    <origin xyz=".2 .05 .1" rpy="0 .3 0"/>
+    <parent link="front_foot"/>
+    <child link="camera"/>
+  </joint>
+
 </robot>
 
