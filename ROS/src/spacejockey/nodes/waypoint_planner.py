@@ -3,31 +3,20 @@ from Tkinter import *
 from copy import deepcopy
 import math
 ferr = 0.0001 #floating point comparison error correction term
-import IPython
+#import IPython
 
 #ROS Imports
 import roslib
 roslib.load_manifest('spacejockey')
 import rospy
 import sys
-from spacejockey.msg import PlannerAction
+import spacejockey
+from spacejockey.msg import MajorPlanAction
 
-
-#ROS Global stuff
-
-#get configuration constants from the param server
-#this class recursively parses configuration attributes into properties, letting us use the easy . syntax
-#TODO: roll this into the spacejockey __init__.py
-class ParamNode:
-    def __init__(self, **entries): 
-        self.__dict__.update(entries)
-        for key in self.__dict__:
-        	if type(self.__dict__[key]) is dict:
-        		self.__dict__[key] = ParamNode(**self.__dict__[key])
-config = ParamNode(**rospy.get_param("/planner"))
+config = spacejockey.config("/planner")
 
 #ROS publisher
-actionPub = rospy.Publisher('major_actions', PlannerAction)
+actionPub = rospy.Publisher('major_actions', MajorPlanAction)
 
 class Point:
 	"""Point class stores and X,Y pair in meters, and provides scaling to/from the screen size, theta is optional"""
@@ -78,8 +67,8 @@ class Waypoint(Point):
 		self.action = action
 
 class MajorMove():
-	STEP = PlannerAction.STEP
-	VIEW = PlannerAction.VIEW
+	STEP = MajorPlanAction.STEP
+	VIEW = MajorPlanAction.VIEW
 
 	FRONT = 0
 	MIDDLE = 1
@@ -101,7 +90,7 @@ class MajorMove():
 		global actionPub
 		node_name = self.__class__.NAMES[self.node_id] if (self.action == self.__class__.STEP) else "camera"
 		x, y, theta = (self.point.x, self.point.y, self.point.theta) if (self.action == self.__class__.STEP) else (self.waypoint.x, self.waypoint.y, 0.0)
-		return actionPub.publish(PlannerAction(self.major_id, self.action, node_name, x, y, theta))
+		return actionPub.publish(MajorPlanAction(self.major_id, self.action, node_name, x, y, theta))
 
 	def isAtTarget(self):
 		global ferr
@@ -192,6 +181,11 @@ class App:
 
 
 	def update(self):
+		#check for ROS shutdown
+		if rospy.is_shutdown():
+			self.root.destroy()
+			return
+
 		#update robot draw state
 		if(len(self.waypoints) > 0):
 			if len(self.moves) > 0:
