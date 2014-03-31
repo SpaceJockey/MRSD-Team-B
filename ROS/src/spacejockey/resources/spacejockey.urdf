@@ -1,12 +1,13 @@
 <?xml version="1.0"?>
-<robot name="spacejockey">
+<robot name="flexible">
+  
   <link name="center_foot">
     <visual>
       <geometry>
-        <cylinder length="0.05" radius="0.2"/>
+        <box size=".075 .095 .053"/>
       </geometry>
       <material name="teal">
-        <color rgba="0 .8 .8 1"/>
+        <color rgba=".2 .2 1 .95"/>
       </material>
     </visual>
   </link>
@@ -14,25 +15,25 @@
   <link name="center_aft">
     <visual>
       <geometry>
-        <cylinder length="0.05" radius="0.2"/>
+        <box size=".075 .095 .032"/>
       </geometry>
-      <origin rpy="0 0 0" xyz="0 -0.2 0"/>
-      <material name="teal"/>
+      <origin rpy="0 0 0" xyz="0 -0.0475 0"/>
+      <material name="green">
+        <color rgba=".1 .8 .1 .95"/>
+      </material>
     </visual>
   </link>
 
   <link name="fore_base_pole">
     <visual>
       <geometry>
-        <cylinder length="0.15" radius=".02"/>
+        <box size=".100 .032 .162"/>
       </geometry>
-      <origin rpy="-1.57075 0 0 " xyz="0 0.075 0"/>
-      <material name="Gray">
-        <color rgba=".7 .7 .7 1"/>
-      </material>
+      <origin rpy="-1.57075 0 0 " xyz="0 0.081 0"/>
+      <material name="green"/>
     </visual>
   </link>
-  
+
   <link name="fore_base_prism">
     <visual>
       <geometry>
@@ -58,11 +59,11 @@
   <link name="aft_base_pole">
     <visual>
       <geometry>
-        <cylinder length="0.15" radius=".02"/>
+      	<box size=".100 .032 .162"/>
       </geometry>
-      <origin rpy="-1.57075 0 0 " xyz="0 -0.075 0"/>
-      <material name="Gray">
-        <color rgba=".7 .7 .7 1"/>
+      <origin rpy="-1.57075 0 0 " xyz="0 -0.081 0"/>
+      <material name="red">
+      	<color rgba=".8 .1 .1 .95"/>
       </material>
     </visual>
   </link>
@@ -79,7 +80,7 @@
     </visual>
   </link>
 
-  <link name="rear_foot">
+  <link name="back_foot">
     <visual>
       <geometry>
         <cylinder length="0.04" radius="0.15"/>
@@ -96,7 +97,7 @@
   <joint name="center_swivel" type="revolute">
     <axis xyz="0 0 -1"/>
     <limit effort="1000.0" lower="-.8" upper=".8" velocity="0.5"/>
-    <origin rpy="0 0 0" xyz="0 -0.2 0"/>
+    <origin rpy="0 0 0" xyz="0 -0.0475 0"/>
     <parent link="center_foot"/>
     <child link="center_aft"/>
   </joint>
@@ -104,7 +105,7 @@
   <joint name="fore_base_pitch" type="revolute">
     <axis xyz="1 0 0"/>
     <limit effort="1000.0" lower="-.6" upper=".6" velocity="0.5"/>
-    <origin rpy="0 0 0" xyz="0 .2 0"/>
+    <origin rpy="0 0 0" xyz="0 .0475 0"/>
     <parent link="center_foot"/>
     <child link="fore_base_pole"/>
   </joint>
@@ -127,7 +128,7 @@
   <joint name="aft_base_pitch" type="revolute">
     <axis xyz="-1 0 0"/>
     <limit effort="1000.0" lower="-.6" upper=".6" velocity="0.5"/>
-    <origin rpy="0 0 0" xyz="0 -.4 0"/>
+    <origin rpy="0 0 0" xyz="0 -.095 0"/>
     <parent link="center_aft"/>
     <child link="aft_base_pole"/>
   </joint>
@@ -144,7 +145,7 @@
     <limit effort="1000.0" lower="-1.2" upper="1.2" velocity="0.5"/>
     <origin rpy="0 0 0" xyz="0.15 0 0"/>
     <parent link="aft_base_prism"/>
-    <child link="rear_foot"/>
+    <child link="back_foot"/>
   </joint>
 
   <joint name="camera_fixed" type="fixed">
@@ -152,6 +153,5 @@
     <parent link="front_foot"/>
     <child link="camera"/>
   </joint>
-
 </robot>
 
