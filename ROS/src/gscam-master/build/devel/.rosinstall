@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/ardyadipta/catkin_ws/src/gscam-master/build/devel/setup.sh
