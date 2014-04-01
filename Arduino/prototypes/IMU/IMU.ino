@@ -63,6 +63,8 @@ void loop()
 
   //Dump the raw IMU data
   imu_msg.data_length = sizeof(accel_t_gyro);
+  // convert the accelerometer data to 'g' unit 
+  
   imu_msg.data = (int16_t *) &accel_t_gyro;
   imu_state.publish(&imu_msg);
 
