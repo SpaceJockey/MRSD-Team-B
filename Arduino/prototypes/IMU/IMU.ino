@@ -16,7 +16,8 @@ static std_msgs::Int16MultiArray imu_msg; //imu state output
 static ros::Publisher imu_state("imu_data", &imu_msg);
 
 /*
-should we have separate topics for temperature and such, or just dump everything, and let others cherry-pick upstream
+should we have separate topics for temperature and such, 
+or just dump everything, and let others cherry-pick upstream
 static std_msgs::Float32 temp_msg; //imu temperature output, in degrees C
 static ros::Publisher temp_state("temperature_data", &temp_msg);
 */
@@ -61,7 +62,18 @@ void loop()
   SWAP (accel_t_gyro.reg.z_gyro_h, accel_t_gyro.reg.z_gyro_l);
 
 
-  //Dump the raw IMU data
+  /*Dump the raw IMU data
+  in order to get the value in g unit, it has to be divided by 16384 
+  When the sensor is placed perfectly leveled with the ground,
+  the value of x and y is 0, and the value of z is +16384 at a sensitivity of 2g.  
+  In order to get the real value, we have to multiplied it by 1g/16384 
+  in this case, to keep the value is still readable and still in integer type, 
+  I divided by 164,
+  which means the unit is in g/100
+  */
+  accel_t_gyro.value.x_accel = accel_t_gyro.value.x_accel/164;
+  accel_t_gyro.value.y_accel = accel_t_gyro.value.y_accel/164;
+  accel_t_gyro.value.z_accel = accel_t_gyro.value.z_accel/164;
   imu_msg.data_length = sizeof(accel_t_gyro);
   imu_msg.data = (int16_t *) &accel_t_gyro;
   imu_state.publish(&imu_msg);
