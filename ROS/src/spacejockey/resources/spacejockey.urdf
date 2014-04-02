@@ -80,7 +80,7 @@
     </visual>
   </link>
 
-  <link name="back_foot">
+  <link name="rear_foot">
     <visual>
       <geometry>
         <cylinder length="0.04" radius="0.15"/>
@@ -90,7 +90,11 @@
     </visual>
   </link>
 
+  <!--    stub frames -->
   <link name="camera" />
+  <link name="front_detach" />
+  <link name="center_detach" />
+  <link name="rear_detach" />
 
 
 
@@ -145,13 +149,34 @@
     <limit effort="1000.0" lower="-1.2" upper="1.2" velocity="0.5"/>
     <origin rpy="0 0 0" xyz="0.15 0 0"/>
     <parent link="aft_base_prism"/>
-    <child link="back_foot"/>
+    <child link="rear_foot"/>
   </joint>
 
   <joint name="camera_fixed" type="fixed">
     <origin xyz=".2 .05 .1" rpy="0 .3 0"/>
     <parent link="front_foot"/>
     <child link="camera"/>
+  </joint>
+
+  <joint name="front_attach" type="prismatic">
+    <parent link="front_foot"/>
+    <child link="front_detach"/>
+    <limit effort="1000.0" lower="0" upper="0.006" velocity="0.5"/>
+    <origin rpy="0 0 0" xyz="0 0.0 0"/>
+  </joint>
+
+  <joint name="center_attach" type="prismatic">
+    <parent link="center_foot"/>
+    <child link="center_detach"/>
+    <limit effort="1000.0" lower="0" upper="0.006" velocity="0.5"/>
+    <origin rpy="0 0 0" xyz="0 0.0 0"/>
+  </joint>
+
+  <joint name="rear_attach" type="prismatic">
+    <parent link="rear_foot"/>
+    <child link="rear_detach"/>
+    <limit effort="1000.0" lower="0" upper="0.006" velocity="0.5"/>
+    <origin rpy="0 0 0" xyz="0 0.0 0"/>
   </joint>
 </robot>
 
