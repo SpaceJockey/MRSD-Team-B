@@ -1,5 +1,5 @@
-#ifndef MPU6050_H
-#define MPU6050_H
+#ifndef IMU_H
+#define IMU_H
 
 // Default I2C address for the MPU-6050 is 0x68.
 #define MPU6050_I2C_ADDRESS 0x68
@@ -23,13 +23,10 @@
 #define MPU6050_GYRO_ZOUT_H        0x47   // R  
 #define MPU6050_GYRO_ZOUT_L        0x48   // R  
 
-#include <Arduino.h>
-#include <Scheduler.h>
-#include <Wire.h>
+#include "SpaceJockey.h"
+
 #include <ros.h>
 #include <std_msgs/Float32MultiArray.h>
-
-extern ros::NodeHandle nh;
 
 static float accel_f[3];
 static std_msgs::Float32MultiArray imu_msg; //imu state output
@@ -54,7 +51,7 @@ typedef union accel_t_union
 };
 
 //stub, implementation is after the class
-void imuLoop();
+static void imuLoop();
 
 class MPU6050{
 	private:
@@ -115,7 +112,7 @@ class MPU6050{
 
 MPU6050 IMU = MPU6050(&Wire);
 
-void imuLoop(){
+static void imuLoop(){
   IMU.readAccel((float *) &accel_f);
 
   imu_msg.data = (float *) &accel_f;
