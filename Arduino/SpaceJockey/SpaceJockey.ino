@@ -26,7 +26,7 @@ void setup() {
 
   //init monitoring threads
   Battery.begin();
-  //IMU.begin();
+  IMU.begin();
 
   //init control topic subscriber
   Joints.begin();
