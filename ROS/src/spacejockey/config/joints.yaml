@@ -1,3 +1,4 @@
-f0/min: deg(-15)
-f0/max: deg(75)
-f0/vel: deg(30)
+names:      ['center_swivel','fore_base_pitch','aft_base_pitch','front_pitch','rear_pitch','fore_extend','aft_extend']
+ratios:     [3.0,              2.0,            2.0,             2.0,          2.0,         100,           100]
+lash/radii: [2.25,           1.5,              1.5,             1.5,          1.5,         100,           100]
+lash/lash: 0.01

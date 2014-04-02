@@ -13,8 +13,13 @@ view/min: .1
 view/opt: .15 # optimum camera viewing angle
 view/radius: .1
 
+#Tkinter window options
 window/width: 600
 window/height: 600
 window/scale: 0.0015  #15 cm / 100px
 window/origin/x: 300
 window/origin/y: 300
+
+#Subplanner options
+move/detachHeight: .03 #ground clearance at detachment
+move/clearHeight: .06  #ground clearance at peak
