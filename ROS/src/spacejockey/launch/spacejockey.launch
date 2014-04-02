@@ -5,11 +5,12 @@
 	<node name="gaitgen" pkg="gait_generator" type="gait_generator.py" respawn="true"/>
 	<node name="scheduler" pkg="scheduler" type="scheduler.py" />
 	<node name="SerialUSB" pkg="rosserial_python" type="serial_node.py" />
-	<node name="gui" pkg="rqt_sj" type="rqt_sj" respawn="true"/>
+	<!-- <node name="gui" pkg="rqt_sj" type="rqt_sj" respawn="true"/> -->
 	<node pkg="robot_state_publisher" type="robot_state_publisher" name="rob_st_pub" />
 	<node pkg="joint_state_publisher" type="joint_state_publisher" name="rob_joint_pub">
 		<param name="use_gui" value="True" />
 	</node>
+	<node pkg="spacejockey" type="control_bridge.py" name="ctl_bridge" />
 	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find spacejockey)/resources/spacejockey.rviz" required="true" />
 	<node pkg="tf" type="static_transform_publisher" name="world" args="0 0 0 0 0 0 /world /center_foot 100"/>
 </launch>
