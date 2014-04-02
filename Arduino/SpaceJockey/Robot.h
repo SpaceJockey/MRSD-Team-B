@@ -12,38 +12,46 @@
 #define DEG_20 (M_PI / 9)
 #define DEG_30 (M_PI / 6)
 #define DEG_45 (M_PI / 4)
-//float degtorad(float deg){return (deg * M_PI) / 180.0;}
 
 /*Robot Configuration Parameters
-TODO: investigate rolling these into some sort of ROS perameter server
+TODO: investigate rolling these into the ROS perameter server
 
 ROS Joint configs are indexed so...
 0	Center Swivel
-1	Center Segment Front Pitch
-2	Center Segment Rear Pitch
-3	Front Segment Pitch
-4	Rear Segment Pitch
-5	Center Segment Front Prismatic
-6	Center Segment Rear Prismatic
+1	Front Center Pitch
+2	Rear Center Pitch
+3	Front Foot Pitch
+4	Rear Foot Pitch
+5	Front Prism
+6	Rear Prism
+7	Front Detach
+8	Center Detach
+9	Rear Detach
 
 Servo Wiring Configs:
-12	Center Swivel
-2	Center Segment Front Pitch
-10	Center Segment Rear Pitch
-3	Front Segment Pitch
-11	Rear Segment Pitch
-0	Front Prismatic
-8	Rear Prismatic
+0 	Front Detach
+1   Front Foot Pitch
+2   Front Prism
+3   Front Center Pitch
 
+4	Center Swivel
+5	Center Detach
+
+8	Rear Center Pitch
+9	Rear Prism
+10  Rear Foot Pitch	
+11  Rear Detach
+
+15  Feedback PWM
 */
 
 //These are the configuration values for the robot, they need to be tuned!
 //These are in radians or meters, depending on joint types
-static const float real_min[] = {-DEG_30, -DEG_30, -DEG_30, -DEG_45, -DEG_45,   0,   0};
-static const float real_max[] = { DEG_30,  DEG_30,  DEG_30,  DEG_45,  DEG_45, .145, .145};
+static const float real_min[] = {-DEG_30, -DEG_30, -DEG_30, -DEG_45, -DEG_45,   0,     0,    0,    0,    0};
+static const float real_max[] = { DEG_30,  DEG_30,  DEG_30,  DEG_45,  DEG_45, .145, .145, .007, .007, .007};
 
 //Servo addresses for the servo control board
-static const unsigned int servo_addr[] = {12, 2, 10, 3, 11, 0, 8};
+static const unsigned int servo_addr[] = {4, 3, 8, 1, 10, 2, 9, 0, 5, 11};
 
 //Servo Calibration Values
 #define SERVO_HZ  300
@@ -78,7 +86,7 @@ class Robot {
 		
 		//Set the specified servo to the correct real-world position
 		void setServoPos(unsigned int joint, float value){
-			if(joint > 6) return; //ignore unimplemented channels
+			if(joint > 9) return; //ignore unimplemented channels
 			//Map angles to servo values
 			unsigned int sval = ((int) (((value - real_min[joint]) * ((float) (_servo_max - _servo_min)))  / (real_max[joint] - real_min[joint]))) + _servo_min;
 			_servos.setPWM(servo_addr[joint], 0, sval);
