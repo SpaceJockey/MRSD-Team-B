@@ -10,9 +10,18 @@ import cv
 from std_msgs.msg import String
 from cv_bridge import CvBridge, CvBridgeError 
 
+try:
+    cam_url = rospy.get_param("/spacecam/url")
+except:
+    cam_url = 'http://admin:admin@10.68.68.22/goform/video?channel=1&.mjpg'
+
 class SpaceJockeyCam(object):
     def __init__(self):
-        self.stream=urllib.urlopen('http://admin:admin@10.68.68.22/goform/video?channel=1&.mjpg')
+        try:
+            self.stream=urllib.urlopen(cam_url)
+        except:
+            rospy.logerr('Unable to open camera stream: ' + cam_url)
+            #TODO: Fix this Dipta! sys.exit(-1)
         self.bytes=''
         self.image_pub = rospy.Publisher("spacecam_image",Image)
         self.bridge = CvBridge()
