@@ -47,8 +47,8 @@ Servo Wiring Configs:
 
 //These are the configuration values for the robot, they need to be tuned!
 //These are in radians or meters, depending on joint types
-static const float real_min[] = {-DEG_30, -DEG_30, -DEG_30, -DEG_45, -DEG_45,   0,     0,    0,    0,    0};
-static const float real_max[] = { DEG_30,  DEG_30,  DEG_30,  DEG_45,  DEG_45, .145, .145, .007, .007, .007};
+static const float real_min[] = {-DEG_30, -DEG_30, -DEG_30, -DEG_45, -DEG_45, .19726, .19726,    0,    0,    0};
+static const float real_max[] = { DEG_30,  DEG_30,  DEG_30,  DEG_45,  DEG_45, .27315, .27315, .007, .007, .007};
 
 //Servo addresses for the servo control board
 static const unsigned int servo_addr[] = {4, 3, 8, 1, 10, 2, 9, 0, 5, 11};

@@ -1,12 +1,13 @@
 <?xml version="1.0"?>
-<robot name="flexible">
+<robot name="Space Jockey">
   
-  <link name="center_foot">
+  <link name="center_seg">
     <visual>
       <geometry>
         <box size=".075 .095 .053"/>
       </geometry>
-      <material name="teal">
+      <origin xyz="0 0.0475 0"/>
+      <material name="blue">
         <color rgba=".2 .2 1 .95"/>
       </material>
     </visual>
@@ -17,10 +18,8 @@
       <geometry>
         <box size=".075 .095 .032"/>
       </geometry>
-      <origin rpy="0 0 0" xyz="0 -0.0475 0"/>
-      <material name="green">
-        <color rgba=".1 .8 .1 .95"/>
-      </material>
+      <origin xyz="0 -0.0475 0"/>
+      <material name="blue" />
     </visual>
   </link>
 
@@ -30,29 +29,31 @@
         <box size=".100 .032 .162"/>
       </geometry>
       <origin rpy="-1.57075 0 0 " xyz="0 0.081 0"/>
-      <material name="green"/>
+      <material name="green">
+        <color rgba=".1 .8 .1 .95"/>
+      </material>
     </visual>
   </link>
 
   <link name="fore_base_prism">
     <visual>
       <geometry>
-        <cylinder length="0.15" radius=".018"/>
+        <cylinder length="0.15" radius=".010"/>
       </geometry>
-      <origin rpy="0 1.57075 0 " xyz=".075 0 0"/>
-      <material name="cyan">
-	<color rgba=".8 0 .8 1"/>
+      <origin rpy="0 -1.57075 0 " xyz="-0.075 0 0"/>
+      <material name="silver">
+	      <color rgba=".7 .7 .7 1"/>
       </material>
     </visual>
   </link>
 
-  <link name="front_foot">
+  <link name="front_seg">
     <visual>
       <geometry>
-        <cylinder length="0.04" radius="0.15"/>
-      </geometry>
-      <origin rpy="0 0 0" xyz="0.15 0 0"/>
-      <material name="teal"/>
+        <box size=".060 .095 .060"/>
+      </geometry> 
+      <origin xyz="0.030 0 -0.01763"/>
+      <material name="blue" />
     </visual>
   </link>
 
@@ -71,68 +72,62 @@
   <link name="aft_base_prism">
     <visual>
       <geometry>
-        <cylinder length="0.15" radius=".018"/>
+        <cylinder length="0.15" radius=".010"/>
       </geometry>
-      <origin rpy="0 -1.57075 0 " xyz="0.075 0 0"/>
-      <material name="cyan">
-	<color rgba=".8 0 .8 1"/>
-      </material>
+      <origin rpy="0 -1.57075 0 " xyz="-0.075 0 0"/>
+      <material name="silver" />
     </visual>
   </link>
 
-  <link name="rear_foot">
+  <link name="rear_seg">
     <visual>
       <geometry>
-        <cylinder length="0.04" radius="0.15"/>
-      </geometry>
-      <origin rpy="0 0 0" xyz="0.15 0 0"/>
-      <material name="teal"/>
+        <box size=".060 .095 .060"/>
+      </geometry> 
+      <origin xyz="0.030 0 -0.01763"/>
+      <material name="blue"/>
     </visual>
   </link>
 
-  <!--    stub frames -->
+  <!--  stub frames  -->
   <link name="camera" />
-  <link name="front_detach" />
-  <link name="center_detach" />
-  <link name="rear_detach" />
-
-
+  <link name="front_foot" />
+  <link name="center_foot" />
+  <link name="rear_foot" />
 
   <joint name="center_swivel" type="revolute">
-    <axis xyz="0 0 -1"/>
+    <axis xyz="0 0 1"/>
     <limit effort="1000.0" lower="-.8" upper=".8" velocity="0.5"/>
-    <origin rpy="0 0 0" xyz="0 -0.0475 0"/>
-    <parent link="center_foot"/>
+    <parent link="center_seg"/>
     <child link="center_aft"/>
   </joint>
 
   <joint name="fore_base_pitch" type="revolute">
     <axis xyz="1 0 0"/>
     <limit effort="1000.0" lower="-.6" upper=".6" velocity="0.5"/>
-    <origin rpy="0 0 0" xyz="0 .0475 0"/>
-    <parent link="center_foot"/>
+    <origin xyz="0 0.06985 0"/>
+    <parent link="center_seg"/>
     <child link="fore_base_pole"/>
   </joint>
 
   <joint name="fore_extend" type="prismatic">
     <parent link="fore_base_pole"/>
     <child link="fore_base_prism"/>
-    <limit effort="1000.0" lower="0" upper="0.15" velocity="0.5"/>
+    <limit effort="1000.0" lower="0.19726" upper="0.27315" velocity="0.5"/>
     <origin rpy="0 0 1.57075" xyz="0 0.0 0"/>
   </joint>
 
   <joint name="front_pitch" type="revolute">
     <axis xyz="0 -1 0"/>
     <limit effort="1000.0" lower="-1.2" upper="1.2" velocity="0.5"/>
-    <origin rpy="0 0 0" xyz="0.15 0 0"/>
     <parent link="fore_base_prism"/>
-    <child link="front_foot"/>
+    <child link="front_seg"/>
   </joint>
 
   <joint name="aft_base_pitch" type="revolute">
     <axis xyz="-1 0 0"/>
     <limit effort="1000.0" lower="-.6" upper=".6" velocity="0.5"/>
-    <origin rpy="0 0 0" xyz="0 -.095 0"/>
+    <origin xyz="0 -0.06985 0"/>
     <parent link="center_aft"/>
     <child link="aft_base_pole"/>
   </joint>
@@ -140,43 +135,45 @@
   <joint name="aft_extend" type="prismatic">
     <parent link="aft_base_pole"/>
     <child link="aft_base_prism"/>
-    <limit effort="1000.0" lower="0" upper="0.15" velocity="0.5"/>
+    <limit effort="1000.0" lower="0.19726" upper="0.27315" velocity="0.5"/>
     <origin rpy="0 0 -1.57075" xyz="0 0.0 0"/>
   </joint>
 
   <joint name="rear_pitch" type="revolute">
     <axis xyz="0 -1 0"/>
     <limit effort="1000.0" lower="-1.2" upper="1.2" velocity="0.5"/>
-    <origin rpy="0 0 0" xyz="0.15 0 0"/>
     <parent link="aft_base_prism"/>
-    <child link="rear_foot"/>
-  </joint>
-
-  <joint name="camera_fixed" type="fixed">
-    <origin xyz=".2 .05 .1" rpy="0 .3 0"/>
-    <parent link="front_foot"/>
-    <child link="camera"/>
+    <child link="rear_seg"/>
   </joint>
 
   <joint name="front_attach" type="prismatic">
-    <parent link="front_foot"/>
-    <child link="front_detach"/>
+    <parent link="front_seg"/>
+    <child link="front_foot"/>
     <limit effort="1000.0" lower="0" upper="0.006" velocity="0.5"/>
-    <origin rpy="0 0 0" xyz="0 0.0 0"/>
+    <axis xyz="0 0 -1"/>
+    <origin xyz="0.00069 0 -0.04763"/>
   </joint>
 
   <joint name="center_attach" type="prismatic">
     <parent link="center_foot"/>
-    <child link="center_detach"/>
+    <child link="center_seg"/>
     <limit effort="1000.0" lower="0" upper="0.006" velocity="0.5"/>
-    <origin rpy="0 0 0" xyz="0 0.0 0"/>
+    <axis xyz="0 0 1"/>
+    <origin xyz="0 0 .050" />
   </joint>
 
   <joint name="rear_attach" type="prismatic">
-    <parent link="rear_foot"/>
-    <child link="rear_detach"/>
+    <parent link="rear_seg"/>
+    <child link="rear_foot"/>
     <limit effort="1000.0" lower="0" upper="0.006" velocity="0.5"/>
-    <origin rpy="0 0 0" xyz="0 0.0 0"/>
+    <axis xyz="0 0 -1"/>
+    <origin xyz="0.00069 0 -0.04763"/>
+  </joint>
+
+  <joint name="camera_fixed" type="fixed">
+    <origin xyz=".06 .025 -.03" rpy="0 .3 0"/>
+    <parent link="front_seg"/>
+    <child link="camera"/>
   </joint>
 </robot>
 
