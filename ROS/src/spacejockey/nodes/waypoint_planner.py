@@ -123,8 +123,8 @@ class App:
 		self.statusbox.pack(side=RIGHT)
 
 		#robot configuration locations are represented as tuples of AngledPoints representing each foot.
-		self.currconfig = [AngledPoint(.05),AngledPoint(),AngledPoint(-.05)]
-		self.planconfig = [AngledPoint(.05),AngledPoint(),AngledPoint(-.05)]
+		self.currconfig = [AngledPoint(config.extend.min),AngledPoint(),AngledPoint(-config.extend.min)]
+		self.planconfig = [AngledPoint(config.extend.min),AngledPoint(),AngledPoint(-config.extend.min)]
 
 		#set up queues
 		self.waypoints = []
