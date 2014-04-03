@@ -9,7 +9,9 @@ import rospy
 import cv
 from std_msgs.msg import String
 from cv_bridge import CvBridge, CvBridgeError 
+import argparse
 
+#todo: make some input parse arguments like, showing the GUI or not
 try:
     cam_url = rospy.get_param("/spacecam/url")
 except:
@@ -20,19 +22,31 @@ class SpaceJockeyCam(object):
         try:
             self.stream=urllib.urlopen(cam_url)
         except:
-            rospy.logerr('Unable to open camera stream: ' + cam_url)
-            #TODO: Fix this Dipta! sys.exit(-1)
+            rospy.logerr('Unable to open camera stream: ' + str(cam_url))
+            sys.exit('Unable to open camera stream')
         self.bytes=''
         self.image_pub = rospy.Publisher("spacecam_image",Image)
         self.bridge = CvBridge()
 
-        # self.image_sub = rospy.Subscriber("image_topic",Image,self.callback)
-        
-
 if __name__ == '__main__':
-    spacecam = SpaceJockeyCam()
+
+
+    parser = argparse.ArgumentParser(description='script for testing planners')
+    parser.add_argument('-g', '--gui', type=str, default='no',
+                        help='To show the GUI or not')
+    args = parser.parse_args()
+
+    if args.gui == 'no':
+        visualize = False
+    elif args.gui == 'yes':
+        visualize = True
+    else:
+        print 'Unknown GUI option: %s' % args.gui
+        exit(0)
+    
     rospy.init_node('SpaceJockeyCamera', anonymous=True)
-    # try:
+    spacecam = SpaceJockeyCam()
+
     while True:
         spacecam.bytes+=spacecam.stream.read(1024)
         a = spacecam.bytes.find('\xff\xd8')
@@ -44,9 +58,8 @@ if __name__ == '__main__':
             # image_message = spacecam.bridge.cv_to_imgmsg(i, encoding="passthrough")
             image_message = cv.fromarray(i)
             spacecam.image_pub.publish(spacecam.bridge.cv_to_imgmsg(image_message, "bgr8"))
-            cv2.imshow('Space Jockey Publisher Cam',i)
-            if cv2.waitKey(1) ==27:
+
+            if visualize:
+                cv2.imshow('Space Jockey Publisher Cam',i)
+            if cv2.waitKey(1) ==27: # wait until ESC key is pressed in the GUI window to stop it
                 exit(0) 
-    # except KeyboardInterrupt:
-    #     print "Shutting down"
-    # cv.DestroyAllWindows()
