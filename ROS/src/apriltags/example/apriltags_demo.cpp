@@ -295,66 +295,6 @@ public:
     }
   }
   
-//   void setupVideo() {
-
-// #ifdef EXPOSURE_CONTROL
-//     // manually setting camera exposure settings; OpenCV/v4l1 doesn't
-//     // support exposure control; so here we manually use v4l2 before
-//     // opening the device via OpenCV; confirmed to work with Logitech
-//     // C270; try exposure=20, gain=100, brightness=150
-
-//     string video_str = "/dev/video0";
-//     video_str[10] = '0' + m_deviceId;
-//     int device = v4l2_open(video_str.c_str(), O_RDWR | O_NONBLOCK);
-
-//     if (m_exposure >= 0) {
-//       // not sure why, but v4l2_set_control() does not work for
-//       // V4L2_CID_EXPOSURE_AUTO...
-//       struct v4l2_control c;
-//       c.id = V4L2_CID_EXPOSURE_AUTO;
-//       c.value = 1; // 1=manual, 3=auto; V4L2_EXPOSURE_AUTO fails...
-//       if (v4l2_ioctl(device, VIDIOC_S_CTRL, &c) != 0) {
-//         cout << "Failed to set... " << strerror(errno) << endl;
-//       }
-//       cout << "exposure: " << m_exposure << endl;
-//       v4l2_set_control(device, V4L2_CID_EXPOSURE_ABSOLUTE, m_exposure*6);
-//     }
-//     if (m_gain >= 0) {
-//       cout << "gain: " << m_gain << endl;
-//       v4l2_set_control(device, V4L2_CID_GAIN, m_gain*256);
-//     }
-//     if (m_brightness >= 0) {
-//       cout << "brightness: " << m_brightness << endl;
-//       v4l2_set_control(device, V4L2_CID_BRIGHTNESS, m_brightness*256);
-//     }
-//     v4l2_close(device);
-// #endif
-
-//     //to get IP Camera
-    
-//     const std::string videoStreamAddress = "http://admin:admin@10.68.68.22/goform/video?user=admin&password=admin&channel=1&.mjpg";
-
-//     // find and open a USB camera (built in laptop camera, web cam etc)
-//     //uncomment this to capture video from USB
-//     //m_cap = cv::VideoCapture(m_deviceId);
-
-//     //uncomment this to capture video from wifi
-//     m_cap = cv::VideoCapture(videoStreamAddress);
-//         if(!m_cap.isOpened()) {
-//       cerr << "ERROR: Can't find video device " << videoStreamAddress << "\n";
-//       exit(1);
-//     }
-//     m_cap.set(CV_CAP_PROP_FRAME_WIDTH, m_width);
-//     m_cap.set(CV_CAP_PROP_FRAME_HEIGHT, m_height);
-//     cout << "Camera successfully opened (ignore error messages above...)" << endl;
-//     cout << "Actual resolution: "
-//          << m_cap.get(CV_CAP_PROP_FRAME_WIDTH) << "x"
-//          << m_cap.get(CV_CAP_PROP_FRAME_HEIGHT) << endl;
-
-//   }
-
-
-
   void setupVideo() {
 
 #ifdef EXPOSURE_CONTROL
@@ -388,12 +328,20 @@ public:
       v4l2_set_control(device, V4L2_CID_BRIGHTNESS, m_brightness*256);
     }
     v4l2_close(device);
-#endif 
+#endif
+
+    //to get IP Camera
+    
+    const std::string videoStreamAddress = "http://admin:admin@10.68.68.22/goform/video?user=admin&password=admin&channel=1&.mjpg";
 
     // find and open a USB camera (built in laptop camera, web cam etc)
-    m_cap = cv::VideoCapture(m_deviceId);
+    //uncomment this to capture video from USB
+    //m_cap = cv::VideoCapture(m_deviceId);
+
+    //uncomment this to capture video from wifi
+    m_cap = cv::VideoCapture(videoStreamAddress);
         if(!m_cap.isOpened()) {
-      cerr << "ERROR: Can't find video device " << m_deviceId << "\n";
+      cerr << "ERROR: Can't find video device " << videoStreamAddress << "\n";
       exit(1);
     }
     m_cap.set(CV_CAP_PROP_FRAME_WIDTH, m_width);
@@ -404,6 +352,58 @@ public:
          << m_cap.get(CV_CAP_PROP_FRAME_HEIGHT) << endl;
 
   }
+
+
+
+//   void setupVideo() {
+
+// #ifdef EXPOSURE_CONTROL
+//     // manually setting camera exposure settings; OpenCV/v4l1 doesn't
+//     // support exposure control; so here we manually use v4l2 before
+//     // opening the device via OpenCV; confirmed to work with Logitech
+//     // C270; try exposure=20, gain=100, brightness=150
+
+//     string video_str = "/dev/video0";
+//     video_str[10] = '0' + m_deviceId;
+//     int device = v4l2_open(video_str.c_str(), O_RDWR | O_NONBLOCK);
+
+//     if (m_exposure >= 0) {
+//       // not sure why, but v4l2_set_control() does not work for
+//       // V4L2_CID_EXPOSURE_AUTO...
+//       struct v4l2_control c;
+//       c.id = V4L2_CID_EXPOSURE_AUTO;
+//       c.value = 1; // 1=manual, 3=auto; V4L2_EXPOSURE_AUTO fails...
+//       if (v4l2_ioctl(device, VIDIOC_S_CTRL, &c) != 0) {
+//         cout << "Failed to set... " << strerror(errno) << endl;
+//       }
+//       cout << "exposure: " << m_exposure << endl;
+//       v4l2_set_control(device, V4L2_CID_EXPOSURE_ABSOLUTE, m_exposure*6);
+//     }
+//     if (m_gain >= 0) {
+//       cout << "gain: " << m_gain << endl;
+//       v4l2_set_control(device, V4L2_CID_GAIN, m_gain*256);
+//     }
+//     if (m_brightness >= 0) {
+//       cout << "brightness: " << m_brightness << endl;
+//       v4l2_set_control(device, V4L2_CID_BRIGHTNESS, m_brightness*256);
+//     }
+//     v4l2_close(device);
+// #endif 
+
+//     // find and open a USB camera (built in laptop camera, web cam etc)
+//     m_cap = cv::VideoCapture(m_deviceId);
+//         if(!m_cap.isOpened()) {
+//       cerr << "ERROR: Can't find video device " << m_deviceId << "\n";
+//       exit(1);
+//     }
+//     m_cap.set(CV_CAP_PROP_FRAME_WIDTH, m_width);
+//     m_cap.set(CV_CAP_PROP_FRAME_HEIGHT, m_height);
+//     cout << "Camera successfully opened (ignore error messages above...)" << endl;
+//     cout << "Actual resolution: "
+//          << m_cap.get(CV_CAP_PROP_FRAME_WIDTH) << "x"
+//          << m_cap.get(CV_CAP_PROP_FRAME_HEIGHT) << endl;
+
+//   }
 
 
   void print_detection(AprilTags::TagDetection& detection) const {
@@ -441,37 +441,38 @@ public:
          << ", yaw=" << yaw
          << ", pitch=" << pitch
          << ", roll=" << roll
+         << " okokokok "
          << endl;
-    // cout << "Rot_matrix"
-    //      << endl;
-    // cout <<fixed_rot
-    //      << endl;
+    cout << "Rot_matrix"
+         << endl;
+    cout <<fixed_rot
+         << endl;
 
-    // cout << "Tra_vevtor"
-    //      << endl;
-    // cout <<translation
-    //      << endl;
+    cout << "Tra_vevtor"
+         << endl;
+    cout <<translation
+         << endl;
 
-    myfile << "Id=" << detection.id
-           << " (Hamming=" << detection.hammingDistance << ")"
-           << " distance=" << translation.norm()
-           << "m x=" << translation(0)
-           << " y=" << translation(1)
-           << " z=" << translation(2)
-           << " yaw=" << yaw
-           << " pitch=" << pitch
-           << " roll=" << roll
-           << " done"
+    myfile << "  Id: " << detection.id
+           << " (Hamming: " << detection.hammingDistance << ")"
+           << "  distance=" << translation.norm()
+           << "m, x=" << translation(0)
+           << ", y=" << translation(1)
+           << ", z=" << translation(2)
+           << ", yaw=" << yaw
+           << ", pitch=" << pitch
+           << ", roll=" << roll
+           << " okokokok "
            << endl;
-    // myfile << "Rot_matrix"
-    //        << endl;
-    // myfile <<fixed_rot
-    //        << endl;
+    myfile << "Rot_matrix"
+           << endl;
+    myfile <<fixed_rot
+           << endl;
 
-    // myfile << "Tra_vevtor"
-    //        << endl;
-    // myfile <<translation
-    //        << endl;
+    myfile << "Tra_vevtor"
+           << endl;
+    myfile <<translation
+           << endl;
 
     myfile.close();
     // Also note that for SLAM/multi-view application it is better to
