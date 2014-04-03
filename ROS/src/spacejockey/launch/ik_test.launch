@@ -1,0 +1,12 @@
+<launch>
+	<rosparam command="load" file="$(find spacejockey)/config/planner.yaml" ns="planner" />
+	<rosparam command="load" file="$(find spacejockey)/config/joints.yaml" />
+	<param name="robot_description" textfile="$(find spacejockey)/resources/spacejockey.urdf" />
+	<node name="ik_test" pkg="spacejockey" type="ik_test.py"/>
+	<node pkg="joint_state_publisher" type="joint_state_publisher" name="rob_joint_pub">
+		<rosparam command="load" file="$(find spacejockey)/config/jsp_options.yaml" />
+	</node>
+	<node pkg="robot_state_publisher" type="robot_state_publisher" name="rob_st_pub" />
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find spacejockey)/resources/ik_test.rviz" required="true" />
+	<!--<node pkg="tf" type="static_transform_publisher" name="world" args="0 0 0 1.57 0 0 /world /center_foot 100"/> -->
+</launch>

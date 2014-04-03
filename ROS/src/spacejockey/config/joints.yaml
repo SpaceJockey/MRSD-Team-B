@@ -5,9 +5,9 @@ joints/lash/lash: 0.01
 arduino/ctl_msg_order: ['center_swivel', 'fore_base_pitch', 'aft_base_pitch', 'front_pitch', 'rear_pitch', 'fore_extend', 'aft_extend', 'front_attach', 'center_attach', 'rear_attach']
 
 zeros/center_swivel: 0.0
-zeros/fore_base_pitch: -0.1
-zeros/aft_base_pitch: -0.1
-zeros/front_pitch: 0.1
-zeros/rear_pitch: 0.1
+zeros/fore_base_pitch: -0.065
+zeros/aft_base_pitch: -0.065
+zeros/front_pitch: 0.065
+zeros/rear_pitch: 0.065
 zeros/fore_extend: 0.198
 zeros/aft_extend: 0.198
