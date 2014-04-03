@@ -2,15 +2,18 @@
 import rospy
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Float32MultiArray
+import spacejockey
+
+arduino = spacejockey.config("/arduino")
 
 posArray = Float32MultiArray()  
-posArray.data = [0.0, ]*9
+posArray.data = [0.0, ]*10
 
 def joints_cb(msg):
-    #TODO: Double-check ordering to match arduino side...
-    for i in range(9):
+    for j in arduino.ctl_msg_order:
         if msg.position:
-            posArray.data[i] = msg.position[i]
+            index = msg.name.index(j)
+            posArray.data[arduino.ctl_msg_order.index(j)] = msg.position[index]
         else:
             position = None
     serialPub.publish(posArray)

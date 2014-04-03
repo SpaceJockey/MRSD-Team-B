@@ -1,5 +1,6 @@
 <launch>
 	<rosparam command="load" file="$(find spacejockey)/config/planner.yaml" ns="planner" />
+	<rosparam command="load" file="$(find spacejockey)/config/joints.yaml" ns="/" />
 	<param name="robot_description" textfile="$(find spacejockey)/resources/spacejockey.urdf" />
 	<node name="waypoint_planner" pkg="spacejockey" type="waypoint_planner.py" required="true" />
 	<node name="planner_broadcaster" pkg="spacejockey" type="planner_broadcaster.py"/>

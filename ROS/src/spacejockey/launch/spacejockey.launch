@@ -1,5 +1,5 @@
 <launch>
-	<rosparam command="load" file="$(find spacejockey)/config/joints.yaml" ns="joints" />
+	<rosparam command="load" file="$(find spacejockey)/config/joints.yaml" ns="/" />
 	<rosparam command="load" file="$(find spacejockey)/config/planner.yaml" ns="planner" />
 	<param name="robot_description" textfile="$(find spacejockey)/resources/spacejockey.urdf" />
 	<node name="gaitgen" pkg="gait_generator" type="gait_generator.py" respawn="true"/>
