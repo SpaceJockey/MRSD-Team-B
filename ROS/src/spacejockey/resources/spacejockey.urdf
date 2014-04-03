@@ -95,6 +95,7 @@
   <link name="center_foot" />
   <link name="rear_foot" />
 
+<!-- TODO: Order these sensibly and  make Arduino Code take JointState Tagged Messages -->
   <joint name="center_swivel" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="1000.0" lower="-.8" upper=".8" velocity="0.5"/>
@@ -110,11 +111,12 @@
     <child link="fore_base_pole"/>
   </joint>
 
-  <joint name="fore_extend" type="prismatic">
-    <parent link="fore_base_pole"/>
-    <child link="fore_base_prism"/>
-    <limit effort="1000.0" lower="0.19726" upper="0.27315" velocity="0.5"/>
-    <origin rpy="0 0 1.57075" xyz="0 0.0 0"/>
+  <joint name="aft_base_pitch" type="revolute">
+    <axis xyz="-1 0 0"/>
+    <limit effort="1000.0" lower="-.6" upper=".6" velocity="0.5"/>
+    <origin xyz="0 -0.06985 0"/>
+    <parent link="center_aft"/>
+    <child link="aft_base_pole"/>
   </joint>
 
   <joint name="front_pitch" type="revolute">
@@ -124,12 +126,18 @@
     <child link="front_seg"/>
   </joint>
 
-  <joint name="aft_base_pitch" type="revolute">
-    <axis xyz="-1 0 0"/>
-    <limit effort="1000.0" lower="-.6" upper=".6" velocity="0.5"/>
-    <origin xyz="0 -0.06985 0"/>
-    <parent link="center_aft"/>
-    <child link="aft_base_pole"/>
+  <joint name="rear_pitch" type="revolute">
+    <axis xyz="0 -1 0"/>
+    <limit effort="1000.0" lower="-1.2" upper="1.2" velocity="0.5"/>
+    <parent link="aft_base_prism"/>
+    <child link="rear_seg"/>
+  </joint>
+
+  <joint name="fore_extend" type="prismatic">
+    <parent link="fore_base_pole"/>
+    <child link="fore_base_prism"/>
+    <limit effort="1000.0" lower="0.19726" upper="0.27315" velocity="0.5"/>
+    <origin rpy="0 0 1.57075" xyz="0 0.0 0"/>
   </joint>
 
   <joint name="aft_extend" type="prismatic">
@@ -137,13 +145,6 @@
     <child link="aft_base_prism"/>
     <limit effort="1000.0" lower="0.19726" upper="0.27315" velocity="0.5"/>
     <origin rpy="0 0 -1.57075" xyz="0 0.0 0"/>
-  </joint>
-
-  <joint name="rear_pitch" type="revolute">
-    <axis xyz="0 -1 0"/>
-    <limit effort="1000.0" lower="-1.2" upper="1.2" velocity="0.5"/>
-    <parent link="aft_base_prism"/>
-    <child link="rear_seg"/>
   </joint>
 
   <joint name="front_attach" type="prismatic">

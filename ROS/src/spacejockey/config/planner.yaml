@@ -2,24 +2,25 @@
 #distances are in meters
 
 #body limits
-extend/max: .15 #linear actuator reach
-extend/min: .05
+extend/max: .34 #linear actuator reach
+extend/min: .26
 angle/max: deg(15)
 
 #camera reach
-view/extend: .1 # where to put the foot when viewing
-view/max: .2 #camera view range
-view/min: .1
-view/opt: .15 # optimum camera viewing angle
-view/radius: .1
+view/extend: .3 # where to put the foot when viewing
+view/extendHeight: .1
+view/max: .6 #camera view range
+view/min: .35
+view/opt: .5 # optimum camera viewing angle
+view/radius: .2
 
 #Tkinter window options
 window/width: 600
 window/height: 600
-window/scale: 0.0015  #15 cm / 100px
+window/scale: 0.0033  #33 cm / 100px
 window/origin/x: 300
 window/origin/y: 300
 
 #Subplanner options
-move/detachHeight: .03 #ground clearance at detachment
+move/detachHeight: .01 #ground clearance at detachment
 move/clearHeight: .06  #ground clearance at peak

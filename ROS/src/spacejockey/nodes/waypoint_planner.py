@@ -74,7 +74,7 @@ class MajorMove():
 	MIDDLE = 1
 	REAR = 2
 
-	NAMES = ("front_foot", "middle_foot", "rear_foot")
+	NAMES = ("front_foot", "center_foot", "rear_foot")
 
 	current_id = 0
 

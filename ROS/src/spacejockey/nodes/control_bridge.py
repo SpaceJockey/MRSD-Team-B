@@ -4,10 +4,11 @@ from sensor_msgs.msg import JointState
 from std_msgs.msg import Float32MultiArray
 
 posArray = Float32MultiArray()  
-posArray.data = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+posArray.data = [0.0, ]*9
 
 def joints_cb(msg):
-    for i in range(len(msg.name)):
+    #TODO: Double-check ordering to match arduino side...
+    for i in range(9):
         if msg.position:
             posArray.data[i] = msg.position[i]
         else:
