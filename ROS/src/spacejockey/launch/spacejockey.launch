@@ -1,8 +1,0 @@
-<launch>
-	<rosparam command="load" file="$(find spacejockey)/config/joints.yaml" ns="joints" />
-	<rosparam command="load" file="$(find spacejockey)/config/planner.yaml" ns="planner" />
-	<node name="gaitgen" pkg="gait_generator" type="gait_generator.py" respawn="true"/>
-	<node name="scheduler" pkg="scheduler" type="scheduler.py" />
-	<node name="SerialUSB" pkg="rosserial_python" type="serial_node.py" />
-	<node name="gui" pkg="rqt_sj" type="rqt_sj" />
-</launch>

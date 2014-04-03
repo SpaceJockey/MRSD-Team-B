@@ -1,4 +1,0 @@
-<launch>
-	<rosparam command="load" file="$(find spacejockey)/config/planner.yaml" ns="planner" />
-	<node name="waypoint_planner" pkg="spacejockey" type="waypoint_planner.py"/>
-</launch>
