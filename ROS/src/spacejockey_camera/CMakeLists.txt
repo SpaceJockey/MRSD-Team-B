@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(axis_camera)
+project(spacejockey_camera)
 
 find_package(catkin REQUIRED
   COMPONENTS

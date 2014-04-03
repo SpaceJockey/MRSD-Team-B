@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Robot camera camera image driver. Based on:
+# Axis camera image driver. Based on:
 # https://code.ros.org/svn/wg-ros-pkg/branches/trunk_cturtle/sandbox/axis_camera
 # /axis.py
 #
@@ -13,9 +13,9 @@ from sensor_msgs.msg import CompressedImage, CameraInfo
 import camera_info_manager
 
 class StreamThread(threading.Thread):
-    def __init__(self, robotcam):
+    def __init__(self, axis):
         threading.Thread.__init__(self)
-        self.robotcam = robotcam
+        self.axis = axis
         self.daemon = True
         self.timeoutSeconds = 2.5
 
@@ -32,23 +32,23 @@ class StreamThread(threading.Thread):
             rospy.sleep(2) # if stream stays intact we shouldn't get to this
 
     def formURL(self):
-        #self.url = 'http://%s/mjpg/video.mjpg' % self.robotcam.hostname #the original one
-        self.url = 'http://10.68.68.22/goform/video?user=admin&password=admin&channel=1&.mjpg'# % self.robotcam.hostname
-        #self.url += "?fps=0&resolultion=%dx%d" % (self.robotcam.width, 
-        #                                                    self.robotcam.height)
-        rospy.logdebug('opening ' + str(self.robotcam))
+        #self.url = 'http://%s/mjpg/video.mjpg' % self.axis.hostname #the original one
+        self.url = 'http://10.68.68.22/goform/video?user=admin&password=admin&channel=1&.mjpg'# % self.axis.hostname
+        #self.url += "?fps=0&resolultion=%dx%d" % (self.axis.width, 
+        #                                                    self.axis.height)
+        rospy.logdebug('opening ' + str(self.axis))
 
     def authenticate(self):
         '''only try to authenticate if user/pass configured.  I have not
         used this method (yet).'''
-        if self.robotcam.password != '' and self.robotcam.username != '':
+        if self.axis.password != '' and self.axis.username != '':
             # create a password manager
             password_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
 
             # Add the username and password, use default realm.
-            top_level_url = "http://" + self.robotcam.hostname
-            password_mgr.add_password(None, top_level_url, self.robotcam.username, 
-                                                            self.robotcam.password)
+            top_level_url = "http://" + self.axis.hostname
+            password_mgr.add_password(None, top_level_url, self.axis.username, 
+                                                            self.axis.password)
             handler = urllib2.HTTPBasicAuthHandler(password_mgr)
 
             # create "opener" (OpenerDirector instance)
@@ -58,7 +58,7 @@ class StreamThread(threading.Thread):
             urllib2.install_opener(opener)
     
     def openURL(self):
-        '''Open connection to Robot camera using http'''
+        '''Open connection to Axis camera using http'''
         try:
             self.fp = urllib2.urlopen(self.url, timeout=self.timeoutSeconds)
             return(True)
@@ -118,21 +118,21 @@ class StreamThread(threading.Thread):
         '''Publish jpeg image as a ROS message'''
         self.msg = CompressedImage()
         self.msg.header.stamp = rospy.Time.now()
-        self.msg.header.frame_id = self.robotcam.frame_id
+        self.msg.header.frame_id = self.axis.frame_id
         self.msg.format = "jpeg"
         self.msg.data = self.img
-        self.robotcam.pub.publish(self.msg)
+        self.axis.pub.publish(self.msg)
 
     def publishCameraInfoMsg(self):
         '''Publish camera info manager message'''
-        cimsg = self.robotcam.cinfo.getCameraInfo()
+        cimsg = self.axis.cinfo.getCameraInfo()
         cimsg.header.stamp = msg.header.stamp
-        cimsg.header.frame_id = self.robotcam.frame_id
-        cimsg.width = self.robotcam.width
-        cimsg.height = self.robotcam.height
-        self.robotcam.caminfo_pub.publish(cimsg)
+        cimsg.header.frame_id = self.axis.frame_id
+        cimsg.width = self.axis.width
+        cimsg.height = self.axis.height
+        self.axis.caminfo_pub.publish(cimsg)
 
-class robotcam:
+class Axis:
     def __init__(self, hostname, username, password, width, height, frame_id, 
                                                             camera_info_url):
         self.hostname = hostname
@@ -145,12 +145,12 @@ class robotcam:
 
         # generate a valid camera name based on the hostname
         self.cname = camera_info_manager.genCameraName(self.hostname)
-        # self.cinfo = camera_info_manager.CameraInfoManager(cname = self.cname,
-                                                   # url = self.camera_info_url)
-        # self.cinfo.loadCameraInfo()         # required before getCameraInfo()
+        self.cinfo = camera_info_manager.CameraInfoManager(cname = self.cname,
+                                                   url = self.camera_info_url)
+        self.cinfo.loadCameraInfo()         # required before getCameraInfo()
         self.st = None
         self.pub = rospy.Publisher("image_raw/compressed", CompressedImage, self)
-        # self.caminfo_pub = rospy.Publisher("camera_info", CameraInfo, self)
+        self.caminfo_pub = rospy.Publisher("camera_info", CameraInfo, self)
 
     def __str__(self):
         """Return string representation."""
@@ -165,18 +165,18 @@ class robotcam:
 
 
 def main():
-    rospy.init_node("Robotcam_driver")
+    rospy.init_node("axis_driver")
 
     arg_defaults = {
         'hostname': '10.68.68.22',       # default IP address
-        'username': 'admin',               # default login name
-        'password': 'admin',
+        'username': '',               # default login name
+        'password': '',
         'width': 640,
         'height': 480,
-        'frame_id': 'Robot_camera',
+        'frame_id': 'axis_camera',
         'camera_info_url': ''}
     args = updateArgs(arg_defaults)
-    robotcam(**args)
+    Axis(**args)
     rospy.spin()
 
 def updateArgs(arg_defaults):

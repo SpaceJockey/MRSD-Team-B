@@ -32,10 +32,9 @@ class StreamThread(threading.Thread):
             rospy.sleep(2) # if stream stays intact we shouldn't get to this
 
     def formURL(self):
-        #self.url = 'http://%s/mjpg/video.mjpg' % self.axis.hostname #the original one
-        self.url = 'http://10.68.68.22/goform/video?user=admin&password=admin&channel=1&.mjpg'# % self.axis.hostname
-        #self.url += "?fps=0&resolultion=%dx%d" % (self.axis.width, 
-        #                                                    self.axis.height)
+        self.url = 'http://%s/goform/video?channel=1&.mjpg' % self.axis.hostname
+        self.url += "?fps=0&resolultion=%dx%d" % (self.axis.width, 
+                                                            self.axis.height)
         rospy.logdebug('opening ' + str(self.axis))
 
     def authenticate(self):
@@ -169,8 +168,8 @@ def main():
 
     arg_defaults = {
         'hostname': '10.68.68.22',       # default IP address
-        'username': '',               # default login name
-        'password': '',
+        'username': 'admin',               # default login name
+        'password': 'admin',
         'width': 640,
         'height': 480,
         'frame_id': 'axis_camera',
