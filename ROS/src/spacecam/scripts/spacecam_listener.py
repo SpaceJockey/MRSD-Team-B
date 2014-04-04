@@ -12,9 +12,9 @@ from cv_bridge import CvBridge, CvBridgeError
 
 class SpaceJockeyCam(object):
     def __init__(self):
-        cv.NamedWindow("Space Cam Listener", 1)
+        #cv.NamedWindow("Space Cam Listener", 1)
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber("spacecam_image",Image,self.callback)
+        self.image_sub = rospy.Subscriber("camera_image",Image,self.callback)
 
 
     def callback(self,data):
@@ -30,16 +30,11 @@ class SpaceJockeyCam(object):
         cv.ShowImage("SpaceCam Listener Image", cv_image)
         cv.WaitKey(3)
         
-
-def main(args):
+if __name__ == '__main__':
   spacecam_listener = SpaceJockeyCam()
-  rospy.init_node('SpaceJockeyCamera_listener', anonymous=True)
+  rospy.init_node('spacecam_listener', anonymous=True)
   try:
     rospy.spin()
   except KeyboardInterrupt:
     print "Shutting down"
   cv.DestroyAllWindows()
-
-if __name__ == '__main__':
-    main(sys.argv)
-    
