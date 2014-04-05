@@ -83,10 +83,10 @@ class ArduinoHardware {
     int getBaud(){return baud_;}
 
     void init(){
-/*#if defined(USE_USBCON)
+#if defined(USE_USBCON)
       // Startup delay as a fail-safe to upload a new sketch
       delay(3000); 
-#endif*/
+#endif
       iostream->begin(baud_);
     }
 
