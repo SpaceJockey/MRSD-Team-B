@@ -85,11 +85,11 @@ class Robot {
 		void calibratePWM(); //TODO: pull this in from prototypes/PWMDigitalCalibrate
 		
 		//Set the specified servo to the correct real-world position
-		void setServoPos(unsigned int joint, float value){
-			if(joint > 9) return; //ignore unimplemented channels
+		void setServoPos(unsigned int channel, unsigned int value){
+			//if(joint > 9) return; //ignore unimplemented channels
 			//Map angles to servo values
-			unsigned int sval = ((int) (((value - real_min[joint]) * ((float) (_servo_max - _servo_min)))  / (real_max[joint] - real_min[joint]))) + _servo_min;
-			_servos.setPWM(servo_addr[joint], 0, sval);
+			//unsigned int sval = ((int) (((value - real_min[joint]) * ((float) (_servo_max - _servo_min)))  / (real_max[joint] - real_min[joint]))) + _servo_min;
+			_servos.setPWM(channel, 0, value);
 		}
 	private:
 		Adafruit_PWMServoDriver _servos;

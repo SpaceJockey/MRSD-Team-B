@@ -4,20 +4,20 @@
 
 //ROS Stuff
 #include <ros.h>
-#include <std_msgs/Float32MultiArray.h>
+#include <std_msgs/Int16MultiArray.h>
 
 static uint8_t blink; //used for debugging...
 
 //ROS subscriber
-static void joint_cb(const std_msgs::Float32MultiArray& cmd_msg){
+static void joint_cb(const std_msgs::Int16MultiArray& cmd_msg){
 	//blink LED to indicate CB is running...
 	blink = 1-blink;
 	digitalWrite(STATUS_LED, blink);
 	
 	//update servos
-	for(int c = 0; c < cmd_msg.data_length; c++) Servos.setServoPos(c, cmd_msg.data[c]);
+	for(int c = 0; c < cmd_msg.data_length; c++) Servos.setServoPos(c, (unsigned int) cmd_msg.data[c]);
 }
-static ros::Subscriber<std_msgs::Float32MultiArray> link_sub("joint_ctl", joint_cb);
+static ros::Subscriber<std_msgs::Int16MultiArray> link_sub("joint_ctl", joint_cb);
 
 class JointSub{
 	public:
