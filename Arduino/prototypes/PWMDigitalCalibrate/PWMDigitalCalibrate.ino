@@ -11,29 +11,26 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 #define SERVO_CHAN 1
 
-volatile unsigned long startus = 0;
-volatile unsigned long pulseus = 0;
-volatile bool gotPulse = false;
+//Need to be unsigned long on AVR devices
+//static volatile unsigned int startus = 0;
+static volatile unsigned int pulseus = 0;
 
 void readPulse(){
-	unsigned long currus = micros();
+	unsigned int currus = micros();
+	static unsigned int startus;
 	if(digitalRead(FEEDBACK_PIN)) { //rising edge
 		startus = currus;
 	}else{
 		pulseus = currus - startus;
-		gotPulse = true;
 	}
 }
 
-int target = 900;
-int error = 9999;
-int lasterror = 9999;
-int servomin = 0;
-int servomax = 9999;
-
 void setup() {
+	int servomin = 0;
+	int servomax = 9999;
 
 	pwm.begin();
+	TWI_ConfigureMaster(WIRE_INTERFACE, 400000, VARIANT_MCK); //I2C Fast mode
 	pwm.setPWMFreq(300);  // Digital servos run at 300 Hz updates
 	attachInterrupt(FEEDBACK_PIN, readPulse, CHANGE);
 	pwm.setPWM(FEEDBACK_CHAN, 0, SERVOMID);
@@ -50,26 +47,17 @@ void setup() {
 	Serial.println(servomax);
 }
 
-int findTarget(int tgt){
-	int target = tgt;
-	int error = 9999;
+int findTarget(int target){
+	//int target = tgt;
+	int error = 1;
 	int pulselen = SERVOMID;
 	while (error != 0){
-		pwm.setPWM(FEEDBACK_CHAN, 0, pulselen);
-		//pwm.setPWM(SERVO_CHAN, 0, pulselen);
-		for(int i = 0; i < 2; i++) { //wait two pulses
-			while(gotPulse == false); //spin until pulse recieved
-			gotPulse = false;
-		}
-		error = target - pulseus;
 		pulselen = pulselen + ((error *3) / 4);
+		pwm.setPWM(FEEDBACK_CHAN, 0, pulselen); //should take 100us in fast mode
+		delay(10); //should give enough time for the pulse width to change and 3 pulses to hit
+		//while(!gotPulse) delay(1);
+		error = target - pulseus;
 	}
-	/*
-	Serial.print("Found: ");
-	Serial.print(pulselen); //print the pulse length
-	Serial.print(" ==> ");
-	Serial.println(pulseus); //print the pulse length
-	*/
 	return pulselen;
 }
 
