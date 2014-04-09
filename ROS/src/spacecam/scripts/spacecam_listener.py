@@ -2,7 +2,7 @@
 import cv2
 import urllib 
 import numpy as np
-from sensor_msgs.msg import Image 
+from sensor_msgs.msg import Image, CameraInfo
 import roslib
 import sys
 import rospy
@@ -14,7 +14,8 @@ class SpaceJockeyCam(object):
     def __init__(self):
         #cv.NamedWindow("Space Cam Listener", 1)
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber("camera_image",Image,self.callback)
+        self.image_sub = rospy.Subscriber("spacecam/image_raw",Image,self.callback)
+        self.Kmatrix_sub = rospy.Subscriber("spacecam/camera_info",CameraInfo,self.callback_Kmatrix)
 
 
     def callback(self,data):
@@ -29,6 +30,9 @@ class SpaceJockeyCam(object):
 
         cv.ShowImage("SpaceCam Listener Image", cv_image)
         cv.WaitKey(3)
+
+    def callback_Kmatrix(self,data):
+        self.Kmatrix = data.K
         
 if __name__ == '__main__':
   spacecam_listener = SpaceJockeyCam()
