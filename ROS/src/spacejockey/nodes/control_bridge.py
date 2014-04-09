@@ -5,19 +5,21 @@ from std_msgs.msg import Int16MultiArray
 import spacejockey
 
 arduino = spacejockey.config("/arduino")
-joints = spacejockey.config("/joints")
+joints = spacejockey.urdf.joint_map
 
 posArray = Int16MultiArray()  
 posArray.data = [0, ] * len(arduino.joint_wiring)
 
 def joints_cb(msg):
     for i in range(len(msg.name)):
-        name = msg.name[i]
-        pos = msg.position[i]
-        #TODO: Use URDF min/max specs...
-        rmin = joints.min[joints.name.index(name)]
-        rmax = joints.max[joints.name.index(name)]
-        posArray.data[arduino.joint_wiring.index(name)] = int((((pos - rmin) * (arduino.servo.max - arduino.servo.min)) / (rmax-rmin)) + arduino.servo.min)
+        try:
+            name = msg.name[i]
+            pos = msg.position[i]
+            joint = joints[name]
+            #TODO: clip to servo mins/maxes
+            posArray.data[arduino.joint_wiring.index(name)] = int((((pos - joint.limit.lower) * (arduino.servo.max - arduino.servo.min)) / (joint.limit.upper-joint.limit.lower)) + arduino.servo.min)
+        except KeyError:
+            continue
             
     serialPub.publish(posArray)
 

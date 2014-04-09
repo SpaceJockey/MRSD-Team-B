@@ -1,6 +1,8 @@
 import roslib
 roslib.load_manifest('spacejockey')
 import rospy
+import rospkg
+from urdf_parser_py.urdf import URDF
 
 #ROS Global Config stuff
 
@@ -15,3 +17,8 @@ class ParamNode:
 
 def config(prefix = ""):
 	return ParamNode(**rospy.get_param(prefix))
+
+try:
+	urdf = URDF.from_parameter_server()
+except KeyError:
+	urdf = URDF.from_xml_file(rospkg.RosPack().get_path('spacejockey') + '/resources/spacejockey.urdf')
