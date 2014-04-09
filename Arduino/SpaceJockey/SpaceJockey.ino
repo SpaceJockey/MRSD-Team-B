@@ -17,19 +17,15 @@ This is the firmware sketch for the Space Jockey Robot
 ros::NodeHandle nh; //declared "extern" in SpaceJockey.h
 
 void setup() {
-  //init servo driver
-  Servos.begin();
-  Servos.setHiSpeed(); //set i2c bus to 400 kHz updates
-
   //Set up ROS node
   nh.initNode();
+
+  //init servo driver
+  Servos.begin();
 
   //init monitoring threads
   Battery.begin();
   IMU.begin();
-
-  //init control topic subscriber
-  Joints.begin();
 
   //spin until rosserial connection is live
   while (!nh.connected()) nh.spinOnce();
