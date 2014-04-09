@@ -2,7 +2,16 @@ joints/ratios:     [3.0,              2.0,            2.0,             2.0,     
 joints/lash/radii: [2.25,           1.5,              1.5,             1.5,          1.5,         100,           100]
 joints/lash/lash: 0.01
 
-arduino/ctl_msg_order: ['center_swivel', 'fore_base_pitch', 'aft_base_pitch', 'front_pitch', 'rear_pitch', 'fore_extend', 'aft_extend', 'front_attach', 'center_attach', 'rear_attach']
+#TODO: read these from URDF
+joints/name: ['center_swivel', 'fore_base_pitch', 'aft_base_pitch', 'front_pitch', 'rear_pitch', 'fore_extend', 'aft_extend', 'front_attach', 'center_attach', 'rear_attach']
+joints/min: [-0.6, -0.6, -0.6, -0.6, -0.6, 0.19726, 0.19726,   0.0,   0.0,   0.0]
+joints/max: [ 0.6,  0.6,  0.6,  0.6,  0.6, 0.27315, 0.27315, 0.006, 0.006, 0.006]
+
+#this is the joint-names -> adafruit PWM channel # mapping
+# channels in order, 0 -> 15, could be redone as a dict()
+arduino/joint_wiring: ['front_attach', 'front_pitch', 'fore_extend', 'fore_base_pitch', 'center_swivel', 'center_attach', '', '', 'aft_base_pitch', 'aft_extend', 'rear_pitch', 'rear_attach', '', '', '', 'pwm_feedback']
+arduino/servo/min: 900
+arduino/servo/max: 2100
 
 zeros/center_swivel: 0.0
 zeros/fore_base_pitch: -0.065

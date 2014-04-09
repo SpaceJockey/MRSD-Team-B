@@ -77,7 +77,10 @@ static void joint_cb(const std_msgs::Int16MultiArray& cmd_msg){
 	//update servos
 	for(int c = 0; c < cmd_msg.data_length; c++){
 		if(c > 14) return; //ignore unimplemented and feedback channels
-		_pwm_driver.setPWM(c, 0, map(cmd_msg.data[c], _SERVOMIN_US, _SERVOMAX_US, _servo_min, _servo_max));
+		int pos = cmd_msg.data[c];
+		if(pos > _SERVOMAX_US) pos = _SERVOMAX_US;
+		if(pos < _SERVOMIN_US) pos = _SERVOMIN_US;
+		_pwm_driver.setPWM(c, 0, map(pos, _SERVOMIN_US, _SERVOMAX_US, _servo_min, _servo_max));
 	}
 }
 static ros::Subscriber<std_msgs::Int16MultiArray> link_sub("joint_ctl", joint_cb);
@@ -96,6 +99,11 @@ class Actuators {
 			//calibrate the min/max values
 			_servo_min = calibratePWM(_SERVOMIN_US, _servo_min);
 			_servo_max = calibratePWM(_SERVOMAX_US, _servo_max);
+
+			//init all servos to mid-range
+			for(int c = 0; c < 15; c++){
+				_pwm_driver.setPWM(c, 0, (_servo_min + _servo_max)/2);
+			}
 
 			//start up ROS listener
 			nh.subscribe(link_sub);
