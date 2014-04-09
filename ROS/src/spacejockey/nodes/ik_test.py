@@ -18,35 +18,47 @@ import IPython
 #floating point error compensation
 ferr = 0.0001
 
-#TODO: load these from URDF
-joint_names = [
-  'center_swivel',
-  'fore_base_pitch',
-  'aft_base_pitch',
-  'front_pitch',
-  'rear_pitch',
-  'fore_extend',
-  'aft_extend',
-  'front_attach',
-  'center_attach',
-  'rear_attach']
+joints = spacejockey.urdf.joint_map
+joint_names = joints.keys()
+
+#unroll joint limits from the URDF
+joint_upper = dict()
+joint_lower = dict()
+safe_limits = rospy.get_param('/use_smallest_joint_limits')
+#TODO: unroll these using lambda defs...
+for j in joint_names:
+  try:
+    if(safe_limits):
+      joint_upper[j] = joints[j].safety_controller.soft_upper_limit
+      joint_lower[j] = joints[j].safety_controller.soft_lower_limit
+    else:
+      joint_upper[j] = joints[j].limit.upper
+      joint_lower[j] = joints[j].limit.lower
+  except AttributeError:
+    continue
+
 node_names =  ['front_foot', 'center_foot', 'rear_foot']
 tgt_names =  ['front_tgt', 'center_tgt', 'rear_tgt']
 
 config = spacejockey.config("/planner")
 footLocs = [(config.extend.min,0,0), (0,0,0), (-config.extend.min,0,0)]
 
-
+def clip_limits(positions):
+  for j in positions.keys():
+    try:
+      if positions[j] > joint_upper[j]:
+        positions[j] = joint_upper[j]
+      if positions[j] < joint_lower[j]:
+        positions[j] = joint_lower[j]
+    except KeyError:
+      continue
+  return positions
 
 #This is a hackackular quick and dirty implementation, needs to be fixed long term
 #takes X, Y, Z tuples, returns a set of joint angles
 def IK(front,center,rear):
   #initialize joint positions...
   positions = OrderedDict.fromkeys(joint_names, 0.0)
-  #step one, compute detach states
-  positions['front_attach'] = 0.0 if front[0] < ferr else 0.006 
-  positions['center_attach'] = 0.0 if center[0] < ferr else 0.006 
-  positions['rear_attach'] = 0.0 if rear[0] < ferr else 0.006 
 
   f_xy_dist = math.sqrt((front[0] - center[0])**2 + (front[1] - center[1])**2) - .07054 
   f_z_dist = center[2] - front[2] + .0194
@@ -71,7 +83,14 @@ def IK(front,center,rear):
   positions['front_pitch'] = ftheta
   positions['aft_base_pitch'] = -rtheta
   positions['rear_pitch'] = rtheta
-  return positions
+
+  #compute detach states
+  #TODO: add lever twists to end joints...
+  #positions['front_attach'] = 0.0 if front[0] < ferr else 0.006 
+  positions['center_attach'] = 0.0 if center[0] < ferr else 0.006 
+  #positions['rear_attach'] = 0.0 if rear[0] < ferr else 0.006 
+
+  return clip_limits(positions)
 
 
 def makeBox():
