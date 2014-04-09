@@ -1,3 +1,11 @@
+#This tells joint_state_publisher and the IK engine
+#to use the URDF safety_controller limits, not the hardware limits
+use_smallest_joint_limits: False
+
+#these are the default settings for the joint_state_publisher node
+source_list: ["joint_minor"]
+use_gui: True
+
 #these are used for lash compensation settings
 #TODO: look if we can hack these into the URDF
 joints/name: ['center_swivel', 'fore_base_pitch', 'aft_base_pitch', 'front_pitch', 'rear_pitch', 'fore_extend', 'aft_extend', 'front_attach', 'center_attach', 'rear_attach']

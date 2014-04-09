@@ -1,4 +1,0 @@
-#general system options
-
-use_gui: True
-source_list: ["joint_minor"]
