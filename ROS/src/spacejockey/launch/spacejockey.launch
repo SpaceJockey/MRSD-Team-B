@@ -6,5 +6,5 @@
 	<node name="serial_node_USB" pkg="rosserial_python" type="serial_node.py" args="/dev/ttyACM0" />
 	
 	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find spacejockey)/resources/spacejockey.rviz" required="true" />
-	<node pkg="tf" type="static_transform_publisher" name="world" args="0 0 0 1.57 0 0 /world /center_foot 10"/>
+	<node pkg="tf" type="static_transform_publisher" name="world" args="0 0 0 1.57 0 0 /world /robot 10"/>
 </launch>

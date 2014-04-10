@@ -2,5 +2,5 @@
 	<include file="$(find spacejockey)/launch/core.launch" />
 	<node name="ik_test" pkg="spacejockey" type="ik_test.py" output="screen" required="true" />
 	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find spacejockey)/resources/ik_test.rviz" required="true" />
-	<!--<node pkg="tf" type="static_transform_publisher" name="world" args="0 0 0 1.57 0 0 /world /center_foot 100"/> -->
+	<!-- <node pkg="tf" type="static_transform_publisher" name="world" args="0 0 0 0 0 0 /robot /base_link 10"/> -->
 </launch>
