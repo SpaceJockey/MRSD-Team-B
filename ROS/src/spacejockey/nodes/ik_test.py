@@ -205,7 +205,7 @@ def processFeedback(feedback):
     for m in markers.itervalues():
       (loc, rot) = poseToTf(m.pose)
       #print(rot) #TODO: debug this...
-      tfCast.sendTransform(loc, rot, rospy.Time.now(), m.name, m.header.frame_id)
+      tfCast.sendTransform(loc, rot, rospy.Time.now(), '/static/' + m.name, m.header.frame_id)
 
     try:
       tfList.waitForTransform(feedback.marker_name, "/robot",  rospy.Time(0), rospy.Duration(.1));

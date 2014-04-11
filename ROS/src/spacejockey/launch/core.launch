@@ -4,4 +4,5 @@
 	<param name="robot_description" textfile="$(find spacejockey)/resources/spacejockey.urdf" />
 	<node pkg="robot_state_publisher" type="robot_state_publisher" name="rob_st_pub" />
 	<node pkg="joint_state_publisher" type="joint_state_publisher" name="rob_joint_pub" />
+	<node name="static_tf_keepalive" pkg="spacejockey" type="static_tf_keepalive.py" /> 
 </launch>
