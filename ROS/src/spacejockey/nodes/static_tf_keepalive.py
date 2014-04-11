@@ -25,7 +25,7 @@ if __name__ == '__main__':
 			if not frame.startswith('static/'):
 				continue
 			try:
-				t = listener.lookupTransform(frame, args.root_frame, rospy.Time(0))
+				t = listener.lookupTransform(args.root_frame, frame, rospy.Time(0))
 				staticTfs[frame[7:]] = t
 			except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException) as e:
 				rospy.logerr(e)

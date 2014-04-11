@@ -1,5 +1,5 @@
 <launch>
 	<include file="$(find spacejockey)/launch/core.launch" />
-	<node name="ik_test" pkg="spacejockey" type="ik_test.py" output="screen" /> <!-- required="true" /> -->
-	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find spacejockey)/resources/ik_test.rviz" /> <!-- required="true" /> -->
+	<node name="ik_test" pkg="spacejockey" type="ik_test.py" output="screen" required="true" />
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find spacejockey)/resources/ik_test.rviz" required="true" />
 </launch>

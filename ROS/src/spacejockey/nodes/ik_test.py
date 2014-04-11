@@ -38,11 +38,7 @@ for j in joints.keys():
   except AttributeError:
     continue
 
-node_names =  ['front_foot', 'center_foot', 'rear_foot']
-tgt_names =  ['front_tgt', 'center_tgt', 'rear_tgt']
-
 config = spacejockey.config("/planner")
-footLocs = [(config.extend.min,0,0), (0,0,0), (-config.extend.min,0,0)]
 
 def clip_limits(positions):
   for j in positions.keys():
@@ -200,28 +196,28 @@ def poseToTf(pose):
 
 def processFeedback(feedback):
     #update marker location
-    markers[feedback.marker_name].pose = feedback.pose;
-    #republish all marker poses, then get the transforms between them...
-    for m in markers.itervalues():
-      (loc, rot) = poseToTf(m.pose)
-      #print(rot) #TODO: debug this...
-      tfCast.sendTransform(loc, rot, rospy.Time.now(), '/static/' + m.name, m.header.frame_id)
+    (loc, rot) = poseToTf(feedback.pose)
+    tfCast.sendTransform(loc, rot, rospy.Time.now(), '/static/' + feedback.marker_name, feedback.header.frame_id)
 
     try:
       tfList.waitForTransform(feedback.marker_name, "/robot",  rospy.Time(0), rospy.Duration(.1));
       (loc, rot) = tfList.lookupTransform(feedback.marker_name, "/robot",  rospy.Time(0))
     except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException) as e:
-      print(e)
+      #print(e)
       return
     soln = {
       'front_tgt' : IK(front = loc, doDetach = True),
       'rear_tgt' : IK(rear = loc, doDetach = True),
       'robot' : {}
     }[feedback.marker_name]
+    publishJoints(soln)
 
+
+
+def publishJoints(ik_soln):
     joint_msg = JointState()
-    joint_msg.name = soln.keys()
-    joint_msg.position = soln.values() 
+    joint_msg.name = ik_soln.keys()
+    joint_msg.position = ik_soln.values() 
     jointPub.publish(joint_msg)
 
 rospy.init_node("ik_test")
@@ -236,12 +232,15 @@ markers = {
   'front_tgt' : make6DofMarker("front_tgt", config.extend.min, 0, 0),
   'rear_tgt'  : make6DofMarker("rear_tgt", -config.extend.min, 0, 0)
 }
-
 server.applyChanges()
+
+#publish initial marker tfs
+for m in markers.iteritems():
+  (loc, rot) = poseToTf(m[1].pose)
+  tfCast.sendTransform(loc, rot, rospy.Time.now(), '/static/' + m[0], m[1].header.frame_id)
+#rospy.spinOnce()
+
 #force initial IK soln
-soln = IK(*tuple(footLocs))
-joint_msg = JointState()
-joint_msg.name = soln.keys()
-joint_msg.position = soln.values() 
-jointPub.publish(joint_msg)
+#TODO: fix this!
+#publishJoints(IK(*tuple(footLocs)))
 rospy.spin()
