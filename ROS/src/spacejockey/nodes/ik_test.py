@@ -57,47 +57,52 @@ def clip_limits(positions):
 
 #This is a hackackular quick and dirty implementation, needs to be fixed long term
 #takes X, Y, Z tuples (in the local robot frame), returns a partial set of joint angles
-def IK(center, front = None, rear = None, doDetach = False):
+def IK(front = None, rear = None, doDetach = False):
   #initialize joint positions...
   positions = dict() #.fromkeys(joints.keys(), 0.0)
-  tfCast.sendTransform((0,0,0), tf.transformations.quaternion_from_euler(0, 0, 0), rospy.Time.now(), "/center_foot", "/robot")
+  #tfCast.sendTransform((0,0,0), tf.transformations.quaternion_from_euler(0, 0, 0), rospy.Time.now(), "/center_foot", "/robot")
 
+  positions['center_attach'] = 0.0 #default off...
   if(front):
-    f_xy_dist = math.sqrt((front[0] - center[0])**2 + (front[1] - center[1])**2) - .07054 
-    f_z_dist = center[2] - front[2] + .0194
+    f_xy_dist = math.sqrt(front[0]**2 + front[1]**2) - .07054 #TODO:, parameterize joint offsets from URDF...
+    f_z_dist = front[2] + .0194
     positions['fore_extend'] = math.sqrt(f_xy_dist**2 + f_z_dist**2)
     ftheta = math.atan2(f_z_dist, f_xy_dist)
     positions['fore_base_pitch'] = -ftheta
     positions['front_pitch'] = ftheta
-    front_theta = math.atan2(front[1] - center[1], front[0] - center[0])
+    front_theta = math.atan2(front[1], front[0])
     positions['center_swivel'] = front_theta
-    positions['center_attach'] = 0.0 if front[2] < 0.0 else 0.006 
-    if (doDetach and front[2] > ferr): #twist the front foot off!
-      positions['front_pitch'] += 0.09
+    if doDetach:
+      if front[2] < 0.0: #detach the center foot
+        positions['center_attach'] = 1.0 
+      if front[2] > ferr: #twist the front foot to detach
+        positions['front_pitch'] += 0.09
 
   if(rear):
-    r_xy_dist = math.sqrt((center[0] - rear[0])**2 + (center[1] - rear[1])**2) - .07054
-    r_z_dist = center[2] - rear[2] + .0194
+    r_xy_dist = math.sqrt(rear[0]**2 + rear[1]**2) - .07054
+    r_z_dist = rear[2] + .0194
     positions['aft_extend'] = math.sqrt(r_xy_dist**2 + r_z_dist**2)
     rtheta = math.atan2(r_z_dist, r_xy_dist)
     positions['aft_base_pitch'] = -rtheta
     positions['rear_pitch'] = rtheta
-    rear_theta = math.atan2(center[1] - rear[1], center[0] - rear[0])
+    rear_theta = math.atan2(-rear[1], -rear[0]) #TODO: verify this...
     positions['center_swivel'] = rear_theta
-    positions['center_attach'] = 0.0 if rear[2] < 0.0 else 0.006
-    if (doDetach and rear[2] > ferr): #twist the front foot off!
-      positions['rear_pitch'] += 0.09
+    if doDetach:
+      if rear[2] < 0.0: #detach the center foot
+        positions['center_attach'] = 1.0 
+      if rear[2] > ferr: #twist the rear foot to detach
+        positions['rear_pitch'] += 0.09
 
   #TODO: this may not be right!
   if(front and rear):
     #Hacky, rotate the robot frame in the world pose
     ctheta = math.atan2(rear[0], -rear[1])
-    tfCast.sendTransform((0,0,0), tf.transformations.quaternion_from_euler(0, 0, ctheta), rospy.Time.now(), "/center_foot", "/robot")
+    #tfCast.sendTransform((0,0,0), tf.transformations.quaternion_from_euler(0, 0, ctheta), rospy.Time.now(), "/center_foot", "/robot")
     positions['center_swivel'] = math.atan2(math.sin(front_theta-rear_theta), math.cos(front_theta-rear_theta))
 
   return clip_limits(positions)
 
-def make6DofMarker( name, x = 0, y = 0, z = 0, parent = "/world"):
+def makeMarker(name, x, y, z, parent):
   int_marker = InteractiveMarker()
   int_marker.header.frame_id = parent
   int_marker.scale = 0.1
@@ -109,6 +114,16 @@ def make6DofMarker( name, x = 0, y = 0, z = 0, parent = "/world"):
   int_marker.pose.position.y = y
   int_marker.pose.position.z = z
 
+  int_marker.pose.orientation.x = 0.0
+  int_marker.pose.orientation.y = 0.0
+  int_marker.pose.orientation.z = 0.0
+  int_marker.pose.orientation.w = 1.0
+  return int_marker
+
+
+def make6DofMarker( name, x = 0, y = 0, z = 0, parent = "/world"):
+  int_marker = makeMarker(name, x, y, z, parent)
+  
   control = InteractiveMarkerControl()
   control.orientation.w = 1
   control.orientation.x = 1
@@ -143,16 +158,7 @@ def make6DofMarker( name, x = 0, y = 0, z = 0, parent = "/world"):
   return int_marker
 
 def makeXYRMarker( name, x = 0, y = 0, z = 0, parent = "/world"):
-  int_marker = InteractiveMarker()
-  int_marker.header.frame_id = parent
-  int_marker.scale = 0.1
-
-  int_marker.name = name
-  int_marker.description = name
-
-  int_marker.pose.position.x = x
-  int_marker.pose.position.y = y
-  int_marker.pose.position.z = z
+  int_marker = makeMarker(name, x, y, z, parent)
 
   control = InteractiveMarkerControl()
   control.orientation.w = 1
@@ -193,15 +199,26 @@ def poseToTf(pose):
   return ((pose.position.x, pose.position.y, pose.position.z), (pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w))
 
 def processFeedback(feedback):
-    #tfCast.sendTransform(ctrans, crot, rospy.Time.now(), "/center_foot", "/world")
-    (loc, rot) = poseToTf(feedback.pose)
-    tfCast.sendTransform(loc, rot, rospy.Time.now(), feedback.marker_name, feedback.header.frame_id)
-    if feedback.marker_name == 'robot':
-      return
+    #update marker location
+    markers[feedback.marker_name].pose = feedback.pose;
+    #republish all marker poses, then get the transforms between them...
+    for m in markers.itervalues():
+      (loc, rot) = poseToTf(m.pose)
+      #print(rot) #TODO: debug this...
+      tfCast.sendTransform(loc, rot, rospy.Time.now(), m.name, m.header.frame_id)
 
-    #tfList.lookupTransform("/base_link", "/camera_depth_optical_frame",ros::Time::now(), transform);
-    footLocs[tgt_names.index(feedback.marker_name)] = loc
-    soln = IK(footLocs[1], footLocs[0], footLocs[2])
+    try:
+      tfList.waitForTransform(feedback.marker_name, "/robot",  rospy.Time(0), rospy.Duration(.1));
+      (loc, rot) = tfList.lookupTransform(feedback.marker_name, "/robot",  rospy.Time(0))
+    except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException) as e:
+      print(e)
+      return
+    soln = {
+      'front_tgt' : IK(front = loc, doDetach = True),
+      'rear_tgt' : IK(rear = loc, doDetach = True),
+      'robot' : {}
+    }[feedback.marker_name]
+
     joint_msg = JointState()
     joint_msg.name = soln.keys()
     joint_msg.position = soln.values() 
@@ -214,10 +231,11 @@ tfCast = tf.TransformBroadcaster()
 tfList = tf.TransformListener()
 # create an interactive marker server on the topic namespace simple_marker
 server = InteractiveMarkerServer("ik_test")
-robot_mrk = makeXYRMarker("robot", 0, 0, 0)
-tfCast.sendTransform((0,0,0), (0,0,0,1), rospy.Time.now(), '/robot', '/world') #init robot frame
-front_mrk = make6DofMarker("front_tgt", config.extend.min, 0, 0) #, "/robot")
-rear_mrk = make6DofMarker("rear_tgt", -config.extend.min, 0, 0) #, "/robot")
+markers = {
+  'robot'     : makeXYRMarker("robot", 0, 0, 0), 
+  'front_tgt' : make6DofMarker("front_tgt", config.extend.min, 0, 0),
+  'rear_tgt'  : make6DofMarker("rear_tgt", -config.extend.min, 0, 0)
+}
 
 server.applyChanges()
 #force initial IK soln
