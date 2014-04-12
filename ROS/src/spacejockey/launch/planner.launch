@@ -2,6 +2,6 @@
 	<include file="$(find spacejockey)/launch/core.launch" />
 	<node name="waypoint_planner" pkg="spacejockey" type="waypoint_planner.py" required="true" />
 	<node name="planner_broadcaster" pkg="spacejockey" type="planner_broadcaster.py"/>
-	<node name="minor_planner" pkg="spacejockey" type="minor_planner.py"/>
+	<node name="minor_planner" pkg="spacejockey" type="minor_planner.py" output="screen" required="true" />
 	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find spacejockey)/resources/spacejockey.rviz" required="true" />
 </launch>
