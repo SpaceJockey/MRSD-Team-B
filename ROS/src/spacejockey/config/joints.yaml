@@ -21,9 +21,9 @@ arduino/servo/max: 2100
 
 #these are used by joint_state_publisher to set the default joint 'safe position'
 zeros/center_swivel: 0.0
-zeros/fore_base_pitch: -0.065
+zeros/fore_base_pitch: 0.065
 zeros/aft_base_pitch: -0.065
-zeros/front_pitch: 0.065
+zeros/front_pitch: -0.065
 zeros/rear_pitch: 0.065
 zeros/fore_extend: 0.198
 zeros/aft_extend: 0.198

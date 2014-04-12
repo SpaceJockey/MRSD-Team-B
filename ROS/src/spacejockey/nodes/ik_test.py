@@ -54,48 +54,42 @@ def clip_limits(positions):
 #This is a hackackular quick and dirty implementation, needs to be fixed long term
 #takes X, Y, Z tuples (in the local robot frame), returns a partial set of joint angles
 def IK(front = None, rear = None, doDetach = False):
-  #initialize joint positions...
-  positions = dict() #.fromkeys(joints.keys(), 0.0)
-  #tfCast.sendTransform((0,0,0), tf.transformations.quaternion_from_euler(0, 0, 0), rospy.Time.now(), "/center_foot", "/robot")
-
+  positions = dict()
   positions['center_attach'] = 0.0 #default off...
   if(front):
     f_xy_dist = math.sqrt(front[0]**2 + front[1]**2) - .07054 #TODO:, parameterize joint offsets from URDF...
-    f_z_dist = front[2] + .0194
+    f_z_dist = front[2] - .0194
     positions['fore_extend'] = math.sqrt(f_xy_dist**2 + f_z_dist**2)
     ftheta = math.atan2(f_z_dist, f_xy_dist)
     positions['fore_base_pitch'] = -ftheta
     positions['front_pitch'] = ftheta
-    front_theta = math.atan2(front[1], front[0])
-    positions['center_swivel'] = front_theta
+    
+    ctheta = math.atan2(front[1], front[0])
+    positions['center_swivel'] = ctheta
+    
     if doDetach:
       if front[2] < 0.0: #detach the center foot
         positions['center_attach'] = 1.0 
       if front[2] > ferr: #twist the front foot to detach
-        positions['front_pitch'] += 0.09
+        positions['front_pitch'] += 0.1
 
   if(rear):
     r_xy_dist = math.sqrt(rear[0]**2 + rear[1]**2) - .07054
-    r_z_dist = rear[2] + .0194
+    r_z_dist = rear[2] - .0194
     positions['aft_extend'] = math.sqrt(r_xy_dist**2 + r_z_dist**2)
     rtheta = math.atan2(r_z_dist, r_xy_dist)
-    positions['aft_base_pitch'] = -rtheta
-    positions['rear_pitch'] = rtheta
-    rear_theta = math.atan2(-rear[1], -rear[0]) #TODO: verify this...
-    positions['center_swivel'] = rear_theta
+    positions['aft_base_pitch'] = rtheta
+    positions['rear_pitch'] = -rtheta
+
+    ctheta = math.atan2(rear[1], -rear[0])
+    positions['center_swivel'] = ctheta
+
     if doDetach:
       if rear[2] < 0.0: #detach the center foot
         positions['center_attach'] = 1.0 
       if rear[2] > ferr: #twist the rear foot to detach
-        positions['rear_pitch'] += 0.09
-
-  #TODO: this may not be right!
-  if(front and rear):
-    #Hacky, rotate the robot frame in the world pose
-    ctheta = math.atan2(rear[0], -rear[1])
-    #tfCast.sendTransform((0,0,0), tf.transformations.quaternion_from_euler(0, 0, ctheta), rospy.Time.now(), "/center_foot", "/robot")
-    positions['center_swivel'] = math.atan2(math.sin(front_theta-rear_theta), math.cos(front_theta-rear_theta))
-
+        positions['rear_pitch'] += 0.1
+  #TODO: what happens to the center joint if both front and back are set?
   return clip_limits(positions)
 
 def makeMarker(name, x, y, z, parent):
@@ -200,8 +194,8 @@ def processFeedback(feedback):
     tfCast.sendTransform(loc, rot, rospy.Time.now(), '/static/' + feedback.marker_name, feedback.header.frame_id)
 
     try:
-      tfList.waitForTransform(feedback.marker_name, "/robot",  rospy.Time(0), rospy.Duration(.1));
-      (loc, rot) = tfList.lookupTransform(feedback.marker_name, "/robot",  rospy.Time(0))
+      tfList.waitForTransform("/robot", feedback.marker_name,  rospy.Time(0), rospy.Duration(.1));
+      (loc, rot) = tfList.lookupTransform("/robot", feedback.marker_name,  rospy.Time(0))
     except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException) as e:
       #print(e)
       return
