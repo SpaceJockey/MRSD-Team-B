@@ -1,0 +1,4 @@
+<launch>
+	<include file="$(find spacejockey)/launch/core.launch" />
+	<node name="ipython_shell" pkg="spacejockey" type="ipython_shell.py" output="screen" required="true" />
+</launch>

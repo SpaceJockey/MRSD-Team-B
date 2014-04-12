@@ -4,9 +4,6 @@ import rospy
 import rospkg
 from urdf_parser_py.urdf import URDF
 
-import sys
-import cStringIO
-
 #ROS Global Config stuff
 
 #get configuration constants from the param server

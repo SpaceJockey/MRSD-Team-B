@@ -2,8 +2,4 @@
 	<include file="$(find spacejockey)/launch/core.launch" />
 	<node name="ik_test" pkg="spacejockey" type="ik_test.py" output="screen" required="true" />
 	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find spacejockey)/resources/ik_test.rviz" required="true" />
-
-	<!-- <node pkg="tf" type="static_transform_publisher" name="robot" args="0 0 0 0 0 0 /world /robot 10"/>
-	<node pkg="tf" type="static_transform_publisher" name="front_tgt" args=".3 0 0 0 0 0 /world /front_tgt 10"/>
-	<node pkg="tf" type="static_transform_publisher" name="rear_tgt" args="-.3 0 0 0 0 0 /world /rear_tgt 10"/> -->
 </launch>

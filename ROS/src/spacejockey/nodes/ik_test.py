@@ -3,94 +3,14 @@ import roslib
 roslib.load_manifest('spacejockey')
 import rospy
 import spacejockey
+from spacejockey.kinematics import IK
 import tf
 from sensor_msgs.msg import JointState
 import math
 from interactive_markers.interactive_marker_server import *
-from interactive_markers.menu_handler import *
 from visualization_msgs.msg import *
 
-import IPython
-
-
-#floating point error compensation
-ferr = 0.0001
-
-joints = spacejockey.urdf.joint_map
-
-#unroll joint limits from the URDF
-joint_upper = dict()
-joint_lower = dict()
-safe_limits = rospy.get_param('/use_smallest_joint_limits')
-#TODO: unroll these using lambda defs...
-for j in joints.keys():
-  try:
-    if(safe_limits and (joints[j].type == "revolute" or joints[j].type == "prismatic")):
-      try:
-        joint_upper[j] = joints[j].safety_controller.soft_upper_limit
-        joint_lower[j] = joints[j].safety_controller.soft_lower_limit
-      except AttributeError:
-        joint_upper[j] = joints[j].limit.upper
-        joint_lower[j] = joints[j].limit.lower
-    else:
-      joint_upper[j] = joints[j].limit.upper
-      joint_lower[j] = joints[j].limit.lower
-  except AttributeError:
-    continue
-
 config = spacejockey.config("/planner")
-
-def clip_limits(positions):
-  for j in positions.keys():
-    try:
-      if positions[j] > joint_upper[j]:
-        positions[j] = joint_upper[j]
-      if positions[j] < joint_lower[j]:
-        positions[j] = joint_lower[j]
-    except KeyError:
-      continue
-  return positions
-
-#This is a hackackular quick and dirty implementation, needs to be fixed long term
-#takes X, Y, Z tuples (in the local robot frame), returns a partial set of joint angles
-def IK(front = None, rear = None, doDetach = False):
-  positions = dict()
-  positions['center_attach'] = 0.0 #default off...
-  if(front):
-    f_xy_dist = math.sqrt(front[0]**2 + front[1]**2) - .07054 #TODO:, parameterize joint offsets from URDF...
-    f_z_dist = front[2] - .0194
-    positions['fore_extend'] = math.sqrt(f_xy_dist**2 + f_z_dist**2)
-    ftheta = math.atan2(f_z_dist, f_xy_dist)
-    positions['fore_base_pitch'] = -ftheta
-    positions['front_pitch'] = ftheta
-    
-    ctheta = math.atan2(front[1], front[0])
-    positions['center_swivel'] = ctheta
-    
-    if doDetach:
-      if front[2] < 0.0: #detach the center foot
-        positions['center_attach'] = 1.0 
-      if front[2] > ferr: #twist the front foot to detach
-        positions['front_pitch'] += 0.1
-
-  if(rear):
-    r_xy_dist = math.sqrt(rear[0]**2 + rear[1]**2) - .07054
-    r_z_dist = rear[2] - .0194
-    positions['aft_extend'] = math.sqrt(r_xy_dist**2 + r_z_dist**2)
-    rtheta = math.atan2(r_z_dist, r_xy_dist)
-    positions['aft_base_pitch'] = rtheta
-    positions['rear_pitch'] = -rtheta
-
-    ctheta = math.atan2(rear[1], -rear[0])
-    positions['center_swivel'] = ctheta
-
-    if doDetach:
-      if rear[2] < 0.0: #detach the center foot
-        positions['center_attach'] = 1.0 
-      if rear[2] > ferr: #twist the rear foot to detach
-        positions['rear_pitch'] += 0.1
-  #TODO: what happens to the center joint if both front and back are set?
-  return clip_limits(positions)
 
 def makeMarker(name, x, y, z, parent):
   int_marker = InteractiveMarker()
