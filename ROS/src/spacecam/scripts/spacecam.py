@@ -26,7 +26,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='spacecam.py', description='reads a given url string and dumps it to a ros_image topic')
     parser.add_argument('-g', '--gui', action='store_true', help='show a GUI of the camera stream')
     parser.add_argument('-u', '--url', default='http://admin:admin@10.68.68.22/goform/video?channel=1&.mjpg', help='camera stream url to parse')
-    args = parser.parse_args()
+    args, unknown = parser.parse_known_args()
     
     rospy.init_node('SpaceJockeyCamera', anonymous=True)
     spacecam = SpaceJockeyCam(args.url)
