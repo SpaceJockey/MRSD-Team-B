@@ -9,6 +9,8 @@ import rospy
 import cv
 from std_msgs.msg import String
 from cv_bridge import CvBridge, CvBridgeError 
+from sensor_msgs.msg import CameraInfo
+import camera_info_manager
 import argparse
 
 class SpaceJockeyCam(object):
@@ -19,10 +21,26 @@ class SpaceJockeyCam(object):
             rospy.logerr('Unable to open camera stream: ' + str(url))
             sys.exit() #'Unable to open camera stream')
         self.bytes=''
-        self.image_pub = rospy.Publisher("camera_image", Image)
+        self.width = 640
+        self.height = 480
+        self.frame_id = 'spacecam'
+        self.image_pub = rospy.Publisher("spacecam/image_raw", Image)
+        self.cinfo = camera_info_manager.CameraInfoManager(cname = 'spacecam',
+                                                   url = 'PACKAGE://spacecam/config/calibration.yaml')
+        self.cinfo.loadCameraInfo()         # required before getCameraInfo()
+        self.caminfo_pub = rospy.Publisher("spacecam/camera_info", CameraInfo)
         self.bridge = CvBridge()
 
-if __name__ == '__main__':
+    def publishCameraInfoMsg(self):
+        '''Publish camera info manager message'''
+        cimsg = self.cinfo.getCameraInfo()
+        cimsg.header.stamp = rospy.Time.now()
+        cimsg.header.frame_id = self.frame_id
+        cimsg.width = self.width
+        cimsg.height = self.height
+        self.caminfo_pub.publish(cimsg)
+
+def main():
     parser = argparse.ArgumentParser(prog='spacecam.py', description='reads a given url string and dumps it to a ros_image topic')
     parser.add_argument('-g', '--gui', action='store_true', help='show a GUI of the camera stream')
     parser.add_argument('-u', '--url', default='http://admin:admin@10.68.68.22/goform/video?channel=1&.mjpg', help='camera stream url to parse')
@@ -39,11 +57,21 @@ if __name__ == '__main__':
             jpg = spacecam.bytes[a:b+2]
             spacecam.bytes= spacecam.bytes[b+2:]
             i = cv2.imdecode(np.fromstring(jpg, dtype=np.uint8),cv2.CV_LOAD_IMAGE_COLOR)
-            # image_message = spacecam.bridge.cv_to_imgmsg(i, encoding="passthrough")
-            image_message = cv.fromarray(i)
-            spacecam.image_pub.publish(spacecam.bridge.cv_to_imgmsg(image_message, "bgr8"))
+            image_message = spacecam.bridge.cv2_to_imgmsg(i, "passthrough")
+            spacecam.image_pub.publish(image_message)
+            print "height: ", image_message.height
+            print "width: ", image_message.width
+            print "encoding: ", image_message.encoding
+            print "step: ", image_message.step
+            spacecam.publishCameraInfoMsg()
 
             if args.gui:
                 cv2.imshow('Space Jockey Publisher Cam',i)
             if cv2.waitKey(1) ==27: # wait until ESC key is pressed in the GUI window to stop it
                 exit(0) 
+    
+
+
+
+if __name__ == '__main__':
+    main()
