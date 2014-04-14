@@ -18,7 +18,7 @@ def joints_cb(msg):
             joint = joints[name]
             #TODO: clip to servo mins/maxes
             posArray.data[arduino.joint_wiring.index(name)] = int((((pos - joint.limit.lower) * (arduino.servo.max - arduino.servo.min)) / (joint.limit.upper-joint.limit.lower)) + arduino.servo.min)
-        except KeyError:
+        except: #don't care about bad joint mappings...
             continue
             
     serialPub.publish(posArray)

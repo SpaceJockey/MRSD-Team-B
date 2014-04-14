@@ -8,7 +8,7 @@
   <link name="center_seg">
     <visual>
       <geometry>
-        <box size=".095 .075 .053"/>
+        <box size=".095 .075 .032"/>
       </geometry>
       <origin xyz="0.0475 0 0"/>
       <material name="blue" />
@@ -18,7 +18,7 @@
   <link name="center_aft">
     <visual>
       <geometry>
-        <box size=".095 .075 .032"/>
+        <box size=".095 .075 .05"/>
       </geometry>
       <origin xyz="-0.0475 0 0"/>
       <material name="blue" />

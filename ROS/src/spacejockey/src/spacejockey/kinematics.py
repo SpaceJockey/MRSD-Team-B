@@ -12,6 +12,7 @@ joint_upper = dict()
 joint_lower = dict()
 joint_vel = dict()
 safe_limits = rospy.get_param('/use_smallest_joint_limits')
+detach_height = rospy.get_param('/planner/move/detachHeight')
 #TODO: unroll these using lambda defs...
 for j in urdf.joint_map.keys():
   try:
@@ -59,10 +60,10 @@ def IK(front = None, rear = None, doDetach = False, checkLimits = True):
     positions['center_swivel'] = ftheta
     
     if doDetach:
-      if front[2] < 0.0: #detach the center foot
+      if front[2] < -detach_height + float_err: #detach the center foot
         positions['center_attach'] = 0.1 
-      if front[2] > float_err: #twist the front foot to detach
-        positions['front_pitch'] += 0.1
+      if front[2] >= detach_height - float_err: #twist the front foot to detach
+        positions['front_pitch'] -= 0.1
 
   if(rear):
     r_xy_dist = math.sqrt(rear[0]**2 + rear[1]**2) - .07054
@@ -77,10 +78,10 @@ def IK(front = None, rear = None, doDetach = False, checkLimits = True):
     positions['center_swivel'] = -rtheta
 
     if doDetach:
-      if rear[2] < 0.0: #detach the center foot
+      if rear[2] < -detach_height + float_err: #detach the center foot
         positions['center_attach'] = 0.1 
-      if rear[2] > float_err: #twist the rear foot to detach
-        positions['rear_pitch'] -= 0.1
+      if rear[2] >= detach_height - float_err: #twist the rear foot to detach
+        positions['rear_pitch'] += 0.1
 
   #TODO: what happens to the center joint if both front and back are set?
   if front and rear:
