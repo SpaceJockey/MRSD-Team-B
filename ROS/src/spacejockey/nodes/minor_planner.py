@@ -1,6 +1,6 @@
 #!/usr/bin/env python  
 import roslib
-roslib.load_manifest('spacejockey')
+#roslib.load_manifest('spacejockey')
 import rospy
 from collections import deque, namedtuple
 import spacejockey

@@ -1,5 +1,5 @@
 import roslib
-roslib.load_manifest('spacejockey')
+#roslib.load_manifest('spacejockey')
 import rospy
 import math
 from . import urdf

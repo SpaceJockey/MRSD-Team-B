@@ -7,7 +7,7 @@ ferr = 0.0001 #floating point comparison error correction term
 
 #ROS Imports
 import roslib
-roslib.load_manifest('spacejockey')
+#roslib.load_manifest('spacejockey')
 import rospy
 import sys
 import spacejockey
