@@ -7,6 +7,7 @@ Panels:
         - /Global Options1
         - /Status1
         - /InteractiveMarkers1
+        - /TF1
       Splitter Ratio: 0.5
     Tree Height: 330
   - Class: rviz/Selection
@@ -131,6 +132,10 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
+        robot:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
       Name: RobotModel
       Robot Description: robot_description
       TF Prefix: ""
@@ -145,6 +150,8 @@ Visualization Manager:
         aft_base_pole:
           Value: true
         aft_base_prism:
+          Value: true
+        brain:
           Value: true
         camera:
           Value: true
@@ -170,16 +177,23 @@ Visualization Manager:
           Value: true
         robot:
           Value: true
+        static/rear_tgt:
+          Value: true
+        static/robot:
+          Value: true
         world:
           Value: true
       Marker Scale: 0.2
       Name: TF
-      Show Arrows: false
+      Show Arrows: true
       Show Axes: true
       Show Names: true
       Tree:
         world:
-          center_foot:
+          rear_tgt:
+            brain:
+              {}
+          robot:
             center_aft:
               aft_base_pole:
                 aft_base_prism:
@@ -194,9 +208,11 @@ Visualization Manager:
                         {}
                       front_foot:
                         {}
-          rear_tgt:
+            center_foot:
+              {}
+          static/rear_tgt:
             {}
-          robot:
+          static/robot:
             {}
       Update Interval: 0
       Value: true
@@ -224,7 +240,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 0.758957
+      Distance: 0.872685
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
@@ -239,7 +255,7 @@ Visualization Manager:
       Pitch: 0.509795
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 5.10723
+      Yaw: 3.20223
     Saved: ~
 Window Geometry:
   Displays:
@@ -257,5 +273,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 980
-  X: 273
-  Y: 29
+  X: 264
+  Y: 21

@@ -1,6 +1,10 @@
 #Soft constraints for major planning actions
 #distances are in meters
 
+#starting positions...
+start/robot/loc: [0.0, 0.0, 0.0]
+start/robot/rot: [0.0, 0.0, 0.0, 1.0]
+
 #body limits
 extend/max: .34 #linear actuator reach
 extend/min: .26

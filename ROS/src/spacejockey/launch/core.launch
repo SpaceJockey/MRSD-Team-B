@@ -1,4 +1,5 @@
 <launch>
+	<rosparam command="load" file="$(find spacejockey)/config/general.yaml" />
 	<rosparam command="load" file="$(find spacejockey)/config/joints.yaml" />
 	<rosparam command="load" file="$(find spacejockey)/config/planner.yaml" ns="planner" />
 	<param name="robot_description" textfile="$(find spacejockey)/resources/spacejockey.urdf" />

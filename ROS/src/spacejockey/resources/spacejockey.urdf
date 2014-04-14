@@ -92,10 +92,13 @@
   <link name="center_foot" />
   <link name="rear_foot" />
 
-  <joint name="base_fixed" type="fixed">
+  <!-- this is a fake joint for communicating robot rotations from the IK easily -->
+  <joint name="robot_rot" type="continuous"> 
+    <axis xyz="0 0 1"/>
     <parent link="robot"/>
     <child link="center_aft"/>
     <origin xyz="0 0 .067" />
+    <limit effort="1000.0" lower="-3.15" upper="3.15" velocity="0.5"/>
   </joint>
 
   <joint name="center_swivel" type="revolute">

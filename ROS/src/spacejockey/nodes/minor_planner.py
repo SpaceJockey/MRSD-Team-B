@@ -4,21 +4,22 @@ roslib.load_manifest('spacejockey')
 import rospy
 from collections import deque, namedtuple
 import spacejockey
-from spacejockey.kinematics import IK
+from spacejockey.kinematics import IK, joint_vel
 from spacejockey.msg import MajorPlanAction
 import tf
 from sensor_msgs.msg import JointState
+from geometry_msgs.msg import Transform, TransformStamped
 import math
 import argparse
 
 
 
 #TODO: load these from URDF
-node_names =  ['front_foot', 'center_foot', 'rear_foot']
+frame_names=  rospy.get_param('/joints/frame_names')
 minorqueue = deque()
 actionqueue = deque()
 
-MinorAction = namedtuple('MinorAction', 'name pos detach')
+MinorAction = namedtuple('MinorAction', 'name loc detach') #todo: add view angles
 PauseAction = namedtuple('PauseAction', 'name duration')
 float_error = .0001
 
@@ -36,9 +37,9 @@ class MinorPlanner:
     rospy.Subscriber('joint_states', JointState, self.handle_joint_states)
     rospy.init_node('minor_planner', anonymous=True)
 
-    self.tf = tf.TransformListener()
+    self.tf = tf.Transformer(True,  cache_time = rospy.Duration(1)) #local transformer for maths...
+    self.tfList = tf.TransformListener()
     self.tfCast = tf.TransformBroadcaster()
-
     self.lastTf = [((self.config.extend.min,0,0), tf.transformations.quaternion_from_euler(0, 0, 0)),
                    ((0,0,0), tf.transformations.quaternion_from_euler(0, 0, 0)),
                    ((-self.config.extend.min,0,0), tf.transformations.quaternion_from_euler(0, 0, 0))]
@@ -53,30 +54,80 @@ class MinorPlanner:
         return False
     return True
 
+  def eta(self):
+    """estimated time untile we've reached our next node"""
+    times = [0.0]
+    for j in self.joint_tgt.keys():
+      err = self.joint_tgt[j] - self.joints[j]
+      times.append(joint_vel[j] * err)
+    return max(times) 
+
   def update_joints(self):
     joints = self.joints #TODO: add joint velocities to self.joints
+    for j in self.joint_tgt.keys():
+      err = self.joint_tgt[j] - self.joints[j] 
+      joints[j] += math.copysign(min(abs(err), (joint_vel[j] / self.Hz)), err)
     j_msg = JointState()
     j_msg.name = joints.keys()
     j_msg.position = joints.values() 
-    self.jointPub.publish(joint_msg)
+    self.jointPub.publish(j_msg)
     return True
 
   def unpause(self, event):
     self.isPaused = False
 
+
+  def saveTransform(self, child_id, parent_id, loc, rot, time = rospy.Time(0)):
+    """save a tf to our private Transformer"""
+    t = TransformStamped()
+    t.header.frame_id = parent_id
+    t.header.stamp = time
+    t.child_frame_id = child_id
+    t.transform.translation.x = loc[0]
+    t.transform.translation.y = loc[1]
+    t.transform.translation.z = loc[2]
+    t.transform.rotation.x = rot[0]
+    t.transform.rotation.y = rot[1]
+    t.transform.rotation.z = rot[2]
+    t.transform.rotation.w = rot[3]
+    self.tf.setTransform(t)
+
+  def pullTransform(self, child_id, parent_id, time = rospy.Time(0)):
+    """pull a tf from the world to our private Transformer"""
+    (loc, rot) = self.tfList.lookupTransform(parent_id, child_id, time)
+    self.saveTransform(child_id, parent_id, loc, rot)
+    return (loc, rot)
+
+  def computeTransform(self, child_id, parent_id, time = rospy.Time(0)):
+    """query our private Transformer"""
+    return self.tf.lookupTransform(parent_id, child_id, time)
+
   def execute_minor_action(self, act):
     if act.name == 'pause':
       self.isPaused = True
       rospy.Timer(rospy.Duration(act.duration), self.unpause, True) #oneshot timer
-    #TODO: pull tfs, execute joint angles
-    return
+      return
+    self.tf.clear()
+
+    #pull needed values into our Transformer
+    for node in frame_names.keys():
+      if node == act.name:
+        self.saveTransform(frame_names[node], 'world', act.loc, (0,0,0,1))
+      else:
+        self.pullTransform(frame_names[node], 'world')
+
+    #calculate robot-frame transforms...
+    (floc, foobar) = self.computeTransform('front_foot', 'robot')
+    (rloc, foobar) = self.computeTransform('rear_foot', 'robot')
+    self.joint_tgt = IK(front = floc, rear=rloc, doDetach = act.detach)
+
+    #update the robot position...
+    if act.name == 'center_foot':
+      t_est = rospy.Duration.from_sec(self.eta())
+      self.tfCast.sendTransform(act.loc, (0,0,0,1), rospy.Time.now() + t_est, 'static/robot', 'world')
 
   def execute_move_action(self, msg):
-    node = node_names.index(msg.node_name)
-    try:
-      (loc, rot) = self.tf.lookupTransform('/world', msg.node_name, rospy.Time(0)) #try to get tf from world frame...
-    except:
-      (loc, rot) = self.lastTf[node] #fall back to internal model
+    (loc, rot) = self.tfList.lookupTransform('/world', msg.node_name, rospy.Time(0)) #try to get tf from world frame...
     loc = list(loc)
     loc[2] = self.config.move.detachHeight #detach
     minorqueue.append(MinorAction(msg.node_name, tuple(loc), True))
@@ -93,7 +144,6 @@ class MinorPlanner:
 
     loc[2] = 0.0 #attach
     minorqueue.append(MinorAction(msg.node_name, tuple(loc), False))
-    self.lastTf[node] = ((msg.x, msg.y, 0.0), tf.transformations.quaternion_from_euler(0, 0, msg.theta))
 
   def execute_view_action(self, msg):
     #TODO: make this a thing!
