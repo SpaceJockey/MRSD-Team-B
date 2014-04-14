@@ -25,8 +25,7 @@ class SpaceJockeyCam(object):
         self.height = 480
         self.frame_id = 'spacecam'
         self.image_pub = rospy.Publisher("spacecam/image_raw", Image)
-        self.cinfo = camera_info_manager.CameraInfoManager(cname = 'spacecam',
-                                                   url = 'PACKAGE://spacecam/config/calibration.yaml')
+        self.cinfo = camera_info_manager.CameraInfoManager(cname = 'spacecam', url = 'PACKAGE://spacecam/config/calibration.yaml')
         self.cinfo.loadCameraInfo()         # required before getCameraInfo()
         self.caminfo_pub = rospy.Publisher("spacecam/camera_info", CameraInfo)
         self.bridge = CvBridge()
