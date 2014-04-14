@@ -23,6 +23,7 @@ if __name__ == '__main__':
 	while not rospy.is_shutdown():
 		#listen for new static transforms
 		for frame in listener.getFrameStrings():
+			#print frame
 			if not frame.startswith('static/'):
 				continue
 			try:

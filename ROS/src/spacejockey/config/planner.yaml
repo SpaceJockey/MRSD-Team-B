@@ -1,9 +1,9 @@
 #Soft constraints for major planning actions
 #distances are in meters
 
-#starting positions...
-start/robot/loc: [0.0, 0.0, 0.0]
-start/robot/rot: [0.0, 0.0, 0.0, 1.0]
+frame_names/front_foot: 'front_foot'
+frame_names/center_foot: 'robot'
+frame_names/rear_foot: 'rear_foot'
 
 #body limits
 extend/max: .34 #linear actuator reach
@@ -12,7 +12,7 @@ angle/max: deg(15)
 
 #camera reach
 view/extend: .3 # where to put the foot when viewing
-view/extendHeight: .1
+view/extendHeight: .3
 view/max: .6 #camera view range
 view/min: .35
 view/opt: .5 # optimum camera viewing angle

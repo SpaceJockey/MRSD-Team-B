@@ -11,13 +11,20 @@ float_err = 0.0001
 joint_upper = dict()
 joint_lower = dict()
 joint_vel = dict()
+free_joints = []
+
 safe_limits = rospy.get_param('/use_smallest_joint_limits')
 detach_height = rospy.get_param('/planner/move/detachHeight')
 #TODO: unroll these using lambda defs...
 for j in urdf.joint_map.keys():
   try:
     joint_vel[j] = urdf.joint_map[j].limit.velocity
-    if(safe_limits and (urdf.joint_map[j].type == "revolute" or urdf.joint_map[j].type == "prismatic")):
+    j_type = urdf.joint_map[j].type
+    if not (j_type == "prismatic" or j_type == "revolute"): 
+      continue
+
+    free_joints.append(j)
+    if safe_limits:  
       try:
         joint_upper[j] = urdf.joint_map[j].safety_controller.soft_upper_limit
         joint_lower[j] = urdf.joint_map[j].safety_controller.soft_lower_limit
@@ -29,6 +36,14 @@ for j in urdf.joint_map.keys():
       joint_lower[j] = urdf.joint_map[j].limit.lower
   except AttributeError:
     continue
+
+def normalize(angle):
+  """normalize an angle to the range -pi - pi"""
+  if angle > math.pi:
+    angle -= math.pi
+  elif angle < -math.pi:
+    angle += math.pi
+  return angle
 
 def clip_limits(positions):
   for j in positions.keys():
@@ -43,7 +58,7 @@ def clip_limits(positions):
 
 #TODO: parameterize link offsets from URDF!
 #TODO: parameterize detach heights
-def IK(front = None, rear = None, doDetach = False, checkLimits = True):
+def IK(front = None, rear = None, doDetach = False, checkLimits = True, tgtRange = None):
   """Takes X, Y, Z tuples (in the local robot frame), and returns a partial set of joint angles"""
   positions = dict()
   positions['center_attach'] = 0.0 #default off...
