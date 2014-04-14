@@ -1,0 +1,5 @@
+#Soft constraints for major planning actions
+#distances are in meters
+
+#static starting frames...
+static_tfs/robot: [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0]]
