@@ -243,7 +243,7 @@ class App:
 		d1 = rconfig[1].distTo(rconfig[0])				 #distance between front and middle
 		d2 = rconfig[1].distTo(rconfig[2]) 				 #distance between middle and rear
 
-		if(frontRel > ferr or backRel > ferr): 		#feet not pointing at the thing
+		if(abs(backRel) > ferr or abs(frontRel) > config.angle.max): 		#feet not pointing at the thing
 			if(abs(frontRel) >= abs(backRel)): 		#rotate feet, starting with whichever is farther away
 				outPoint.theta = rconfig[2].theta + math.copysign(min(abs(backRel), config.angle.max), backRel) #TODO
 			else:
