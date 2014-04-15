@@ -10,3 +10,6 @@
 [submodule "ROS/src/camera_info_manager_py"]
 	path = ROS/src/camera_info_manager_py
 	url = https://github.com/ros-perception/camera_info_manager_py.git
+[submodule "ROS/src/tf_weighted"]
+	path = ROS/src/tf_weighted
+	url = https://github.com/Unchapped/tf_weighted.git
