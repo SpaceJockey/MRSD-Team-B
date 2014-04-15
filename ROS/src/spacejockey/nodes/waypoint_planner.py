@@ -3,6 +3,7 @@ from Tkinter import *
 from copy import deepcopy
 import math
 ferr = 0.0001 #floating point comparison error correction term
+merr = 0.01 #move positioning accuracy
 #import IPython
 
 #ROS Imports
@@ -12,8 +13,10 @@ import rospy
 import sys
 import spacejockey
 from spacejockey.msg import MajorPlanAction
+import tf
 
 config = spacejockey.config("/planner")
+frame_names = rospy.get_param('/planner/frame_names')
 
 #ROS publisher
 actionPub = rospy.Publisher('major_actions', MajorPlanAction)
@@ -50,13 +53,13 @@ class Point:
 def angleDiff(x, y): 
 	return math.atan2(math.sin(x-y), math.cos(x-y))
 
-class AngledPoint(Point):
-	def __init__(self, x = 0, y = 0, theta = 0, units = Point.M):
-		Point.__init__(self, x, y, units)
-		self.theta = theta
-
-	def __repr__(self):
-		return '[' + "{:.3f}".format(self.x) + ', ' + "{:.3f}".format(self.y) + ', ' + "{:.4f}".format(self.theta) + ']'
+#class AngledPoint(Point):
+#	def __init__(self, x = 0, y = 0, theta = 0, units = Point.M):
+#		Point.__init__(self, x, y, units)
+#		self.theta = theta
+#
+#	def __repr__(self):
+#		return '[' + "{:.3f}".format(self.x) + ', ' + "{:.3f}".format(self.y) + ', ' + "{:.4f}".format(self.theta) + ']'
 
 class Waypoint(Point):
     VIEW = 1
@@ -89,8 +92,8 @@ class MajorMove():
 	def publish(self):
 		global actionPub
 		node_name = self.__class__.NAMES[self.node_id] if (self.action == self.__class__.STEP) else "camera"
-		x, y, theta = (self.point.x, self.point.y, self.point.theta) if (self.action == self.__class__.STEP) else (self.waypoint.x, self.waypoint.y, 0.0)
-		return actionPub.publish(MajorPlanAction(self.major_id, self.action, node_name, x, y, theta))
+		x, y = (self.point.x, self.point.y) if (self.action == self.__class__.STEP) else (self.waypoint.x, self.waypoint.y)
+		return actionPub.publish(MajorPlanAction(self.major_id, self.action, node_name, x, y, 0.0))
 
 	def isAtTarget(self):
 		global ferr
@@ -98,7 +101,7 @@ class MajorMove():
 
 	def applyTo(self, rconfig):
 		rconfig[self.node_id] = self.point
-		rconfig[1].theta = rconfig[2].theta
+		#rconfig[1].theta = rconfig[2].theta
 
 	
 #main application class
@@ -108,6 +111,8 @@ class App:
 		self.root = master
 		frame = Frame(master)
 		frame.pack()
+
+		self.tfList = tf.TransformListener()
 		
 		self.prevX = 0
 		self.prevY = 0
@@ -123,26 +128,28 @@ class App:
 		self.statusbox.pack(side=RIGHT)
 
 		#robot configuration locations are represented as tuples of AngledPoints representing each foot.
-		self.currconfig = [AngledPoint(config.extend.min),AngledPoint(),AngledPoint(-config.extend.min)]
-		self.planconfig = [AngledPoint(config.extend.min),AngledPoint(),AngledPoint(-config.extend.min)]
+		self.confignames = ("front_foot", "center_foot", "rear_foot")
+		self.currconfig = [Point(config.extend.min),Point(),Point(-config.extend.min)]
+		self.planconfig = [Point(config.extend.min),Point(),Point(-config.extend.min)]
+		self.currMove = None
 
 		#set up queues
 		self.waypoints = []
 		self.moves = []
 
-		#start up ROS
-		rospy.init_node('waypoint_planner')
-		rospy.loginfo('Waypoint Planner Online')
-
 		self.update()
+
+	def setCurrMove(self, move):
+		self.currMove = move
+		move.publish()
 
 	def drawPoint(self, p, color = "blue", tag = ""):
 		x,y = p.toScreen()
 		self.canvas.create_oval(x-3,y-3,x+3,y+3, outline=color, tags=tag)
-		if(isinstance(p, AngledPoint)):
-			cTh = 6 * math.cos(p.theta)
-			sTh = 6 * math.sin(p.theta)
-			self.canvas.create_line(x - cTh, y + sTh, x + cTh, y - sTh, fill=color, tags=tag)
+		#if(isinstance(p, AngledPoint)):
+		#	cTh = 6 * math.cos(p.theta)
+		#	sTh = 6 * math.sin(p.theta)
+		#	self.canvas.create_line(x - cTh, y + sTh, x + cTh, y - sTh, fill=color, tags=tag)
 	
 	def redraw(self):
 		#update status indicator
@@ -171,7 +178,7 @@ class App:
 		if len(self.moves) > 0 and (self.moves[0].action == MajorMove.VIEW):
 			x,y = self.moves[0].waypoint.toScreen()
 			fx, fy = self.moves[0].point.toScreen()
-			theta = self.moves[0].point.theta
+			theta = self.currconfig[1].angleTo(self.currconfig[0]) #self.moves[0].point.theta
 			r = config.view.radius / config.window.scale
 			cTh = r * math.cos(theta)
 			sTh = r * math.sin(theta)
@@ -187,16 +194,30 @@ class App:
 			return
 
 		#update robot draw state
-		if(len(self.waypoints) > 0):
-			if len(self.moves) > 0:
-				self.moves[0].applyTo(self.currconfig)
-				self.redraw()
-			 	if self.moves[0].isAtTarget():
-					self.waypoints.pop(0)
-				self.moves.pop(0)
-		else:
-			self.redraw()
-		self.root.after(500, self.update)
+		now = rospy.Time.now()
+		for node in frame_names.keys():
+			try:
+				self.tfList.waitForTransform('world', frame_names[node], now, rospy.Duration(0.1))
+				(loc, rot) = self.tfList.lookupTransform('world', frame_names[node], now)
+				idx = self.confignames.index(node)
+				self.currconfig[idx] = Point(loc[0], loc[1])
+			except Exception as e:
+				#rospy.logerr(e)
+				continue
+
+
+		if self.waypoints:
+			if self.currMove:
+				#print self.currMove.point.distTo(self.currconfig[self.currMove.node_id])
+				if self.currMove.point.distTo(self.currconfig[self.currMove.node_id]) < merr: #move complete
+			 		if self.currMove.isAtTarget():
+						self.waypoints.pop(0)
+					if self.moves:
+						self.setCurrMove(self.moves.pop(0))
+					else:
+						self.currMove = None
+		self.redraw()
+		self.root.after(50, self.update)
 			
 	#on mouse clicks, add a waypoint
 	def clickCB(self, event):
@@ -214,16 +235,18 @@ class App:
 			move = self.getNextMove(self.planconfig, wp)
 			self.moves.append(move)
 			move.applyTo(self.planconfig)
-			move.publish()
+			#move.publish()
 			if move.isAtTarget():
 				break
+		if not self.currMove:
+			self.setCurrMove(self.moves.pop(0))
 
 	#Returns the next major planning action
 	#Rconfig: Current Configuration
 	#wp: Waypoint 	
 	def getNextMove(self, rconfig, wp):
 		global config, ferr
-		outPoint = AngledPoint() 
+		outPoint = Point() 
 
 		#target state
 		tgtAngle = rconfig[1].angleTo(wp)
@@ -233,21 +256,23 @@ class App:
 		
 		#output pseudoparams
 		extend = config.extend.min  #desired extension
-		outPoint.theta = tgtAngle	#init desired angle
+		newtheta = tgtAngle	#init desired angle
 		node_id = MajorMove.FRONT
 		action = MajorMove.STEP
 
 		#distances and angle error terms
-		frontRel = angleDiff(tgtAngle, rconfig[0].theta) #relative angle between front and target
-		backRel = angleDiff(tgtAngle, rconfig[2].theta)  #relative angle between back and target
+		frontTheta = rconfig[1].angleTo(rconfig[0])
+		backTheta = rconfig[2].angleTo(rconfig[1]) #math.atan2(rconfig[1].y - rconfig[2].y, rconfig[1].x - rconfig[2].x)
+		frontRel = angleDiff(tgtAngle, frontTheta) #relative angle between front and target
+		backRel = angleDiff(tgtAngle, backTheta)  #relative angle between back and target
 		d1 = rconfig[1].distTo(rconfig[0])				 #distance between front and middle
 		d2 = rconfig[1].distTo(rconfig[2]) 				 #distance between middle and rear
 
 		if(abs(backRel) > ferr or abs(frontRel) > config.angle.max): 		#feet not pointing at the thing
 			if(abs(frontRel) >= abs(backRel)): 		#rotate feet, starting with whichever is farther away
-				outPoint.theta = rconfig[2].theta + math.copysign(min(abs(backRel), config.angle.max), backRel) #TODO
+				newtheta = backTheta + math.copysign(min(abs(backRel), config.angle.max), backRel) #TODO
 			else:
-				outPoint.theta = rconfig[0].theta + math.copysign(min(abs(frontRel), config.angle.max), frontRel) #TODO
+				newtheta = frontTheta + math.copysign(min(abs(frontRel), config.angle.max), frontRel) #TODO
 				node_id = MajorMove.REAR
 				extend = -config.extend.min
 		else:										#move towards the thing
@@ -264,8 +289,8 @@ class App:
 				extend = min(tgtDist, config.extend.max - config.extend.min)
 
 		#derive final joint coordinates
-		outPoint.x = rconfig[1].x + (extend * math.cos(outPoint.theta))
-		outPoint.y = rconfig[1].y + (extend * math.sin(outPoint.theta))
+		outPoint.x = rconfig[1].x + (extend * math.cos(newtheta))
+		outPoint.y = rconfig[1].y + (extend * math.sin(newtheta))
 		move = MajorMove(outPoint, node_id, wp, action)
 		return move
 
@@ -273,6 +298,10 @@ class App:
 root = Tk()   
 root.wm_title("Planner Prototype")
 root.config(background="black")
+
+#start up ROS
+rospy.init_node('waypoint_planner')
+rospy.loginfo('Waypoint Planner Online')
 app = App(root)
 
 #start the GUI
