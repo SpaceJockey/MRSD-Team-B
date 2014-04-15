@@ -103,14 +103,14 @@
 
   <joint name="center_swivel" type="revolute">
     <axis xyz="0 0 1"/>
-    <limit effort="1000.0" lower="-.8" upper=".8" velocity="0.5"/>
+    <limit effort="1000.0" lower="-.8" upper=".8" velocity=" 2.094"/>
     <parent link="center_aft"/>
     <child link="center_seg"/>
   </joint>
 
   <joint name="fore_base_pitch" type="revolute">
     <axis xyz="0 1 0"/>
-    <limit effort="1000.0" lower="-.6" upper=".6" velocity="0.5"/>
+    <limit effort="1000.0" lower="-.6" upper=".6" velocity=" 2.094"/>
     <origin xyz="0.06985 0 0"/>
     <parent link="center_seg"/>
     <child link="fore_base_pole"/>
@@ -119,19 +119,19 @@
   <joint name="fore_extend" type="prismatic">
     <parent link="fore_base_pole"/>
     <child link="fore_base_prism"/>
-    <limit effort="1000.0" lower="0.19726" upper="0.27315" velocity="0.5"/>
+    <limit effort="1000.0" lower="0.19726" upper="0.048" velocity="0.5"/>
   </joint>
 
   <joint name="front_pitch" type="revolute">
     <axis xyz="0 1 0"/>
-    <limit effort="1000.0" lower="-.6" upper=".6" velocity="0.5"/>
+    <limit effort="1000.0" lower="-.6" upper=".6" velocity=" 2.094"/>
     <parent link="fore_base_prism"/>
     <child link="front_seg"/>
   </joint>
 
   <joint name="aft_base_pitch" type="revolute">
     <axis xyz="0 1 0"/>
-    <limit effort="1000.0" lower="-.6" upper=".6" velocity="0.5"/>
+    <limit effort="1000.0" lower="-.6" upper=".6" velocity=" 2.094"/>
     <origin xyz="-0.06985 0 0"/>
     <parent link="center_aft"/>
     <child link="aft_base_pole"/>
@@ -141,12 +141,12 @@
     <parent link="aft_base_pole"/>
     <child link="aft_base_prism"/>
     <axis xyz="-1 0 0"/>
-    <limit effort="1000.0" lower="0.19726" upper="0.27315" velocity="0.5"/>
+    <limit effort="1000.0" lower="0.19726" upper="0.048" velocity="0.5"/>
   </joint>
 
   <joint name="rear_pitch" type="revolute">
     <axis xyz="0 1 0"/>
-    <limit effort="1000.0" lower="-.6" upper=".6" velocity="0.5"/>
+    <limit effort="1000.0" lower="-.6" upper=".6" velocity=" 2.094"/>
     <parent link="aft_base_prism"/>
     <child link="rear_seg"/>
   </joint>
@@ -154,7 +154,7 @@
   <joint name="front_attach" type="fixed">
     <parent link="front_seg"/>
     <child link="front_foot"/>
-    <!-- <limit effort="1000.0" lower="0" upper="0.006" velocity="0.5"/>
+    <!-- <limit effort="1000.0" lower="0" upper="0.006" velocity=" 2.094"/>
     <axis xyz="0 0 -1"/> -->
     <origin xyz="0.00069 0 -0.04763"/>
   </joint>
@@ -162,7 +162,7 @@
   <joint name="center_attach" type="prismatic">
     <parent link="robot"/>
     <child link="center_foot"/>
-    <limit effort="1000.0" lower="0" upper="0.006" velocity="0.5"/>
+    <limit effort="1000.0" lower="0" upper="0.006" velocity="0. 2.094"/>
     <axis xyz="0 0 -1"/>
   </joint>
 
