@@ -149,9 +149,10 @@ class MinorPlanner:
     (loc, rot) = self.tfList.lookupTransform('world', frame_id, now)
     loc = list(loc)
 
-    #TODO: skip detach step if node is already off the surface...
-    loc[2] = self.config.move.detachHeight #detach
-    minorqueue.append(MinorAction(msg.node_name, tuple(loc), True))
+    #Skip detach step if node is already off the surface...
+    if(loc[2] < self.config.move.detachHeight):
+      loc[2] = self.config.move.detachHeight #detach
+      minorqueue.append(MinorAction(msg.node_name, tuple(loc), True))
 
     loc[2] = self.config.move.clearHeight #apex
     loc[0] = (loc[0] + msg.x) / 2.0
