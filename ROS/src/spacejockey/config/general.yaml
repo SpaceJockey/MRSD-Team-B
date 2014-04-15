@@ -3,4 +3,7 @@
 
 #static starting frames...
 static_tfs/robot: [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0]]
-static_tfs/ar_marker_0: [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0]]
+static_tfs/marker_0: [[-1.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]
+static_tfs/marker_1: [[1.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]
+static_tfs/marker_2: [[1.0, -1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]
+static_tfs/marker_3: [[-1.0, -1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]

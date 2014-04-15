@@ -16,7 +16,7 @@ import copy
 class CV_tf_cvimages(object):
     def __init__(self):
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber("spacecam/image_raw",Image,self.callback)
+        self.image_sub = rospy.Subscriber("camera/image_raw",Image,self.callback)
         k = rospy.get_param("/camera_matrix/data")
         self.K=np.matrix([[k[0],k[1],k[2]],[k[3],k[4],k[5]],[k[6],k[7],k[8]]])
         self.tfList = tf.TransformListener() # for the getting big H
@@ -24,6 +24,7 @@ class CV_tf_cvimages(object):
     def callback(self,data):
         try:
             cv_image = self.bridge.imgmsg_to_cv2(data, "passthrough")
+            self.tfList.waitForTransform('/camera', '/world', data.header.stamp, rospy.Duration(0.1))
             (trans, rot) = self.tfList.lookupTransform('/camera', '/world', data.header.stamp)
             h = tf.TransformerROS().fromTranslationRotation(trans, rot)
         except Exception as e:

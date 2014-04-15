@@ -119,7 +119,7 @@
   <joint name="fore_extend" type="prismatic">
     <parent link="fore_base_pole"/>
     <child link="fore_base_prism"/>
-    <limit effort="1000.0" lower="0.19726" upper="0.048" velocity="0.5"/>
+    <limit effort="1000.0" lower="0.1902" upper="0.2781" velocity="0.048"/>
   </joint>
 
   <joint name="front_pitch" type="revolute">
@@ -141,7 +141,7 @@
     <parent link="aft_base_pole"/>
     <child link="aft_base_prism"/>
     <axis xyz="-1 0 0"/>
-    <limit effort="1000.0" lower="0.19726" upper="0.048" velocity="0.5"/>
+    <limit effort="1000.0" lower="0.1902" upper="0.2781" velocity="0.048"/>
   </joint>
 
   <joint name="rear_pitch" type="revolute">
@@ -175,7 +175,7 @@
   </joint>
 
   <joint name="camera_fixed" type="fixed">
-    <origin xyz=".06 .025 -.03" rpy="0 .3 0"/>
+    <origin xyz=".06 -.025 -.03" rpy="0 2.3562 0"/>
     <parent link="front_seg"/>
     <child link="camera"/>
   </joint>

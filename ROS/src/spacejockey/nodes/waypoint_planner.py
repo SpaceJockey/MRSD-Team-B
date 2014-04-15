@@ -132,6 +132,7 @@ class App:
 		self.currconfig = [Point(config.extend.min),Point(),Point(-config.extend.min)]
 		self.planconfig = [Point(config.extend.min),Point(),Point(-config.extend.min)]
 		self.currMove = None
+		#self.setCurrMove(MajorMove(Point(.5, 0), 0, Point(.5, 0), MajorMove.VIEW)) #initial localization move
 
 		#set up queues
 		self.waypoints = []
