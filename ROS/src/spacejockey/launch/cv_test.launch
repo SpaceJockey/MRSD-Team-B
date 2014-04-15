@@ -1,0 +1,9 @@
+<launch>
+	<rosparam command="load" file="$(find spacecam)/config/calibration.yaml" />
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find spacejockey)/resources/spacejockey.rviz" required="true" />
+	<!-- <node name="tf_listener" pkg="learning_tf" type="tf_listener.py" required="true" output="screen"/> -->
+	<node name="spacecam" pkg="spacecam" type="spacecam.py" args="-u http://61.44.104.86/nphMotionJpeg?resolution=320x480" />
+	<node name="world_warp" pkg="spacejockey" type="world_warp.py" required="true" output="screen"/>
+	<node name="flaw_detect" pkg="spacejockey" type="flaw_detect.py" required="true" output="screen"/>
+	<node pkg="tf" type="static_transform_publisher" name="camera" args=" 1.5 1.5 0.5 0 0.6 0 /world /camera 100"/>
+</launch>
