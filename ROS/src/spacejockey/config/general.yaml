@@ -3,3 +3,4 @@
 
 #static starting frames...
 static_tfs/robot: [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0]]
+static_tfs/ar_marker_0: [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0]]
