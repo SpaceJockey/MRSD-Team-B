@@ -16,6 +16,7 @@ from spacejockey.msg import MajorPlanAction
 import tf
 
 config = spacejockey.config("/planner")
+window = spacejockey.config("/gui")
 frame_names = rospy.get_param('/planner/frame_names')
 
 #ROS publisher
@@ -28,8 +29,8 @@ class Point:
 	def __init__(self, x = 0, y = 0, units = M):
 		global config
 		if (units == Point.PX):
-			self.x = (x - config.window.origin.x) * config.window.scale
-			self.y = (config.window.origin.y - y) * config.window.scale
+			self.x = (x - window.origin.x) * window.scale
+			self.y = (window.origin.y - y) * window.scale
 		else:
 			self.x = x
 			self.y = y
@@ -37,8 +38,8 @@ class Point:
 	#returns output values in screen coordinates
 	def toScreen(self):
 		global config
-		n_x = (self.x  / config.window.scale) + config.window.origin.x
-		n_y = config.window.origin.y - (self.y / config.window.scale)
+		n_x = (self.x  / window.scale) + window.origin.x
+		n_y = window.origin.y - (self.y / window.scale)
 		return(n_x, n_y)
 
 	#returns the pythagorean distance between two points
@@ -117,7 +118,7 @@ class App:
 		self.prevX = 0
 		self.prevY = 0
 
-		self.canvas = Canvas(frame, bg="black", height = config.window.height, width = config.window.width, confine = "true", cursor = "cross")
+		self.canvas = Canvas(frame, bg="black", height = window.height, width = window.width, confine = "true", cursor = "cross")
 		self.canvas.pack(side=TOP)
 		self.canvas.bind("<Button-1>", self.clickCB) 
 		self.canvas.bind("<Button-3>", self.clickCB) 
@@ -180,7 +181,7 @@ class App:
 			x,y = self.moves[0].waypoint.toScreen()
 			fx, fy = self.moves[0].point.toScreen()
 			theta = self.currconfig[1].angleTo(self.currconfig[0]) #self.moves[0].point.theta
-			r = config.view.radius / config.window.scale
+			r = config.view.radius / window.scale
 			cTh = r * math.cos(theta)
 			sTh = r * math.sin(theta)
 			self.canvas.create_oval(x-r, y-r, x+r, y+r, outline="red", tags="view")
@@ -303,6 +304,7 @@ root.config(background="black")
 #start up ROS
 rospy.init_node('waypoint_planner')
 rospy.loginfo('Waypoint Planner Online')
+#rospy.sleep(0.5)
 app = App(root)
 
 #start the GUI

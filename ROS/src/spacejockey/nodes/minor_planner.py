@@ -27,7 +27,7 @@ float_error = .0001
 
 
 class MinorPlanner:
-  def __init__(self, rate = 10):
+  def __init__(self, rate):
     self.Hz = rate
     self.config = spacejockey.config("/planner")
     #static view position transform
@@ -209,7 +209,7 @@ class MinorPlanner:
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(prog='minor_planner.py', description="this node breaks down moves into their constituent parts and executes them.")
   #parser.add_argument('-f', '--root_frame', default='world', help='the root frame_id to tie transforms to')
-  parser.add_argument('-r', '--rate', type=int, default=10, help='motor control output rate (in Hz)')
+  parser.add_argument('-r', '--rate', type=int, default=50, help='motor control output rate (in Hz)')
   args, unknown = parser.parse_known_args()
   try:
     planner = MinorPlanner(args.rate)
