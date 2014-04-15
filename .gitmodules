@@ -4,3 +4,9 @@
 [submodule "ROS/src/ar_track_alvar"]
 	path = ROS/src/ar_track_alvar
 	url = git@github.com:sniekum/ar_track_alvar.git
+[submodule "ROS/src/vision_opencv"]
+	path = ROS/src/vision_opencv
+	url = https://github.com/ros-perception/vision_opencv.git
+[submodule "ROS/src/camera_info_manager_py"]
+	path = ROS/src/camera_info_manager_py
+	url = https://github.com/ros-perception/camera_info_manager_py.git
