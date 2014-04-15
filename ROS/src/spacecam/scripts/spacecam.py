@@ -39,14 +39,6 @@ class SpaceJockeyCam(object):
         cimsg.height = self.height
         self.caminfo_pub.publish(cimsg)
 
-    def publishMsg(self):
-        '''Publish jpeg image as a ROS message'''
-        self.msg = Image()
-        self.msg.header.stamp = rospy.Time.now()
-        self.msg.header.frame_id = self.frame_id
-        self.msg.data = self.img
-        self.axis.pub.publish(self.msg)
-
 def main():
     parser = argparse.ArgumentParser(prog='spacecam.py', description='reads a given url string and dumps it to a ros_image topic')
     parser.add_argument('-g', '--gui', action='store_true', help='show a GUI of the camera stream')
@@ -64,20 +56,21 @@ def main():
             jpg = spacecam.bytes[a:b+2]
             spacecam.bytes= spacecam.bytes[b+2:]
             i = cv2.imdecode(np.fromstring(jpg, dtype=np.uint8),cv2.CV_LOAD_IMAGE_COLOR)
-            image_message = spacecam.bridge.cv2_to_imgmsg(i, "bgr8")
-            image_message.header.stamp = rospy.Time.now()
-            image_message.header.frame_id = spacecam.frame_id
-            spacecam.image_pub.publish(image_message)
-            spacecam.publishCameraInfoMsg()
-            print "height: ", image_message.height
-            print "width: ", image_message.width
-            print "encoding: ", image_message.encoding
-            print "step: ", image_message.step
-            print "header: ", image_message.header
-            if args.gui:
-                cv2.imshow('Space Jockey Publisher Cam',i)
-            if cv2.waitKey(1) ==27: # wait until ESC key is pressed in the GUI window to stop it
-                exit(0) 
+            if i is not None:
+                image_message = spacecam.bridge.cv2_to_imgmsg(i, "bgr8")
+                image_message.header.stamp = rospy.Time.now()
+                image_message.header.frame_id = spacecam.frame_id
+                spacecam.image_pub.publish(image_message)
+                spacecam.publishCameraInfoMsg()
+                print "height: ", image_message.height
+                print "width: ", image_message.width
+                print "encoding: ", image_message.encoding
+                print "step: ", image_message.step
+                print "header: ", image_message.header
+                if args.gui:
+                    cv2.imshow('Space Jockey Publisher Cam',i)
+                if cv2.waitKey(1) ==27: # wait until ESC key is pressed in the GUI window to stop it
+                    exit(0) 
     
 
 
