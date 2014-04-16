@@ -1,10 +1,8 @@
 <launch>
 	<include file="$(find spacejockey)/launch/core.launch" />
-	<rosparam command="load" file="$(find spacecam)/config/calibration.yaml" />
-	<!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find spacejockey)/resources/spacejockey.rviz" required="true" /> -->
+	<node name="ip_camera" pkg="ipcam" type="ipcam.py" args="-c FILE://$(find spacejockey)/config/camera.yaml http://128.223.164.243/mjpg/video.mjpg" />
 	<node name="minor_planner" pkg="spacejockey" type="minor_planner.py" output="screen"/>
 	<node name="waypoint_planner" pkg="spacejockey" type="waypoint_planner.py" required="true" />
-	<node name="spacecam" pkg="spacecam" type="spacecam.py" args="-u http://166.141.40.13:8050/mjpg/video.mjpg" />
 	<node name="world_warp" pkg="spacejockey" type="world_warp.py" required="true" output="screen"/>
 	<!-- <node name="flaw_detect" pkg="spacejockey" type="flaw_detect.py" required="true" output="screen"/> -->
 </launch>
