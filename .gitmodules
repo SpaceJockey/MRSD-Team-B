@@ -13,3 +13,6 @@
 [submodule "ROS/src/tf_weighted"]
 	path = ROS/src/tf_weighted
 	url = https://github.com/Unchapped/tf_weighted.git
+[submodule "ROS/src/ipcam"]
+	path = ROS/src/ipcam
+	url = https://github.com/ardyadipta/ipcam_ros.git
