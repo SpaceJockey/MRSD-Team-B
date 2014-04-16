@@ -1,6 +1,6 @@
 [submodule "ROS/src/rosserial"]
 	path = ROS/src/rosserial
-	url = https://github.com/Unchapped/rosserial.git
+	url = https://github.com/SpaceJockey/rosserial.git
 [submodule "ROS/src/ar_track_alvar"]
 	path = ROS/src/ar_track_alvar
 	url = git@github.com:sniekum/ar_track_alvar.git
@@ -15,4 +15,4 @@
 	url = https://github.com/Unchapped/tf_weighted.git
 [submodule "ROS/src/ipcam"]
 	path = ROS/src/ipcam
-	url = https://github.com/ardyadipta/ipcam_ros.git
+	url = https://github.com/SpaceJockey/ipcam_ros.git
