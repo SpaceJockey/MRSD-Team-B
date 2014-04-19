@@ -13,6 +13,7 @@ import rospy
 import sys
 import spacejockey
 from spacejockey.msg import MajorPlanAction
+from std_msgs.msg import Int16
 import tf
 
 config = spacejockey.config("/planner")
@@ -114,6 +115,7 @@ class App:
 		frame.pack()
 
 		self.tfList = tf.TransformListener()
+		rospy.Subscriber('battery_state', Int16, self.handleBatt)
 		
 		self.prevX = 0
 		self.prevY = 0
@@ -128,6 +130,11 @@ class App:
 		self.statusbox = Label(frame, textvariable = self.status, relief=SUNKEN, width = 20);
 		self.statusbox.pack(side=RIGHT)
 
+		self.batt = StringVar()
+		self.batt.set("Battery: 100%")
+		self.battbox = Label(frame, textvariable = self.batt, relief=SUNKEN, width = 20);
+		self.battbox.pack(side=LEFT)
+
 		#robot configuration locations are represented as tuples of AngledPoints representing each foot.
 		self.confignames = ("front_foot", "center_foot", "rear_foot")
 		self.currconfig = [Point(config.extend.min),Point(),Point(-config.extend.min)]
@@ -138,8 +145,10 @@ class App:
 		#set up queues
 		self.waypoints = []
 		self.moves = []
-
 		self.update()
+
+	def handleBatt(self, msg):
+		self.batt.set("Battery: " + str(msg.data) + "%")
 
 	def setCurrMove(self, move):
 		self.currMove = move
