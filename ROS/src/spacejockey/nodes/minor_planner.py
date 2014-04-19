@@ -37,10 +37,10 @@ class MinorPlanner:
     self.joints = dict()
     self.isPaused = False
 
-    self.jointPub = rospy.Publisher('joint_states_planned', JointState)    
+    self.jointPub = rospy.Publisher('joint_states', JointState)    
     rospy.Subscriber('major_actions', MajorPlanAction, self.handle_major_action)
-    rospy.Subscriber('joint_states', JointState, self.handle_joint_states)
-    rospy.init_node('minor_planner', anonymous=True)
+    rospy.Subscriber('/joint_states', JointState, self.handle_joint_states)
+    rospy.init_node('minor_planner')
 
     self.tf = tf.Transformer(True,  cache_time = rospy.Duration(1)) #local transformer for maths...
     self.tfTime = rospy.Time(0) #use the same timestamp for all internal tf calcs

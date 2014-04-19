@@ -3,7 +3,7 @@
 use_smallest_joint_limits: False
 
 #these are the default settings for the joint_state_publisher node
-source_list: ["joint_states_planned"]
+source_list: ["planner/joint_states"]
 use_gui: False
 
 #these are used for lash compensation settings

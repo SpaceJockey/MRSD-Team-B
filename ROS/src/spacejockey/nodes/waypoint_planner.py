@@ -115,7 +115,7 @@ class App:
 		frame.pack()
 
 		self.tfList = tf.TransformListener()
-		rospy.Subscriber('battery_state', Int16, self.handleBatt)
+		rospy.Subscriber('/battery_state', Int16, self.handleBatt)
 		
 		self.prevX = 0
 		self.prevY = 0
