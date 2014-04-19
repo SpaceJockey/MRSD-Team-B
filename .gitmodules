@@ -16,3 +16,6 @@
 [submodule "ROS/src/ipcam"]
 	path = ROS/src/ipcam
 	url = https://github.com/SpaceJockey/ipcam_ros.git
+[submodule "ROS/src/geometry_experimental"]
+	path = ROS/src/geometry_experimental
+	url = https://github.com/SpaceJockey/geometry_experimental.git
