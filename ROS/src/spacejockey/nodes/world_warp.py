@@ -13,6 +13,8 @@ import spacejockey
 import tf
 import geometry_msgs.msg
 import copy
+import os,sys
+
 
 class CV_tf_cvimages(object):
     def __init__(self):
@@ -25,6 +27,7 @@ class CV_tf_cvimages(object):
         self.height = rospy.get_param("/gui/height")
         self.scale  = 1.0 / rospy.get_param("/gui/scale")
         self.origin = spacejockey.config("/gui/origin")
+        self.sum=[]
 
     def callback(self,data):
         try:
@@ -62,7 +65,6 @@ class CV_tf_cvimages(object):
 
         # scale the real world to the worldImage 
         c = np.matrix([[self.scale,0,self.origin.x],[0,-self.scale,self.origin.y],[0,0,1]])
-
         # inverse the 3*3 matrix
         b = c*a.I 
         
@@ -99,11 +101,30 @@ class CV_tf_cvimages(object):
         ## TODO
         ## need to overlap all the images from camera  to a big worldImage
         ## need to store this worldImage to ROS images msgs for future calling for image comparison part
-        dst = cv2.warpPerspective(cv_image,b,(self.width, self.height))
-        cv2.imshow("World_Image", dst)
+        if self.sum==[]:
+            dst = cv2.warpPerspective(cv_image,b,(worldImage_width,worldImage_height))
+            self.sum=dst
+            print dst[10,10]
+            print self.sum[10,10]
+        else:
+            dst = cv2.warpPerspective(cv_image,b,(worldImage_width,worldImage_height))
+            # compare the temp pixel values and dst pixel values
+            # if pixel is black on pre [000], then add dst's acoording pixel's value
+            # if pixel is not black on pre, then add dst's accodrding pixle's value /2
+            for row in range(worldImage_height):
+                for col in range(worldImage_width):
+                    if self.sum[row,col][0]==0 and self.sum[row,col][1]==0 and self.sum[row,col][1]==0:
+                        self.sum[row,col]=dst[row,col]
+                    else:
+                        self.sum[row,col]=(self.sum[row,col]+dst[row,col])/2
+        print self.sum
 
+
+        ### this is save the World_Image for the final
+        ### next time run it with flaws on it should save with another name
+        cv2.imwrite(os.path.dirname(sys.argv[0])+"/World_Image.png",self.sum)
+        cv2.imshow("World_Image", self.sum)
         cv2.waitKey(3)
-
 
  
 if __name__ == '__main__':

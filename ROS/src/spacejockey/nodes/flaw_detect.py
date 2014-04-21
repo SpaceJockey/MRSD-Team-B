@@ -24,11 +24,11 @@ class ImageComparison(object):
     def __init__(self):
         self.bridge = CvBridge()
         # call the worldImage 
-        self.worldImage_sub = rospy.Subscriber("spacecam/image_raw",Image,self.callback)
+        self.worldImage_sub = rospy.Subscriber("camera/image_raw",Image,self.callback)
 
     def callback(self,data):
         try:
-            cv_image = self.bridge.imgmsg_to_cv2(data, "passthrough")
+            cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
         except Exception as e:
             rospy.logerr(str(e))
             return
@@ -38,21 +38,22 @@ class ImageComparison(object):
         # right now whole pipeline is not finished
         # so test here by using images created before for image comparison testing
 
-        # here should have img1,img2
-        img1=cv_image
-        img2=cv_image
-        # how to control different time to catch infor from ROSimages msgs
-        # to get different time status worldImages
-        height, width, depth = img1.shape
-        print height
+        # # here should have img1,img2
+        # img1=cv_image
+        # img2=cv_image
+        # # how to control different time to catch infor from ROSimages msgs
+        # # to get different time status worldImages
+        # height, width, depth = img1.shape
+        # print height
 
         # print "Inspection is working..."
         # print 'sys.argv[0] =', sys.argv[0]
         # print 'path = ' + os.path.dirname(sys.argv[0]) 
 
-        # img1 = cv2.imread('testsurface_new1.png')  
-        # print type(img1)
-        # img2 = cv2.imread('testsurface_baseline.png')
+        # change the name to the real worldmap's name instead
+        img1 = cv2.imread(os.path.dirname(sys.argv[0]) +'/testsurface_new1.png')  
+        print type(img1)
+        img2 = cv2.imread(os.path.dirname(sys.argv[0]) +'/testsurface_baseline.png')
 
         # print img1.shape
         gray1=cv2.cvtColor(img1,cv2.COLOR_RGB2GRAY)
