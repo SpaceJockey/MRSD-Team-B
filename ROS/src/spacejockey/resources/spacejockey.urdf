@@ -175,7 +175,7 @@
   </joint>
 
   <joint name="camera_fixed" type="fixed">
-    <origin xyz=".06 -.025 -.03" rpy="0 2.3562 0"/>
+    <origin xyz=".082 .019 -.009" rpy="0 2.3562 0"/>
     <parent link="front_seg"/>
     <child link="camera"/>
   </joint>
