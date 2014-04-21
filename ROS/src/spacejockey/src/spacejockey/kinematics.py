@@ -57,7 +57,6 @@ def clip_limits(positions):
   return positions
 
 #TODO: parameterize link offsets from URDF!
-#TODO: parameterize detach heights
 def IK(front = None, rear = None, doDetach = False, checkLimits = True, tgtRange = None):
   """Takes X, Y, Z tuples (in the local robot frame), and returns a partial set of joint angles"""
   positions = dict()
@@ -79,6 +78,9 @@ def IK(front = None, rear = None, doDetach = False, checkLimits = True, tgtRange
         positions['center_attach'] = 0.1 
       if front[2] >= detach_height - float_err: #twist the front foot to detach
         positions['front_pitch'] -= 0.1
+    elif tgtRange: #FIXME: implement viewing angle for view moves
+      tgtTheta = math.atan2(f_z_dist, tgtRange - f_xy_dist) - math.radians(20) #TODO: pull camera angle from URDF
+      positions['front_pitch'] += tgtTheta
 
   if(rear):
     r_xy_dist = math.sqrt(rear[0]**2 + rear[1]**2) - .07054
@@ -101,10 +103,6 @@ def IK(front = None, rear = None, doDetach = False, checkLimits = True, tgtRange
   #TODO: what happens to the center joint if both front and back are set?
   if front and rear:
     positions['center_swivel'] = ftheta - rtheta
-
-  #FIXME: implement viewing angle for view moves
-  if tgtRange:
-    pass
 
   if(checkLimits):
   	return clip_limits(positions)

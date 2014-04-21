@@ -13,9 +13,9 @@ angle/max: deg(15)
 #camera reach
 view/extend: .3 # where to put the foot when viewing
 view/extendHeight: .125
-view/max: .6 #camera view range
-view/min: .35
-view/opt: .5 # optimum camera viewing angle
+view/max: 1 #camera view range
+view/min: .5
+view/opt: .6 # optimum camera viewing angle
 view/radius: .2
 
 #Subplanner options

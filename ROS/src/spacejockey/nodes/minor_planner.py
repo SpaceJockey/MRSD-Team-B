@@ -176,7 +176,7 @@ class MinorPlanner:
     trange = math.sqrt(vloc[0]**2 + vloc[1]**2)
 
     #queue up a view movement
-    minorqueue.append(ViewAction(1.0)) #trange))
+    minorqueue.append(ViewAction(trange))
 
     #queue up a pause action
     minorqueue.append(PauseAction(3)) #TODO: perameterize pause duration...

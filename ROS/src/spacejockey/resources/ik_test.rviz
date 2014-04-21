@@ -151,8 +151,6 @@ Visualization Manager:
           Value: true
         aft_base_prism:
           Value: true
-        brain:
-          Value: true
         camera:
           Value: true
         center_aft:
@@ -169,6 +167,20 @@ Visualization Manager:
           Value: true
         front_seg:
           Value: true
+        front_tgt:
+          Value: true
+        marker_0:
+          Value: true
+        marker_1:
+          Value: true
+        marker_2:
+          Value: true
+        marker_3:
+          Value: true
+        marker_4:
+          Value: true
+        marker_5:
+          Value: true
         rear_foot:
           Value: true
         rear_seg:
@@ -177,22 +189,39 @@ Visualization Manager:
           Value: true
         robot:
           Value: true
+        static/front_tgt:
+          Value: true
         static/rear_tgt:
           Value: true
-        static/robot:
+        static/view:
+          Value: true
+        view:
           Value: true
         world:
           Value: true
       Marker Scale: 0.2
       Name: TF
-      Show Arrows: true
+      Show Arrows: false
       Show Axes: true
       Show Names: true
       Tree:
         world:
+          front_tgt:
+            {}
+          marker_0:
+            {}
+          marker_1:
+            {}
+          marker_2:
+            {}
+          marker_3:
+            {}
+          marker_4:
+            {}
+          marker_5:
+            {}
           rear_tgt:
-            brain:
-              {}
+            {}
           robot:
             center_aft:
               aft_base_pole:
@@ -210,9 +239,13 @@ Visualization Manager:
                         {}
             center_foot:
               {}
+          static/front_tgt:
+            {}
           static/rear_tgt:
             {}
-          static/robot:
+          static/view:
+            {}
+          view:
             {}
       Update Interval: 0
       Value: true
@@ -240,7 +273,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 0.872685
+      Distance: 1.53381
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
@@ -252,10 +285,10 @@ Visualization Manager:
         Z: 0
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.509795
+      Pitch: 0.309795
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.20223
+      Yaw: 0.49723
     Saved: ~
 Window Geometry:
   Displays:
@@ -273,5 +306,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 980
-  X: 264
-  Y: 21
+  X: 255
+  Y: 19

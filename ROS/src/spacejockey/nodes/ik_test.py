@@ -67,7 +67,7 @@ def make6DofMarker( name, x = 0, y = 0, z = 0, parent = "/world"):
   server.insert(int_marker, processFeedback)
   return int_marker
 
-jointPub = rospy.Publisher('joint_states_planned', JointState)
+jointPub = rospy.Publisher('planner/joint_states', JointState)
 
 def poseToTf(pose):
   return ((pose.position.x, pose.position.y, pose.position.z), (pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w))
@@ -83,17 +83,13 @@ def processFeedback(feedback):
       #tfCast.sendTransform(floc, frot, rospy.Time.now(), '/brain', '/robot') #hollaback
       (cloc, crot) = tfList.lookupTransform('/world', '/robot', rospy.Time(0))
     except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException) as e:
-      #print(e)
+      print(e)
       return
-    #soln = {
-    #  'front_tgt' : IK(front = floc, doDetach = True),
-    #  'rear_tgt' : IK(rear = rloc, doDetach = True),
-    #  'center_tgt' : IK(rear = rloc, front = floc, doDetach = True)
-    #}[feedback.marker_name]
-    soln = IK(rear = rloc, front = floc, doDetach = True)
-    #if('robot_rot' in soln): #apply rotations to the robot pose...
-    #  tfCast.sendTransform(cloc, crot + tf.transformations.quaternion_from_euler(0, 0, soln['robot_rot']), rospy.Time.now(), '/static/robot', '/world')
-    #  soln['robot_rot'] = 0.0
+    if feedback.marker_name == 'view':
+      tgt = math.sqrt((loc[0] - cloc[0])**2 + (loc[1] - cloc[1])**2)
+      soln = IK(rear = rloc, front = floc, tgtRange = tgt)
+    else:
+      soln = IK(rear = rloc, front = floc, doDetach = True)
     publishJoints(soln)
     #TODO: republish the robot frame rotated...
 
@@ -115,7 +111,8 @@ server = InteractiveMarkerServer("ik_test")
 markers = {
   'robot': make6DofMarker("robot", 0, 0, 0), 
   'front_tgt' : make6DofMarker("front_tgt", config.extend.min, 0, 0),
-  'rear_tgt'  : make6DofMarker("rear_tgt", -config.extend.min, 0, 0)
+  'rear_tgt'  : make6DofMarker("rear_tgt", -config.extend.min, 0, 0),
+  'view'  : make6DofMarker("view", config.view.opt, 0, 0)
 }
 server.applyChanges()
 
