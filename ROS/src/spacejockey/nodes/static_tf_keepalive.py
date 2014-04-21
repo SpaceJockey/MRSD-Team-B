@@ -6,7 +6,7 @@ import tf
 import argparse
 
 #this node is a workaround for tf's poor support for static transforms
-#TODO: figure out how to publish these to the underlying tf2 framework...
+#TODO: add a publisher/listener to the tf_static topic
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(prog='static_tf_keepalive.py', description="this node is a workaround for tf's poor support for static transforms")
 	parser.add_argument('-f', '--root_frame', default='world', help='the root frame_id to tie transforms to')

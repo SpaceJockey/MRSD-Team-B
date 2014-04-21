@@ -11,8 +11,9 @@ extend/min: .26
 angle/max: deg(15)
 
 #Tkinter window options
-width: 600
-height: 600
-scale: 0.005  #50 cm / 100px
-origin/x: 300
-origin/y: 300
+#1x3 meter configuration for SVE
+width: 1200
+height: 400
+scale: 0.0025  #25 cm / 100px
+origin/x: 600
+origin/y: 200
