@@ -102,6 +102,10 @@ def IK(front = None, rear = None, doDetach = False, checkLimits = True, tgtRange
   if front and rear:
     positions['center_swivel'] = ftheta - rtheta
 
+  #FIXME: implement viewing angle for view moves
+  if tgtRange:
+    pass
+
   if(checkLimits):
   	return clip_limits(positions)
   else:

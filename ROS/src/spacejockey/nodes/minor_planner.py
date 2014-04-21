@@ -27,7 +27,7 @@ float_error = .0001
 
 
 class MinorPlanner:
-  def __init__(self, rate = 10):
+  def __init__(self, rate):
     self.Hz = rate
     self.config = spacejockey.config("/planner")
     #static view position transform
@@ -37,10 +37,10 @@ class MinorPlanner:
     self.joints = dict()
     self.isPaused = False
 
-    self.jointPub = rospy.Publisher('joint_states_planned', JointState)    
+    self.jointPub = rospy.Publisher('joint_states', JointState)    
     rospy.Subscriber('major_actions', MajorPlanAction, self.handle_major_action)
-    rospy.Subscriber('joint_states', JointState, self.handle_joint_states)
-    rospy.init_node('minor_planner', anonymous=True)
+    rospy.Subscriber('/joint_states', JointState, self.handle_joint_states)
+    rospy.init_node('minor_planner')
 
     self.tf = tf.Transformer(True,  cache_time = rospy.Duration(1)) #local transformer for maths...
     self.tfTime = rospy.Time(0) #use the same timestamp for all internal tf calcs
@@ -209,7 +209,7 @@ class MinorPlanner:
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(prog='minor_planner.py', description="this node breaks down moves into their constituent parts and executes them.")
   #parser.add_argument('-f', '--root_frame', default='world', help='the root frame_id to tie transforms to')
-  parser.add_argument('-r', '--rate', type=int, default=10, help='motor control output rate (in Hz)')
+  parser.add_argument('-r', '--rate', type=int, default=50, help='motor control output rate (in Hz)')
   args, unknown = parser.parse_known_args()
   try:
     planner = MinorPlanner(args.rate)

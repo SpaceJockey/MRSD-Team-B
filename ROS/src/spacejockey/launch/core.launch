@@ -1,7 +1,9 @@
 <launch>
-	<rosparam command="load" file="$(find spacejockey)/config/general.yaml" />
+	<rosparam command="load" file="$(find spacejockey)/config/tf_env.yaml" />
 	<rosparam command="load" file="$(find spacejockey)/config/joints.yaml" />
 	<rosparam command="load" file="$(find spacejockey)/config/planner.yaml" ns="planner" />
+	<rosparam command="load" file="$(find spacejockey)/config/gui.yaml" ns="gui"/>
+	<rosparam command="load" file="$(find spacejockey)/config/camera.yaml" />
 	<param name="robot_description" textfile="$(find spacejockey)/resources/spacejockey.urdf" />
 	<node pkg="robot_state_publisher" type="robot_state_publisher" name="rob_st_pub" />
 	<node pkg="joint_state_publisher" type="joint_state_publisher" name="rob_joint_pub" />

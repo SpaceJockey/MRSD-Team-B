@@ -9,6 +9,7 @@ import rospy
 import cv
 from std_msgs.msg import String
 from cv_bridge import CvBridge, CvBridgeError 
+import spacejockey
 import tf
 import geometry_msgs.msg
 import copy
@@ -16,14 +17,19 @@ import copy
 class CV_tf_cvimages(object):
     def __init__(self):
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber("spacecam/image_raw",Image,self.callback)
+        self.image_sub = rospy.Subscriber("camera/image_raw",Image,self.callback)
         k = rospy.get_param("/camera_matrix/data")
         self.K=np.matrix([[k[0],k[1],k[2]],[k[3],k[4],k[5]],[k[6],k[7],k[8]]])
         self.tfList = tf.TransformListener() # for the getting big H
+        self.width  = rospy.get_param("/gui/width")
+        self.height = rospy.get_param("/gui/height")
+        self.scale  = 1.0 / rospy.get_param("/gui/scale")
+        self.origin = spacejockey.config("/gui/origin")
 
     def callback(self,data):
         try:
             cv_image = self.bridge.imgmsg_to_cv2(data, "passthrough")
+            self.tfList.waitForTransform('/camera', '/world', data.header.stamp, rospy.Duration(0.1))
             (trans, rot) = self.tfList.lookupTransform('/camera', '/world', data.header.stamp)
             h = tf.TransformerROS().fromTranslationRotation(trans, rot)
         except Exception as e:
@@ -44,7 +50,7 @@ class CV_tf_cvimages(object):
         ## to form matrxi_RT
         ## Since Z=0, we can delete third colomun of R
         matrix_RT=np.matrix([[h[0,0],h[0,1],h[0,3]],[h[1,0],h[1,1],h[1,3]],[h[2,0],h[2,1],h[2,3]]])
-        print matrix_RT
+        #print matrix_RT
         a = self.K * matrix_RT
 
         # image point height= 480=u, width=640=v
@@ -53,15 +59,10 @@ class CV_tf_cvimages(object):
         # 3.2 inches x 2.4 inches, or 8.1 x 6.1 cm
         # here assume our test surface to be 3*3 meters
         # here set the world map to be 600*600
-        
-        worldReal_width = 3
-        worldReal_height = 3
-        worldImage_width = 600
-        worldImage_height = 600
-        width_scale = worldImage_width / worldReal_width
-        height_scale = worldImage_height / worldReal_height
+
         # scale the real world to the worldImage 
-        c = np.matrix([[height_scale,0,0],[0,width_scale,0],[0,0,1]])
+        c = np.matrix([[self.scale,0,self.origin.x],[0,-self.scale,self.origin.y],[0,0,1]])
+
         # inverse the 3*3 matrix
         b = c*a.I 
         
@@ -89,16 +90,16 @@ class CV_tf_cvimages(object):
         x4=(W_LT[0,0])
         y4=(W_LT[1,0])
 
-        print " warped four points"
-        print x1,y1
-        print x2,y2
-        print x3,y3
-        print x4,y4
+        #print " warped four points"
+        #print x1,y1
+        #print x2,y2
+        #print x3,y3
+        #print x4,y4
 
         ## TODO
         ## need to overlap all the images from camera  to a big worldImage
         ## need to store this worldImage to ROS images msgs for future calling for image comparison part
-        dst = cv2.warpPerspective(cv_image,b,(worldImage_width,worldImage_height))
+        dst = cv2.warpPerspective(cv_image,b,(self.width, self.height))
         cv2.imshow("World_Image", dst)
 
         cv2.waitKey(3)

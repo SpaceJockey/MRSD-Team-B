@@ -1,6 +1,6 @@
 [submodule "ROS/src/rosserial"]
 	path = ROS/src/rosserial
-	url = https://github.com/Unchapped/rosserial.git
+	url = https://github.com/SpaceJockey/rosserial.git
 [submodule "ROS/src/ar_track_alvar"]
 	path = ROS/src/ar_track_alvar
 	url = git@github.com:sniekum/ar_track_alvar.git
@@ -10,3 +10,12 @@
 [submodule "ROS/src/camera_info_manager_py"]
 	path = ROS/src/camera_info_manager_py
 	url = https://github.com/ros-perception/camera_info_manager_py.git
+[submodule "ROS/src/tf_weighted"]
+	path = ROS/src/tf_weighted
+	url = https://github.com/Unchapped/tf_weighted.git
+[submodule "ROS/src/ipcam"]
+	path = ROS/src/ipcam
+	url = https://github.com/SpaceJockey/ipcam_ros.git
+[submodule "ROS/src/geometry_experimental"]
+	path = ROS/src/geometry_experimental
+	url = https://github.com/SpaceJockey/geometry_experimental.git

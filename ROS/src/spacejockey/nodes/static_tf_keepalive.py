@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import roslib
-#roslib.load_manifest('spacejockey')
 import rospy
 import spacejockey
 import tf
@@ -17,7 +16,10 @@ if __name__ == '__main__':
 	rospy.init_node('static_tf_keepalive')
 	listener = tf.TransformListener()
 	caster = tf.TransformBroadcaster()
-	staticTfs = rospy.get_param('/static_tfs')
+	try:
+		staticTfs = rospy.get_param('/static_tfs')
+	except KeyError:
+		staticTfs = dict()
 
 	rate = rospy.Rate(args.rate)
 	while not rospy.is_shutdown():

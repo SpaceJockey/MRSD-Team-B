@@ -1,12 +1,28 @@
 <launch>
 	<include file="$(find spacejockey)/launch/core.launch" />
-	<include file="$(find spacejockey)/launch/ar_tags.launch" />
-	<node name="waypoint_planner" pkg="spacejockey" type="waypoint_planner.py" required="true" />
-	<node name="minor_planner" pkg="spacejockey" type="minor_planner.py" />
-	<node pkg="spacejockey" type="control_bridge.py" name="ctl_bridge" />
-	<!-- one of these will always fail -->
-	<node name="serial_node_XBee" pkg="rosserial_python" type="serial_node.py" args="/dev/ttyUSB0" />
-	<node name="serial_node_USB" pkg="rosserial_python" type="serial_node.py" args="/dev/ttyACM0" />
 	
+	<!-- Serial Connections -->
+	<group>
+		<arg name="serial" default="/dev/ttyUSB0" />
+		<node name="serial_node" pkg="rosserial_python" type="serial_node.py" args="$(arg serial)" />
+		<node pkg="spacejockey" type="control_bridge.py" name="ctl_bridge" />
+	</group>
+	
+	<!-- camera stuff -->
+	<arg name="camera_url" default="http://admin:admin@10.68.68.22/goform/video?channel=1.mjpg" />
+	<node name="ip_camera" pkg="ipcam" type="ipcam.py" args="-c FILE://$(find spacejockey)/config/camera.yaml $(arg camera_url)" ns="camera" />
+	<include file="$(find spacejockey)/launch/ar_tags.launch" />
+	<node name="world_warp" pkg="spacejockey" type="world_warp.py" />
+
+	<!-- planners -->
+	<group ns="planner">
+		<node name="waypoint_planner" pkg="spacejockey" type="waypoint_planner.py" required="true" />
+		<node name="minor_planner" pkg="spacejockey" type="minor_planner.py">
+			<!-- <remap from="/tf" to="/tf_static"/> -->
+		</node>
+	</group>
+	
+
+	<!-- visualization -->
 	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find spacejockey)/resources/spacejockey.rviz" required="true" />
 </launch>
