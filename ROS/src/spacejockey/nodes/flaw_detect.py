@@ -23,39 +23,31 @@ import copy
 class ImageComparison(object):
     def __init__(self):
         self.bridge = CvBridge()
-        # call the worldImage 
+        # # choice 1.call the dirty_map
+        # self.worldImage_sub = rospy.Subscriber("dirty_map",Image,self.callback)
+        # choice 2
         self.worldImage_sub = rospy.Subscriber("camera/image_raw",Image,self.callback)
-
     def callback(self,data):
         try:
-            cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+            cv_image = self.bridge.imgmsg_to_cv2(data, "passthrough")
         except Exception as e:
             rospy.logerr(str(e))
             return
-        
-        # TODO
-        # need to call the worldImage for image comparison
-        # right now whole pipeline is not finished
-        # so test here by using images created before for image comparison testing
 
-        # # here should have img1,img2
-        # img1=cv_image
-        # img2=cv_image
-        # # how to control different time to catch infor from ROSimages msgs
-        # # to get different time status worldImages
+        ##########################################################################################
+        # # choice 1, conneted with whole pipepline
+        # # img1 is dirty map called from subscriber
+        # # img2 is baseline map stored befoe under the folder
+        # img1 = cv_image 
+        # img2 = cv2.imread(os.path.dirname(sys.argv[0])+"/World_Image.png",self.sum) 
         # height, width, depth = img1.shape
         # print height
 
-        # print "Inspection is working..."
-        # print 'sys.argv[0] =', sys.argv[0]
-        # print 'path = ' + os.path.dirname(sys.argv[0]) 
-
-        # change the name to the real worldmap's name instead
+        ##########################################################################################
+        # choice 2, indenpendent just for image comparison testing
+        # img1 and img2 are all from pre saved images
         img1 = cv2.imread(os.path.dirname(sys.argv[0]) +'/testsurface_new1.png')  
-        print type(img1)
         img2 = cv2.imread(os.path.dirname(sys.argv[0]) +'/testsurface_baseline.png')
-
-        # print img1.shape
         gray1=cv2.cvtColor(img1,cv2.COLOR_RGB2GRAY)
         gray2=cv2.cvtColor(img2,cv2.COLOR_RGB2GRAY)
         #print gray2[400,400]
@@ -66,14 +58,6 @@ class ImageComparison(object):
         # find the keypoints and descriptors with SIFT
         kp1,des1=sift.detectAndCompute(gray1,None)
         kp2,des2=sift.detectAndCompute(gray2,None)
-
-        # draw key points
-        #img1_1=cv2.drawKeypoints(gray1,kp1)
-        #img2_2=cv2.drawKeypoints(gray2,kp2)
-
-        #print img1.shape
-        #cv2.imwrite('img1_1.png',img1_1)
-        #cv2.imwrite('img2_2.png',img2_2)
 
         MIN_MATCH_COUNT = 10
 
@@ -115,20 +99,10 @@ class ImageComparison(object):
             matchesMask = None
 
         dst = cv2.warpPerspective(img1,M,(w,h))
-        #dst = cv2.warpPerspective(gray1,M,(w,h))
 
-        # print pixel value rgb
-        # dst is the new defect image after warping
-        # print dst[1,1]
+        ##############################################################################################
+        ##############################################################################################
         threshold=10
-        # a=dst[0,0]-gray2[0,0]
-        # print a
-        # b=dst[445,641]-gray2[445,641]
-        # print b
-        #b=dst[]
-        #print dst[1,1][0] # print value of r
-
-
         Z=[]
         ## void the edge's influnce, so +-10 for the row, col number
         for row in xrange(10+0,h-10):
@@ -170,7 +144,6 @@ class ImageComparison(object):
             #### draw rectangle's function
             #print dst[110,1]
             cv2.rectangle(dst,(y_min,x_min),(y_max,x_max),(0,255,0),3)
-
             #print dst[110,1]
 
         print "center information of all the groups:......"
@@ -194,9 +167,5 @@ if __name__ == '__main__':
   ImageComparison_listener = ImageComparison()
   rospy.spin() 
   cv2.destroyAllWindows()
-
-
-# import IPython
-# IPython.embed()
 
 

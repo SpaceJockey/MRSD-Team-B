@@ -12,7 +12,7 @@
 	<arg name="camera_url" default="http://admin:admin@10.68.68.22/goform/video?channel=1.mjpg" />
 	<node name="ip_camera" pkg="ipcam" type="ipcam.py" args="-c FILE://$(find spacejockey)/config/camera.yaml $(arg camera_url)" ns="camera" />
 	<include file="$(find spacejockey)/launch/ar_tags.launch" />
-	<node name="world_warp" pkg="spacejockey" type="world_warp.py" />
+	<node name="world_warp" pkg="spacejockey" type="world_warp.py" output="screen" />
 
 	<!-- planners -->
 	<group ns="planner">
