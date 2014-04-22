@@ -102,17 +102,17 @@ class CV_tf_cvimages(object):
         ## need to overlap all the images from camera  to a big worldImage
         ## need to store this worldImage to ROS images msgs for future calling for image comparison part
         if self.sum==[]:
-            dst = cv2.warpPerspective(cv_image,b,(worldImage_width,worldImage_height))
+            dst = cv2.warpPerspective(cv_image,b,(self.width,self.height))
             self.sum=dst
             print dst[10,10]
             print self.sum[10,10]
         else:
-            dst = cv2.warpPerspective(cv_image,b,(worldImage_width,worldImage_height))
+            dst = cv2.warpPerspective(cv_image,b,(self.width,self.height))
             # compare the temp pixel values and dst pixel values
             # if pixel is black on pre [000], then add dst's acoording pixel's value
             # if pixel is not black on pre, then add dst's accodrding pixle's value /2
-            for row in range(worldImage_height):
-                for col in range(worldImage_width):
+            for row in range(self.height):
+                for col in range(self.width):
                     if self.sum[row,col][0]==0 and self.sum[row,col][1]==0 and self.sum[row,col][1]==0:
                         self.sum[row,col]=dst[row,col]
                     else:
