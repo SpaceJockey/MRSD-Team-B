@@ -105,15 +105,42 @@ class ImageComparison(object):
         # print Z
 
         # how to determine k value by using k-means clustering method
-        K = 8
+        # start trying with k=2
+        K = 1
+        # make the decision whether count for one group or not compare the maxlength of the bonding box
+        boxMaxLength=60
+        while(1):
+            criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.1)
+            ret,label,center=cv2.kmeans(Z,K,criteria,100,cv2.KMEANS_RANDOM_CENTERS)
+
+            # print "center information of all the groups:......"
+            # print center
+            # print center[:,1]
+            # print center[:,0]
+            count=0
+            for j in xrange(K):
+                A = Z[label.ravel()==j]
+                #print A[:,1]
+                y_max=int(A[:,1].max())
+                y_min=int(A[:,1].min())
+                x_max=int(A[:,0].max())
+                x_min=int(A[:,0].min())
+                # print y_max,y_min,x_max,x_min
+                # draw rectangle's function
+                if (y_max-y_min)>boxMaxLength or (x_max-x_min)>boxMaxLength:
+                    count=count+1
+            if count >0:
+                K=K+1
+                continue
+            else:
+                break
+        print K
+
+        # then do the k-means clustering again with most suitable K value from above
         criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.1)
         ret,label,center=cv2.kmeans(Z,K,criteria,100,cv2.KMEANS_RANDOM_CENTERS)
-
         print "center information of all the groups:......"
         print center
-        # print center[:,1]
-        # print center[:,0]
-
         for j in xrange(K):
             A = Z[label.ravel()==j]
             #print A[:,1]
@@ -121,11 +148,9 @@ class ImageComparison(object):
             y_min=int(A[:,1].min())
             x_max=int(A[:,0].max())
             x_min=int(A[:,0].min())
-            # print y_max,y_min,x_max,x_min
             # draw rectangle's function
-            cv2.rectangle(dst,(y_min,x_min),(y_max,x_max),(0,255,0),3)
-            # print dst[110,1]
-
+            cv2.rectangle(dst,(y_min,x_min),(y_max,x_max),(0,255,0),3)      
+    
         # show images on the window
         cv2.imshow('defect_image',dst)
         cv2.waitKey(0)

@@ -81,40 +81,62 @@ class ImageComparison(object):
         Z=np.float32(Z)
         print Z
 
-        
-        # # first assuming K=? groups in the image 
-        # K = 3
-        # criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.1)
-        # ret,label,center=cv2.kmeans(Z,K,criteria,100,cv2.KMEANS_RANDOM_CENTERS)
+        # how to determine k value by using k-means clustering method
+        # start trying with k=2
+        K = 1
+        # make the decision whether count for one group or not compare the maxlength of the bonding box
+        boxMaxLength=60
+        while(1):
+            criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.1)
+            ret,label,center=cv2.kmeans(Z,K,criteria,100,cv2.KMEANS_RANDOM_CENTERS)
 
-        # for j in xrange(K):
-        #     A = Z[label.ravel()==j]
-        #     #print A[:,1]
-        #     y_max=int(A[:,1].max())
-        #     y_min=int(A[:,1].min())
-        #     x_max=int(A[:,0].max())
-        #     x_min=int(A[:,0].min())
-        #     #print y_max,y_min,x_max,x_min
-        #     #### draw rectangle's function
-        #     #print img1[110,1]
-        #     cv2.rectangle(img1,(y_min,x_min),(y_max,x_max),(0,255,0),3)
-        #     #print img1[110,1]
+            # print "center information of all the groups:......"
+            # print center
+            # print center[:,1]
+            # print center[:,0]
+            count=0
+            for j in xrange(K):
+                A = Z[label.ravel()==j]
+                #print A[:,1]
+                y_max=int(A[:,1].max())
+                y_min=int(A[:,1].min())
+                x_max=int(A[:,0].max())
+                x_min=int(A[:,0].min())
+                # print y_max,y_min,x_max,x_min
+                # draw rectangle's function
+                if (y_max-y_min)>boxMaxLength or (x_max-x_min)>boxMaxLength:
+                    count=count+1
+            if count >0:
+                K=K+1
+                continue
+            else:
+                break
+        print K
 
-        # print "center information of all the groups:......"
-        # print center
-        # # # Plot the data
-        # # print center[:,1]
-        # # print center[:,0]
+        # then do the k-means clustering again with most suitable K value from above
+        criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.1)
+        ret,label,center=cv2.kmeans(Z,K,criteria,100,cv2.KMEANS_RANDOM_CENTERS)
+        print "center information of all the groups:......"
+        print center
+        for j in xrange(K):
+            A = Z[label.ravel()==j]
+            #print A[:,1]
+            y_max=int(A[:,1].max())
+            y_min=int(A[:,1].min())
+            x_max=int(A[:,0].max())
+            x_min=int(A[:,0].min())
+            # draw rectangle's function
+            cv2.rectangle(dst,(y_min,x_min),(y_max,x_max),(0,255,0),3)  
 
-        # # show images on the window
-        # cv2.imshow('defect_image',img1)
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
+        # show images on the window
+        cv2.imshow('defect_image',img1)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
-        # # print img1
-        # plt.subplot(121),plt.imshow(img2),plt.title('Input')
-        # plt.subplot(122),plt.imshow(img1),plt.title('Output')
-        # plt.show()
+        # print img1
+        plt.subplot(121),plt.imshow(img2),plt.title('Input')
+        plt.subplot(122),plt.imshow(img1),plt.title('Output')
+        plt.show()
 
 if __name__ == '__main__':
   rospy.init_node('ImageComparison_listener', anonymous=True)
