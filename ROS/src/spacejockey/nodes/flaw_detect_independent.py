@@ -20,9 +20,14 @@ from cv_bridge import CvBridge, CvBridgeError
 import geometry_msgs.msg
 import copy
 
+# for the maker part
+from visualization_msgs.msg import Marker
+from visualization_msgs.msg import MarkerArray
+
 class ImageComparison(object):
     def __init__(self):
         self.bridge = CvBridge()
+        self.defect_pub = rospy.Publisher('/visualization_marker', Marker)
         self.worldImage_sub = rospy.Subscriber("camera/image_raw",Image,self.callback)
     def callback(self,data):
         try:
@@ -64,14 +69,14 @@ class ImageComparison(object):
             dst_pts = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1,1,2)
 
             M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC,5.0)
-            print M
+            # print M
 
             #h=img2_2.shape[0]
             # print h 
             #w=img2_2.shape[1]
             h=gray2.shape[0]
             w=gray2.shape[1]
-            print h,w
+            # print h,w
             # h=600, w=600
             # value from the size of the world map
 
@@ -136,6 +141,7 @@ class ImageComparison(object):
                 break
         print K
 
+
         # then do the k-means clustering again with most suitable K value from above
         criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.1)
         ret,label,center=cv2.kmeans(Z,K,criteria,100,cv2.KMEANS_RANDOM_CENTERS)
@@ -149,8 +155,36 @@ class ImageComparison(object):
             x_max=int(A[:,0].max())
             x_min=int(A[:,0].min())
             # draw rectangle's function
-            cv2.rectangle(dst,(y_min,x_min),(y_max,x_max),(0,255,0),3)      
-    
+            cv2.rectangle(dst,(y_min,x_min),(y_max,x_max),(0,255,0),3)
+
+            ######################################
+            # for the markers part
+            ######################################
+            marker = Marker()
+            marker.header.frame_id = "world"  
+            marker.header.stamp = rospy.Time()
+            marker.ns = "my_namespace"
+            marker.id = j
+            marker.type = marker.CUBE
+            marker.action = marker.ADD
+            marker.pose.position.y = float(x_max+x_min-h)/2/h
+            marker.pose.position.x = 3*float(y_max+y_min-w)/2/w
+            marker.pose.position.z = 0
+            marker.pose.orientation.x = 0.0
+            marker.pose.orientation.y = 0.0
+            marker.pose.orientation.z = 0.0
+            marker.pose.orientation.w = 1.0
+            marker.scale.y = float(x_max-x_min)/w
+            marker.scale.x = 3*float(y_max-y_min)/h
+            marker.scale.z = 0.005
+            marker.color.a = 1.0
+            marker.color.r = 1.0
+            marker.color.g = 1.0
+            marker.color.b = 0.0
+            print marker
+            self.defect_pub.publish(marker)
+     
+          
         # show images on the window
         cv2.imshow('defect_image',dst)
         cv2.waitKey(0)

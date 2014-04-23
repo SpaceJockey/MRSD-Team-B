@@ -14,7 +14,7 @@
 	<include file="$(find spacejockey)/launch/ar_tags.launch" />
 	<node name="world_warp" pkg="spacejockey" type="world_warp.py" output="screen" />
 	<!-- <node name="world_warp_dirty" pkg="spacejockey" type="world_warp_dirty.py" output="screen" /> -->
-	<!-- <node name="flaw_detect_independent" pkg="spacejockey" type="flaw_detect_independent.py" output="screen" /> -->
+	<node name="flaw_detect_independent" pkg="spacejockey" type="flaw_detect_independent.py" output="screen" />
 	<!-- <node name="flaw_detect" pkg="spacejockey" type="flaw_detect.py" output="screen" /> -->
 
 

@@ -20,9 +20,14 @@ from cv_bridge import CvBridge, CvBridgeError
 import geometry_msgs.msg
 import copy
 
+# for the maker part
+from visualization_msgs.msg import Marker
+from visualization_msgs.msg import MarkerArray
+
 class ImageComparison(object):
     def __init__(self):
         self.bridge = CvBridge()
+        self.defect_pub = rospy.Publisher('/visualization_marker', Marker)
         # call the dirty_map
         self.worldImage_sub = rospy.Subscriber("dirty_map",Image,self.callback)
        
@@ -127,6 +132,35 @@ class ImageComparison(object):
             x_min=int(A[:,0].min())
             # draw rectangle's function
             cv2.rectangle(dst,(y_min,x_min),(y_max,x_max),(0,255,0),3)  
+
+            ######################################
+            # for the markers part
+            ######################################
+            marker = Marker()
+            marker.header.frame_id = "world"  
+            marker.header.stamp = rospy.Time()
+            marker.ns = "my_namespace"
+            marker.id = j
+            marker.type = marker.CUBE
+            marker.action = marker.ADD
+            marker.pose.position.y = float(x_max+x_min-h1)/2/h1
+            marker.pose.position.x = 3*float(y_max+y_min-w1)/2/w1
+            marker.pose.position.z = 0
+            marker.pose.orientation.x = 0.0
+            marker.pose.orientation.y = 0.0
+            marker.pose.orientation.z = 0.0
+            marker.pose.orientation.w = 1.0
+            marker.scale.y = float(x_max-x_min)/w1
+            marker.scale.x = 3*float(y_max-y_min)/h1
+            marker.scale.z = 0.005
+            marker.color.a = 1.0
+            marker.color.r = 1.0
+            marker.color.g = 1.0
+            marker.color.b = 0.0
+            #print marker
+            self.defect_pub.publish(marker)
+
+
 
         # show images on the window
         cv2.imshow('defect_image',img1)
