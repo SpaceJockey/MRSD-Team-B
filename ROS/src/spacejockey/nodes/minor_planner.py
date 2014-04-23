@@ -49,7 +49,7 @@ class MinorPlanner:
     self.tfTime = rospy.Time(0) #use the same timestamp for all internal tf calcs
     self.tfList = tf.TransformListener()
     #self.tfCast = tf.TransformBroadcaster()
-    self.tfCast = tf_weighted.WeightedTransformBroadcaster()
+    self.tfCast = tf_weighted.StaticTransformBroadcaster()
     self.lastTf = [((self.config.extend.min,0,0), tf.transformations.quaternion_from_euler(0, 0, 0)),
                    ((0,0,0), tf.transformations.quaternion_from_euler(0, 0, 0)),
                    ((-self.config.extend.min,0,0), tf.transformations.quaternion_from_euler(0, 0, 0))]
@@ -60,7 +60,9 @@ class MinorPlanner:
 
   def is_at_joint_tgt(self):
     for j in self.joint_tgt.keys():
+      err = map(lambda j: abs(self.joints[j] - self.joint_tgt[j]), self.joint_tgt.keys())
       if abs(self.joints[j] - self.joint_tgt[j]) > float_error:
+        print abs(self.joints[j] - self.joint_tgt[j])
         return False
     return True
 
@@ -75,7 +77,7 @@ class MinorPlanner:
   def update_joints(self):
     joints = self.joints
     for j in self.joint_tgt.keys():
-      err = normalize(self.joint_tgt[j] - self.joints[j]) 
+      err = normalize(self.joint_tgt[j] - self.joints[j]) #FIXME! I think the bug is here!
       joints[j] += math.copysign(min(abs(err), (joint_vel[j] / self.Hz)), err)
     j_msg = JointState()
     j_msg.name = joints.keys()
@@ -125,21 +127,13 @@ class MinorPlanner:
     self.tf.clear()
 
     #choose a bound joint
-    #bframe = ''
-    #bloc = None
-    #brot = None
 
     #pull needed values into our Transformer
     for frame in frame_names.values():
       if frame == act.name:
         self.saveTransform(frame, 'world', act.loc, (0,0,0,1))
       else:
-        bframe = frame #use this as the fixed frame
-        bloc, brot = self.pullTransform(frame, 'world')
-
-    #TODO: Not sure why this completely breaks things... maybe not worth looking into it...
-    #self.tfCast.sendTransform((0, 0, 0), (0,0,0,1), now, act.name, 'world', 0.0)  #unbind mobile tf
-    #self.tfCast.sendTransform(bloc, brot, now, bframe, 'world', 1.0)                 #bind fixed tf
+        self.pullTransform(frame, 'world')
 
     #calculate robot-frame transforms...
     (floc, foobar) = self.computeTransform('front_foot', 'robot')
@@ -149,7 +143,7 @@ class MinorPlanner:
     #update the robot position...
     if act.name == 'robot':
       t_est = now + rospy.Duration.from_sec(self.eta())
-      self.tfCast.sendTransform(act.loc, (0,0,0,1), t_est, 'robot', 'world', 1.0)
+      self.tfCast.sendTransform(act.loc, (0,0,0,1), t_est, 'robot', 'world')
 
   def execute_move_action(self, msg):
     frame_id = frame_names[msg.node_name] #TODO: recast minor actions to use frame names...
