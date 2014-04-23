@@ -42,10 +42,10 @@ class CV_tf_cvimages(object):
         
         # print h
 
-        print cv_image.shape
+        #print cv_image.shape
         # print cv_image.shape[1]
-        print cv_image[100,100] # print alpha's value
-        print cv_image[479,639]
+        #print cv_image[100,100] # print alpha's value
+        #print cv_image[479,639]
 
         height, width, depth = cv_image.shape
         gray1=cv2.cvtColor(cv_image,cv2.COLOR_RGB2GRAY)
@@ -116,8 +116,7 @@ class CV_tf_cvimages(object):
                             self.sum[row,col]=(self.sum[row,col]*a_pre+dst[row,col]*a_cur)/(a_pre+a_cur)
         #print self.sum
 
-        ### this is save the World_Image for the final
-        ### next time run it with flaws on it should save with another name
+        ### this is save the World_Image for the final baseline 
         cv2.imwrite(os.path.dirname(sys.argv[0])+"/World_Image.png",self.sum)
         cv2.imshow("World_Image", self.sum)
         cv2.waitKey(3)

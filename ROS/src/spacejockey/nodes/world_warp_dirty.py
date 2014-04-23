@@ -43,10 +43,10 @@ class CV_tf_cvimages_dirty(object):
         
         # print h
 
-        print cv_image.shape
+        #print cv_image.shape
         # print cv_image.shape[1]
-        print cv_image[100,100] # print alpha's value
-        print cv_image[479,639]
+        #print cv_image[100,100] # print alpha's value
+        #print cv_image[479,639]
 
         height, width, depth = cv_image.shape
         gray1=cv2.cvtColor(cv_image,cv2.COLOR_RGB2GRAY)
@@ -122,7 +122,7 @@ class CV_tf_cvimages_dirty(object):
         cv2.waitKey(3)
         # publish the dirty_map
         try:
-            self.image_pub.publish(self.bridge.cv1_to_imgmsg(self.sum, "passthrough"))
+            self.image_pub.publish(self.bridge.cv2_to_imgmsg(self.sum, "passthrough"))
         except Exception as e:
             rospy.logerr(str(e))
             return
