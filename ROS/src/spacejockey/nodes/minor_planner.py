@@ -159,16 +159,17 @@ class MinorPlanner:
     minorqueue.append(MinorAction(msg.node_name, tuple(loc), False))
 
     resolution = 20
+    dx = (1.0*msg.x-loc[0])/resolution
+    dy = (msg.y-loc[1])/resolution
     for i in range(1,resolution+1):
-      factor = 1.0*i/resolution
-      loc[0] = (1-factor)*loc[0] + factor*msg.x
-      loc[1] = (1-factor)*loc[1] + factor*msg.y
+      loc[0] = loc[0] + dx
+      loc[1] = loc[1] + dy
       minorqueue.append(MinorAction(msg.node_name, tuple(loc), False))    
 
     attach_res = 10
+    dz = 1.0*clearHeight/attach_res
     for i in range(1,attach_res+1):
-      factor = 1.0-(1.0*i/attach_res)
-      loc[2] = factor*self.config.move.clearHeight
+      loc[2] = max(loc[2]-dz, 0.0)
       minorqueue.append(MinorAction(msg.node_name, tuple(loc), False)) 
 
   def execute_view_action(self, msg):
