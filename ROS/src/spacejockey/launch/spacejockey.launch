@@ -16,10 +16,8 @@
 
 	<!-- planners -->
 	<group ns="planner">
-		<node name="waypoint_planner" pkg="spacejockey" type="waypoint_planner.py" required="true" />
-		<node name="minor_planner" pkg="spacejockey" type="minor_planner.py" required="true" output="screen">
-			<!-- <remap from="/tf" to="/tf_static"/> -->
-		</node>
+		<node name="waypoint_planner" pkg="spacejockey" type="waypoint_planner.py" required="true" output="screen"/>
+		<node name="minor_planner" pkg="spacejockey" type="minor_planner.py" required="true" output="screen" />
 	</group>
 	
 

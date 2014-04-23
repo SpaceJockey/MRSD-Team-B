@@ -5,15 +5,13 @@ import rospy
 from collections import deque, namedtuple
 import spacejockey
 from spacejockey.kinematics import IK, joint_vel, normalize
-from spacejockey.msg import MajorPlanAction
+from spacejockey.srv import *
 import tf
 import tf_weighted
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import Transform, TransformStamped
 import math
 import argparse
-
-
 
 #TODO: load these from URDF
 frame_names = rospy.get_param('/planner/frame_names')
@@ -38,10 +36,16 @@ class MinorPlanner:
     self.joints = dict()
     self.isPaused = False
 
-    self.jointPub = rospy.Publisher('joint_states', JointState)    
-    rospy.Subscriber('major_actions', MajorPlanAction, self.handle_major_action)
-    rospy.Subscriber('/joint_states', JointState, self.handle_joint_states)
     rospy.init_node('minor_planner')
+    self.jointPub = rospy.Publisher('joint_states', JointState)   
+    rospy.Subscriber('/joint_states', JointState, self.handle_joint_states)
+
+    rospy.wait_for_service('major_planner') 
+    try:
+      self.get_major_move = rospy.ServiceProxy('major_planner', MajorPlanner)
+    except rospy.ServiceException, e:
+      rospy.logerr("Service setup failed: " + str(e))
+    self.last_major_id = 0
 
     self.tf = tf.Transformer(True,  cache_time = rospy.Duration(1)) #local transformer for maths...
     self.tfTime = rospy.Time(0) #use the same timestamp for all internal tf calcs
@@ -127,7 +131,6 @@ class MinorPlanner:
       else:
         bframe = frame #use this as the fixed frame
         bloc, brot = self.pullTransform(frame, 'world')
-
     self.tfCast.sendTransform((0, 0, 0), (0,0,0,1), now, act.name, 'world', 0.0)  #unbind mobile tf
     self.tfCast.sendTransform(bloc, brot, now, bframe, 'world', 1.0)                 #bind fixed tf
 
@@ -180,23 +183,30 @@ class MinorPlanner:
 
   def loop(self):
     rate = rospy.Rate(self.Hz)
+    i = 0
     while not rospy.is_shutdown():
+      i += 1
       if self.isPaused:
+        #print "\tis paused"
+        #TODO: add weight outputs...
         pass #do nothing...
       elif not self.is_at_joint_tgt():
-        print "\t\tupdate joints"
+        #print "\tupdate joints"
         self.update_joints()
       elif minorqueue:
-        print "\tminor action"
-        next = minorqueue.popleft() 
+        next = minorqueue.popleft()
+        #print "minor: " + str(len(minorqueue)) 
         self.execute_minor_action(next)
-      elif actionqueue:
-        msg = actionqueue.popleft()
-        print "major action"
-        if(msg.action_type == MajorPlanAction.STEP):
-          self.execute_move_action(msg)
-        else:
-          self.execute_view_action(msg)
+        #print "done"
+      else:
+        move = self.get_major_move(self.last_major_id)
+        self.last_major_id = move.major_id
+        if move.action_type == MajorPlannerResponse.STEP:
+          self.execute_move_action(move)
+        elif move.action_type == MajorPlannerResponse.VIEW:
+          self.execute_view_action(move)
+        else: #sleep
+          minorqueue.append(PauseAction(1))
       rate.sleep()
 
 if __name__ == '__main__':

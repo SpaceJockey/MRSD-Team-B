@@ -1,6 +1,11 @@
+uint32 complete_id
+
+---
+
 #Enumerated action types
 uint16 STEP=0
 uint16 VIEW=1
+uint16 SLEEP=2
 
 #Enumerated node_ids
 
@@ -14,4 +19,3 @@ uint16 action_type
 string node_name
 float32 x
 float32 y
-float32 theta
