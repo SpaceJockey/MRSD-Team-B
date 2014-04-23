@@ -23,8 +23,6 @@ ViewAction = namedtuple('ViewAction', 'range')
 PauseAction = namedtuple('PauseAction', 'duration')
 float_error = .0001
 
-
-
 class MinorPlanner:
   def __init__(self, rate):
     self.Hz = rate
@@ -86,7 +84,6 @@ class MinorPlanner:
 
   def unpause(self, event):
     self.isPaused = False
-
 
   def saveTransform(self, child_id, parent_id, loc, rot):
     """save a tf to our private Transformer"""
@@ -164,18 +161,21 @@ class MinorPlanner:
       loc[2] = self.config.move.detachHeight #detach
       minorqueue.append(MinorAction(msg.node_name, tuple(loc), True))
 
-    loc[2] = self.config.move.clearHeight #apex
-    loc[0] = (loc[0] + msg.x) / 2.0
-    loc[1] = (loc[1] + msg.y) / 2.0
-    minorqueue.append(MinorAction(frame_id, tuple(loc), False))
+    loc[2] = self.config.move.clearHeight #rise to clear height
+    minorqueue.append(MinorAction(msg.node_name, tuple(loc), False))
 
-    loc[2] = self.config.move.detachHeight #pre-landing
-    loc[0] = msg.x
-    loc[1] = msg.y
-    minorqueue.append(MinorAction(frame_id, tuple(loc), False))
+    resolution = 20
+    for i in range(1,resolution+1):
+      factor = 1.0*i/resolution
+      loc[0] = (1-factor)*loc[0] + factor*msg.x
+      loc[1] = (1-factor)*loc[1] + factor*msg.y
+      minorqueue.append(MinorAction(msg.node_name, tuple(loc), False))    
 
-    loc[2] = 0.0 #attach
-    minorqueue.append(MinorAction(frame_id, tuple(loc), False))
+    attach_res = 10
+    for i in range(1,attach_res+1):
+      factor = 1.0-(1.0*i/attach_res)
+      loc[2] = factor*self.config.move.clearHeight
+      minorqueue.append(MinorAction(msg.node_name, tuple(loc), False)) 
 
   def execute_view_action(self, msg):
     #calculate range to target
