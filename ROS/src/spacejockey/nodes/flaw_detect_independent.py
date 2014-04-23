@@ -35,8 +35,6 @@ class ImageComparison(object):
         img2 = cv2.imread(os.path.dirname(sys.argv[0]) +'/testsurface_baseline.png')
         gray1=cv2.cvtColor(img1,cv2.COLOR_RGB2GRAY)
         gray2=cv2.cvtColor(img2,cv2.COLOR_RGB2GRAY)
-        #print gray2[400,400]
-        #print gray1.shape
 
         # Initiate SIFT detector
         sift = cv2.SIFT()
@@ -45,14 +43,12 @@ class ImageComparison(object):
         kp2,des2=sift.detectAndCompute(gray2,None)
 
         MIN_MATCH_COUNT = 10
-
         FLANN_INDEX_KDTREE = 0
 
         index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = 5)
         search_params = dict(checks = 50)
 
         flann = cv2.FlannBasedMatcher(index_params, search_params)
-
         matches = flann.knnMatch(des1,des2,k=2)
 
         # store all the good matches as per Lowe's ratio test.
@@ -108,10 +104,15 @@ class ImageComparison(object):
         Z=np.float32(Z)
         # print Z
 
-
+        # how to determine k value by using k-means clustering method
         K = 8
         criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.1)
         ret,label,center=cv2.kmeans(Z,K,criteria,100,cv2.KMEANS_RANDOM_CENTERS)
+
+        print "center information of all the groups:......"
+        print center
+        # print center[:,1]
+        # print center[:,0]
 
         for j in xrange(K):
             A = Z[label.ravel()==j]
@@ -125,11 +126,6 @@ class ImageComparison(object):
             cv2.rectangle(dst,(y_min,x_min),(y_max,x_max),(0,255,0),3)
             # print dst[110,1]
 
-        print "center information of all the groups:......"
-        print center
-        # print center[:,1]
-        # print center[:,0]
-
         # show images on the window
         cv2.imshow('defect_image',dst)
         cv2.waitKey(0)
@@ -139,6 +135,7 @@ class ImageComparison(object):
         plt.subplot(121),plt.imshow(img2),plt.title('Input')
         plt.subplot(122),plt.imshow(dst),plt.title('Output')
         plt.show()
+
 
 if __name__ == '__main__':
   rospy.init_node('ImageComparison_listener', anonymous=True)
