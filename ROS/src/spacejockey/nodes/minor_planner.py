@@ -160,7 +160,7 @@ class MinorPlanner:
 
     resolution = 20
     dx = (1.0*msg.x-loc[0])/resolution
-    dy = (msg.y-loc[1])/resolution
+    dy = (1.0*msg.y-loc[1])/resolution
     for i in range(1,resolution+1):
       loc[0] = loc[0] + dx
       loc[1] = loc[1] + dy
