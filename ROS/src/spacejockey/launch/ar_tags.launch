@@ -6,8 +6,11 @@
 	<arg name="cam_image_topic" default="/camera/image_raw" />
 	<arg name="cam_info_topic" default="/camera/camera_info" />	
 	<arg name="output_frame" default="camera" />
+	<node name="ip_camera" pkg="ipcam" type="ipcam.py" args="-c FILE://$(find spacejockey)/config/camera.yaml &#34;http://admin:admin@10.68.68.22/goform/video/channel=1&#38;.mjpg&#34; -g" />
 	<node name="ar_track_alvar" pkg="ar_track_alvar" type="individualMarkersNoKinect" respawn="false" output="screen" args="$(arg marker_size) $(arg max_new_marker_error) $(arg max_track_error) $(arg cam_image_topic) $(arg cam_info_topic) $(arg output_frame)" />
-	<node pkg="rosbag" type="rosbag" name="rosbag_record_cam" args="record -o /tmp/ipcamera /camera/image_raw /camera/camera_info"
-       if="$(arg record_cameras)" />
+	<node name="rviz" pkg="rviz" type="rviz"/>
+	<node name="world_camera" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 world camera 100" />
+	<!-- <node pkg="rosbag" type="rosbag" name="rosbag_record_cam" args="record -o /tmp/ipcamera /camera/image_raw /camera/camera_info"
+       if="$(arg record_cameras)" /> -->
     
 </launch>

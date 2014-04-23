@@ -1,6 +1,11 @@
 <launch>
 	<include file="$(find spacejockey)/launch/core.launch" />
-	<node name="ip_camera" pkg="ipcam" type="ipcam.py" args="-c FILE://$(find spacejockey)/config/camera.yaml http://128.223.164.243/mjpg/video.mjpg" />
+		<!-- uncomment below to get images from net cam from internet> -->
+	<node name="ip_camera" pkg="ipcam" type="ipcam.py" args="-c FILE://$(find spacejockey)/config/camera.yaml &#34;http://128.223.164.243/mjpg/video.mjpg&#34; -g" />
+
+	<!-- uncomment below to get images from net cam from our Belkin IP Camera> -->
+	<!-- <node name="ip_camera" pkg="ipcam" type="ipcam.py" args="-c FILE://$(find spacejockey)/config/camera.yaml &#34;http://admin:admin@10.68.68.22/goform/video/channel=1&#38;.mjpg&#34;" /> -->
+
 	<node name="minor_planner" pkg="spacejockey" type="minor_planner.py" output="screen"/>
 	<node name="waypoint_planner" pkg="spacejockey" type="waypoint_planner.py" required="true" />
 	<node name="world_warp" pkg="spacejockey" type="world_warp.py" required="true" output="screen"/>
