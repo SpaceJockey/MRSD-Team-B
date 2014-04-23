@@ -66,6 +66,14 @@ class MinorPlanner:
         return False
     return True
 
+  def eta(self):
+    """estimated time until we've reached our next node"""
+    times = [0.0]
+    for j in self.joint_tgt.keys():
+      err = abs(self.joint_tgt[j] - self.joints[j])
+      times.append(err/joint_vel[j])
+    return max(times) 
+
   def update_joints(self):
     joints = self.joints
     for j in self.joint_tgt.keys():
@@ -120,9 +128,9 @@ class MinorPlanner:
     self.tf.clear()
 
     #choose a bound joint
-    bframe = ''
-    bloc = None
-    brot = None
+    #bframe = ''
+    #bloc = None
+    #brot = None
 
     #pull needed values into our Transformer
     for frame in frame_names.values():
@@ -131,13 +139,20 @@ class MinorPlanner:
       else:
         bframe = frame #use this as the fixed frame
         bloc, brot = self.pullTransform(frame, 'world')
-    self.tfCast.sendTransform((0, 0, 0), (0,0,0,1), now, act.name, 'world', 0.0)  #unbind mobile tf
-    self.tfCast.sendTransform(bloc, brot, now, bframe, 'world', 1.0)                 #bind fixed tf
+
+    #TODO: Not sure why this completely breaks things... maybe not worth looking into it...
+    #self.tfCast.sendTransform((0, 0, 0), (0,0,0,1), now, act.name, 'world', 0.0)  #unbind mobile tf
+    #self.tfCast.sendTransform(bloc, brot, now, bframe, 'world', 1.0)                 #bind fixed tf
 
     #calculate robot-frame transforms...
     (floc, foobar) = self.computeTransform('front_foot', 'robot')
     (rloc, foobar) = self.computeTransform('rear_foot', 'robot')
     self.joint_tgt = IK(front = floc, rear=rloc, doDetach = act.detach)
+
+    #update the robot position...
+    if act.name == 'robot':
+      t_est = now + rospy.Duration.from_sec(self.eta())
+      self.tfCast.sendTransform(act.loc, (0,0,0,1), t_est, 'robot', 'world', 1.0)
 
   def execute_move_action(self, msg):
     frame_id = frame_names[msg.node_name] #TODO: recast minor actions to use frame names...
