@@ -13,6 +13,8 @@ from geometry_msgs.msg import Transform, TransformStamped
 import math
 import argparse
 
+
+
 #TODO: load these from URDF
 frame_names = rospy.get_param('/planner/frame_names')
 minorqueue = deque()
@@ -22,6 +24,8 @@ MinorAction = namedtuple('MinorAction', 'name loc detach')
 ViewAction = namedtuple('ViewAction', 'range')
 PauseAction = namedtuple('PauseAction', 'duration')
 float_error = .0001
+
+
 
 class MinorPlanner:
   def __init__(self, rate):
@@ -34,9 +38,10 @@ class MinorPlanner:
     self.joints = dict()
     self.isPaused = False
 
-    rospy.init_node('minor_planner')
-    self.jointPub = rospy.Publisher('joint_states', JointState)   
+    self.jointPub = rospy.Publisher('joint_states', JointState)    
+    #rospy.Subscriber('major_actions', MajorPlanAction, self.handle_major_action)
     rospy.Subscriber('/joint_states', JointState, self.handle_joint_states)
+    rospy.init_node('minor_planner')
 
     rospy.wait_for_service('major_planner') 
     try:
@@ -48,8 +53,7 @@ class MinorPlanner:
     self.tf = tf.Transformer(True,  cache_time = rospy.Duration(1)) #local transformer for maths...
     self.tfTime = rospy.Time(0) #use the same timestamp for all internal tf calcs
     self.tfList = tf.TransformListener()
-    #self.tfCast = tf.TransformBroadcaster()
-    self.tfCast = tf_weighted.WeightedTransformBroadcaster()
+    self.tfCast = tf_weighted.StaticTransformBroadcaster() #tf.TransformBroadcaster()
     self.lastTf = [((self.config.extend.min,0,0), tf.transformations.quaternion_from_euler(0, 0, 0)),
                    ((0,0,0), tf.transformations.quaternion_from_euler(0, 0, 0)),
                    ((-self.config.extend.min,0,0), tf.transformations.quaternion_from_euler(0, 0, 0))]
@@ -69,7 +73,7 @@ class MinorPlanner:
     times = [0.0]
     for j in self.joint_tgt.keys():
       err = abs(self.joint_tgt[j] - self.joints[j])
-      times.append(err/joint_vel[j])
+      times.append(err / joint_vel[j])
     return max(times) 
 
   def update_joints(self):
@@ -84,6 +88,7 @@ class MinorPlanner:
 
   def unpause(self, event):
     self.isPaused = False
+
 
   def saveTransform(self, child_id, parent_id, loc, rot):
     """save a tf to our private Transformer"""
@@ -100,9 +105,12 @@ class MinorPlanner:
     t.transform.rotation.w = rot[3]
     self.tf.setTransform(t)
 
-  def pullTransform(self, child_id, parent_id):
+  def pullTransform(self, child_id, parent_id, time = None):
     """pull a tf from the world to our private Transformer"""
-    (loc, rot) = self.tfList.lookupTransform(parent_id, child_id, rospy.Time(0))
+    if not time:
+      time = rospy.Time.now()
+    self.tfList.waitForTransform(parent_id, child_id, time, rospy.Duration(0.1))
+    (loc, rot) = self.tfList.lookupTransform(parent_id, child_id, time)
     self.saveTransform(child_id, parent_id, loc, rot)
     return (loc, rot)
 
@@ -114,7 +122,7 @@ class MinorPlanner:
     now = rospy.Time.now()
     if isinstance(act, PauseAction):
       self.isPaused = True
-      rospy.Timer(rospy.Duration(act.duration), self.unpause, True)
+      rospy.Timer(rospy.Duration(act.duration), self.unpause, True) #oneshot timer
       return
 
     if isinstance(act, ViewAction):
@@ -123,23 +131,12 @@ class MinorPlanner:
 
     #move action...
     self.tf.clear()
-
-    #choose a bound joint
-    #bframe = ''
-    #bloc = None
-    #brot = None
-
     #pull needed values into our Transformer
-    for frame in frame_names.values():
-      if frame == act.name:
-        self.saveTransform(frame, 'world', act.loc, (0,0,0,1))
+    for node in frame_names.keys():
+      if node == act.name:
+        self.saveTransform(frame_names[node], 'world', act.loc, (0,0,0,1))
       else:
-        bframe = frame #use this as the fixed frame
-        bloc, brot = self.pullTransform(frame, 'world')
-
-    #TODO: Not sure why this completely breaks things... maybe not worth looking into it...
-    #self.tfCast.sendTransform((0, 0, 0), (0,0,0,1), now, act.name, 'world', 0.0)  #unbind mobile tf
-    #self.tfCast.sendTransform(bloc, brot, now, bframe, 'world', 1.0)                 #bind fixed tf
+        self.pullTransform(frame_names[node], 'world', now)
 
     #calculate robot-frame transforms...
     (floc, foobar) = self.computeTransform('front_foot', 'robot')
@@ -147,9 +144,9 @@ class MinorPlanner:
     self.joint_tgt = IK(front = floc, rear=rloc, doDetach = act.detach)
 
     #update the robot position...
-    if act.name == 'robot':
+    if act.name == 'center_foot':
       t_est = now + rospy.Duration.from_sec(self.eta())
-      self.tfCast.sendTransform(act.loc, (0,0,0,1), t_est, 'robot', 'world', 1.0)
+      self.tfCast.sendTransform(act.loc, (0,0,0,1), t_est, 'robot', 'world')
 
   def execute_move_action(self, msg):
     frame_id = frame_names[msg.node_name] #TODO: recast minor actions to use frame names...
@@ -165,16 +162,17 @@ class MinorPlanner:
     minorqueue.append(MinorAction(msg.node_name, tuple(loc), False))
 
     resolution = 20
+    dx = (1.0*msg.x-loc[0])/resolution
+    dy = (1.0*msg.y-loc[1])/resolution
     for i in range(1,resolution+1):
-      factor = 1.0*i/resolution
-      loc[0] = (1-factor)*loc[0] + factor*msg.x
-      loc[1] = (1-factor)*loc[1] + factor*msg.y
+      loc[0] = loc[0] + dx
+      loc[1] = loc[1] + dy
       minorqueue.append(MinorAction(msg.node_name, tuple(loc), False))    
 
     attach_res = 10
+    dz = 1.0*self.config.move.clearHeight/attach_res
     for i in range(1,attach_res+1):
-      factor = 1.0-(1.0*i/attach_res)
-      loc[2] = factor*self.config.move.clearHeight
+      loc[2] = max(loc[2]-dz, 0.0)
       minorqueue.append(MinorAction(msg.node_name, tuple(loc), False)) 
 
   def execute_view_action(self, msg):
@@ -192,27 +190,17 @@ class MinorPlanner:
     minorqueue.append(PauseAction(3)) #TODO: perameterize pause duration...
     return
 
-  def handle_major_action(self, msg):
-    actionqueue.append(msg)
-
-
   def loop(self):
     rate = rospy.Rate(self.Hz)
-    i = 0
     while not rospy.is_shutdown():
-      i += 1
       if self.isPaused:
-        #print "\tis paused"
-        #TODO: add weight outputs...
         pass #do nothing...
       elif not self.is_at_joint_tgt():
-        #print "\tupdate joints"
         self.update_joints()
       elif minorqueue:
-        next = minorqueue.popleft()
-        #print "minor: " + str(len(minorqueue)) 
+        #print('minor action')
+        next = minorqueue.popleft() 
         self.execute_minor_action(next)
-        #print "done"
       else:
         move = self.get_major_move(self.last_major_id)
         self.last_major_id = move.major_id
