@@ -2,10 +2,10 @@
 ####   Inspection for spacejockey
 ####   Songjie Zhong
 ####   03/19/2014
-####   update date 04/13/2014
+####   update date 04/22/2014
 ####   add k-means for the bonding box and center informations
-####   this is the version working for whole pipeline
-####   img1 is dirty map from rostopic, img2 is clean map from reading png in the folder
+####   compare the difference of the two world images for the independent testing
+####   integrated in ROS
 
 import numpy as np
 import cv2
@@ -28,63 +28,86 @@ class ImageComparison(object):
     def __init__(self):
         self.bridge = CvBridge()
         self.defect_pub = rospy.Publisher('/visualization_marker', Marker)
-        # call the dirty_map
-        self.worldImage_sub = rospy.Subscriber("dirty_map",Image,self.callback)
-       
+        self.worldImage_sub = rospy.Subscriber("camera/image_raw",Image,self.callback)
     def callback(self,data):
         try:
             cv_image = self.bridge.imgmsg_to_cv2(data, "passthrough")
         except Exception as e:
             rospy.logerr(str(e))
             return
-        # choice 1, conneted with whole pipepline
-        # img1 is dirty map called from subscriber
-        # img2 is baseline map stored befoe under the folder
-        img1 = cv_image 
-        img2 = cv2.imread(os.path.dirname(sys.argv[0])+"/World_Image.png") 
-        h1, w1, depth1 = img1.shape
-        h2, w2, depth2 = img2.shape
-        # print h1,w1,depth1
-        # print h2,w2,depth2
-        # print img1
-        # print img2
 
-        # # check whether img1, img2 are passing to here
-        # for row in range(h1):
-        #     for col in range(w1):
-        #         if img1[row,col][0]!=0 or img1[row,col][1]!=0 or img1[row,col][1]!=0:
-        #             print img1[row,col]
-        # # good ! there are values for img1
-        # for row in range(h2):
-        #     for col in range(w2):
-        #         if img2[row,col][0]!=0 or img2[row,col][1]!=0 or img2[row,col][1]!=0:
-        #             print img2[row,col]
-        # good ! there are values for img2
+        img1 = cv2.imread(os.path.dirname(sys.argv[0]) +'/testsurface_new1.png')  
+        img2 = cv2.imread(os.path.dirname(sys.argv[0]) +'/testsurface_baseline.png')
+        gray1=cv2.cvtColor(img1,cv2.COLOR_RGB2GRAY)
+        gray2=cv2.cvtColor(img2,cv2.COLOR_RGB2GRAY)
 
+        # Initiate SIFT detector
+        sift = cv2.SIFT()
+        # find the keypoints and descriptors with SIFT
+        kp1,des1=sift.detectAndCompute(gray1,None)
+        kp2,des2=sift.detectAndCompute(gray2,None)
 
+        MIN_MATCH_COUNT = 10
+        FLANN_INDEX_KDTREE = 0
 
+        index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = 5)
+        search_params = dict(checks = 50)
 
-        # we do not need to warp the img1 because img1 and img2 are already under same situation
-        # following code directly begins with pixel value comparions
+        flann = cv2.FlannBasedMatcher(index_params, search_params)
+        matches = flann.knnMatch(des1,des2,k=2)
 
-        # set up the threshold
+        # store all the good matches as per Lowe's ratio test.
+        good = []
+        for m,n in matches:
+            if m.distance < 0.8*n.distance:
+                good.append(m)
+
+        #print len(good)
+
+        if len(good)>MIN_MATCH_COUNT:
+            src_pts = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1,1,2)
+            dst_pts = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1,1,2)
+
+            M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC,5.0)
+            # print M
+
+            #h=img2_2.shape[0]
+            # print h 
+            #w=img2_2.shape[1]
+            h=gray2.shape[0]
+            w=gray2.shape[1]
+            # print h,w
+            # h=600, w=600
+            # value from the size of the world map
+
+        else:
+            print "Not enough matches are found - %d/%d" % (len(good),MIN_MATCH_COUNT)
+            matchesMask = None
+
+        dst = cv2.warpPerspective(img1,M,(w,h))
+
         threshold=10
         Z=[]
         ## void the edge's influnce, so +-10 for the row, col number
-        for row in xrange(10+0,h1-10):
-            for col in xrange(10+0,w1-10):
-                if(((img1[row,col][0]-img2[row,col][0])*(img1[row,col][0]-img2[row,col][0])+(img1[row,col][1]-img2[row,col][1])*(img1[row,col][1]-img2[row,col][1])+(img1[row,col][2]-img2[row,col][2])*(img1[row,col][2]-img2[row,col][2]))>threshold):
-                    img1[row,col]= [255,0,0]
-                    Z=Z+[row,col]
-                else:
+        for row in xrange(10+0,h-10):
+            for col in xrange(10+0,w-10):
+                ### hard code the size of the april tags here 
+                ## in order to void the influence from april tags
+                if ((row>=0 and row<=120) and (col>=0 and col<=120)) or ((row>=0 and row<=120) and (col>=(w-120) and col<=w)) or ((row>=(h-120) and row<=h) and (col>=0 and col<=120)) or ((row>=(h-120) and row<=h) and (col>=(w-120) and col<=w)):
                     pass
+                else:
+                    if(((dst[row,col][0]-img2[row,col][0])*(dst[row,col][0]-img2[row,col][0])+(dst[row,col][1]-img2[row,col][1])*(dst[row,col][1]-img2[row,col][1])+(dst[row,col][2]-img2[row,col][2])*(dst[row,col][2]-img2[row,col][2]))>threshold):
+                        dst[row,col]= [255,0,0]
+                        Z=Z+[row,col]
+                    else:
+                        pass
 
         # N is the number of the points
         N=len(Z)/2
         Z=np.matrix(Z)
         Z=Z.reshape((N,2))
         Z=np.float32(Z)
-        print Z
+        # print Z
 
         # how to determine k value by using k-means clustering method
         # start trying with k=2
@@ -118,6 +141,7 @@ class ImageComparison(object):
                 break
         print K
 
+
         # then do the k-means clustering again with most suitable K value from above
         criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.1)
         ret,label,center=cv2.kmeans(Z,K,criteria,100,cv2.KMEANS_RANDOM_CENTERS)
@@ -131,7 +155,7 @@ class ImageComparison(object):
             x_max=int(A[:,0].max())
             x_min=int(A[:,0].min())
             # draw rectangle's function
-            cv2.rectangle(dst,(y_min,x_min),(y_max,x_max),(0,255,0),3)  
+            cv2.rectangle(dst,(y_min,x_min),(y_max,x_max),(0,255,0),3)
 
             ######################################
             # for the markers part
@@ -143,34 +167,34 @@ class ImageComparison(object):
             marker.id = j
             marker.type = marker.CUBE
             marker.action = marker.ADD
-            marker.pose.position.y = float(x_max+x_min-h1)/2/h1
-            marker.pose.position.x = 3*float(y_max+y_min-w1)/2/w1
+            marker.pose.position.y = float(x_max+x_min-h)/2/h
+            marker.pose.position.x = 3*float(y_max+y_min-w)/2/w
             marker.pose.position.z = 0
             marker.pose.orientation.x = 0.0
             marker.pose.orientation.y = 0.0
             marker.pose.orientation.z = 0.0
             marker.pose.orientation.w = 1.0
-            marker.scale.y = float(x_max-x_min)/w1
-            marker.scale.x = 3*float(y_max-y_min)/h1
+            marker.scale.y = float(x_max-x_min)/w
+            marker.scale.x = 3*float(y_max-y_min)/h
             marker.scale.z = 0.005
             marker.color.a = 1.0
             marker.color.r = 1.0
             marker.color.g = 1.0
             marker.color.b = 0.0
-            #print marker
+            print marker
             self.defect_pub.publish(marker)
-
-
-
+     
+          
         # show images on the window
-        cv2.imshow('defect_image',img1)
+        cv2.imshow('defect_image',dst)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
-        # print img1
+        # print dst
         plt.subplot(121),plt.imshow(img2),plt.title('Input')
-        plt.subplot(122),plt.imshow(img1),plt.title('Output')
+        plt.subplot(122),plt.imshow(dst),plt.title('Output')
         plt.show()
+
 
 if __name__ == '__main__':
   rospy.init_node('ImageComparison_listener', anonymous=True)

@@ -10,4 +10,5 @@
 	<node name="waypoint_planner" pkg="spacejockey" type="waypoint_planner.py" required="true" />
 	<node name="world_warp" pkg="spacejockey" type="world_warp.py" required="true" output="screen"/>
 	<!-- <node name="flaw_detect" pkg="spacejockey" type="flaw_detect.py" required="true" output="screen"/> -->
+	<node pkg="tf" type="static_transform_publisher" name="camera" args=" 0 0 0.5 0 0.6 0 /world /camera 100"/>
 </launch>

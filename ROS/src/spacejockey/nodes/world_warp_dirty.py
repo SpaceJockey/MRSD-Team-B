@@ -16,9 +16,10 @@ import copy
 import os,sys
 
 
-class CV_tf_cvimages(object):
+class CV_tf_cvimages_dirty(object):
     def __init__(self):
         self.bridge = CvBridge()
+        self.image_pub = rospy.Publisher("dirty_map",Image)
         self.image_sub = rospy.Subscriber("camera/image_raw",Image,self.callback)
         k = rospy.get_param("/camera_matrix/data")
         self.K=np.matrix([[k[0],k[1],k[2]],[k[3],k[4],k[5]],[k[6],k[7],k[8]]])
@@ -116,14 +117,19 @@ class CV_tf_cvimages(object):
                             self.sum[row,col]=(self.sum[row,col]*a_pre+dst[row,col]*a_cur)/(a_pre+a_cur)
         #print self.sum
 
-        ### this is save the World_Image for the final baseline 
-        cv2.imwrite(os.path.dirname(sys.argv[0])+"/World_Image.png",self.sum)
+       
         cv2.imshow("World_Image", self.sum)
         cv2.waitKey(3)
-
+        # publish the dirty_map
+        try:
+            self.image_pub.publish(self.bridge.cv2_to_imgmsg(self.sum, "passthrough"))
+        except Exception as e:
+            rospy.logerr(str(e))
+            return
+  
  
 if __name__ == '__main__':
-  rospy.init_node('CV_listener', anonymous=True)
-  CV_listener = CV_tf_cvimages()
+  rospy.init_node('CV_listener_dirty', anonymous=True)
+  CV_listener_dirty = CV_tf_cvimages_dirty()
   rospy.spin() 
   cv2.destroyAllWindows()
