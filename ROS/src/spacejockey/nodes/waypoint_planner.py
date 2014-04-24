@@ -3,25 +3,19 @@ from Tkinter import *
 from copy import deepcopy
 import math
 ferr = 0.0001 #floating point comparison error correction term
-merr = 0.01 #move positioning accuracy
-#import IPython
 
 #ROS Imports
-import roslib
-#roslib.load_manifest('spacejockey')
 import rospy
-import sys
 import spacejockey
 from spacejockey.msg import MajorPlanAction
+from spacejockey.srv import *
 from std_msgs.msg import Int16
 import tf
 
 config = spacejockey.config("/planner")
 window = spacejockey.config("/gui")
 frame_names = rospy.get_param('/planner/frame_names')
-
-#ROS publisher
-actionPub = rospy.Publisher('major_actions', MajorPlanAction)
+node_names = ("front_foot", "center_foot", "rear_foot")
 
 class Point:
 	"""Point class stores and X,Y pair in meters, and provides scaling to/from the screen size, theta is optional"""
@@ -55,14 +49,6 @@ class Point:
 def angleDiff(x, y): 
 	return math.atan2(math.sin(x-y), math.cos(x-y))
 
-#class AngledPoint(Point):
-#	def __init__(self, x = 0, y = 0, theta = 0, units = Point.M):
-#		Point.__init__(self, x, y, units)
-#		self.theta = theta
-#
-#	def __repr__(self):
-#		return '[' + "{:.3f}".format(self.x) + ', ' + "{:.3f}".format(self.y) + ', ' + "{:.4f}".format(self.theta) + ']'
-
 class Waypoint(Point):
     VIEW = 1
     MOVE = 2
@@ -70,41 +56,6 @@ class Waypoint(Point):
     def __init__(self, x = 0, y = 0, action = MOVE, units = Point.M):
 		Point.__init__(self, x,y,units)
 		self.action = action
-
-class MajorMove():
-	STEP = MajorPlanAction.STEP
-	VIEW = MajorPlanAction.VIEW
-
-	FRONT = 0
-	MIDDLE = 1
-	REAR = 2
-
-	NAMES = ("front_foot", "center_foot", "rear_foot")
-
-	current_id = 0
-
-	def __init__(self, point, node_id, waypoint, action = STEP):
-		self.major_id = self.__class__.current_id
-		self.__class__.current_id += 1
-		self.point = point
-		self.node_id = node_id
-		self.action = action
-		self.waypoint = waypoint
-
-	def publish(self):
-		global actionPub
-		node_name = self.__class__.NAMES[self.node_id] if (self.action == self.__class__.STEP) else "camera"
-		x, y = (self.point.x, self.point.y) if (self.action == self.__class__.STEP) else (self.waypoint.x, self.waypoint.y)
-		return actionPub.publish(MajorPlanAction(self.major_id, self.action, node_name, x, y, 0.0))
-
-	def isAtTarget(self):
-		global ferr
-		return (self.action == self.__class__.VIEW) or (self.node_id == self.__class__.MIDDLE and (self.point.distTo(self.waypoint) < ferr))
-
-	def applyTo(self, rconfig):
-		rconfig[self.node_id] = self.point
-		#rconfig[1].theta = rconfig[2].theta
-
 	
 #main application class
 class App:
@@ -114,11 +65,11 @@ class App:
 		frame = Frame(master)
 		frame.pack()
 
+		self.srv = rospy.Service('major_planner', MajorPlanner, self.handleMajorRequest)
+		self.current_major_id = 1
+
 		self.tfList = tf.TransformListener()
 		rospy.Subscriber('/battery_state', Int16, self.handleBatt)
-		
-		self.prevX = 0
-		self.prevY = 0
 
 		self.canvas = Canvas(frame, bg="black", height = window.height, width = window.width, confine = "true", cursor = "cross")
 		self.canvas.pack(side=TOP)
@@ -140,27 +91,88 @@ class App:
 		self.currconfig = [Point(config.extend.min),Point(),Point(-config.extend.min)]
 		self.planconfig = [Point(config.extend.min),Point(),Point(-config.extend.min)]
 		self.currMove = None
-		#self.setCurrMove(MajorMove(Point(.5, 0), 0, Point(.5, 0), MajorMove.VIEW)) #initial localization move
 
 		#set up queues
 		self.waypoints = []
-		self.moves = []
 		self.update()
 
 	def handleBatt(self, msg):
 		self.batt.set("Battery: " + str(msg.data) + "%")
 
-	def setCurrMove(self, move):
-		self.currMove = move
-		move.publish()
+	def handleMajorRequest(self, req):
+		global config, ferr
+		#req should contain the last completed major_ID
+		#TODO: check it!
+
+		#output pseudoparams
+		tgtPoint = Point()
+		node_name = "front_foot"
+		action = MajorPlannerResponse.STEP
+
+		if self.waypoints: #waypoints is not empty, plan a move
+			wp = self.waypoints[0]
+
+			#get target state
+			tgtAngle = self.currconfig[1].angleTo(wp)
+			tgtDist = self.currconfig[1].distTo(wp) 
+			if wp.action == Waypoint.VIEW: #stop short of view self.waypoints to get in ideal image range
+				tgtDist -= config.view.opt
+
+			#more pseudoparams
+			extend = config.extend.min  #desired extension
+			newtheta = tgtAngle	#init desired angle
+
+			#distances and angle error terms
+			frontTheta = self.currconfig[1].angleTo(self.currconfig[0])
+			backTheta = self.currconfig[2].angleTo(self.currconfig[1])
+			frontRel = angleDiff(tgtAngle, frontTheta) 					#relative angle between front and target
+			backRel = angleDiff(tgtAngle, backTheta)  					#relative angle between back and target
+			d1 = self.currconfig[1].distTo(self.currconfig[0])			#distance between front and middle
+			d2 = self.currconfig[1].distTo(self.currconfig[2]) 			#distance between middle and rear
+
+			#move decision tree
+			if(abs(backRel) > ferr or abs(frontRel) > config.angle.max): 		#feet not pointing at the thing
+				if(abs(frontRel) >= abs(backRel)): 		#rotate feet, starting with whichever is farther away
+					newtheta = backTheta + math.copysign(min(abs(backRel), config.angle.max), backRel) #TODO
+				else:
+					newtheta = frontTheta + math.copysign(min(abs(frontRel), config.angle.max), frontRel) #TODO
+					node_name = "rear_foot"
+					extend = -config.extend.min
+			else:										#move towards the thing
+				if(wp.action == Waypoint.VIEW and tgtDist < config.view.max):	#view plan action
+					action = MajorPlannerResponse.VIEW
+					extend = config.view.extend
+					self.waypoints.remove(wp) 			#is at target
+				elif (d1 < (config.extend.max - ferr)): #extend front segment, accounting for error
+					extend = config.extend.max
+				elif (d2 > config.extend.min + ferr): 	#retract rear foot
+					node_name = "rear_foot"
+					extend = -config.extend.min
+				else: 									#extend middle segment
+					node_name = "center_foot"
+					center_range = config.extend.max - config.extend.min
+					extend = min(tgtDist, center_range)
+					if (extend < center_range - ferr): 	#is at target
+						self.waypoints.remove(wp)
+
+			#derive final joint coordinates
+			tgtPoint.x = self.currconfig[1].x + (extend * math.cos(newtheta))
+			tgtPoint.y = self.currconfig[1].y + (extend * math.sin(newtheta))
+		else: #empty waypoint queue
+			action = MajorPlannerResponse.SLEEP
+			wp = Waypoint()
+
+		x, y = (wp.x, wp.y)
+		if action == MajorPlannerResponse.STEP:
+			x, y = (tgtPoint.x, tgtPoint.y) 
+
+		resp = MajorPlannerResponse(self.current_major_id, action, node_name, x,y)
+		self.current_major_id += 1
+		return resp
 
 	def drawPoint(self, p, color = "blue", tag = ""):
 		x,y = p.toScreen()
 		self.canvas.create_oval(x-3,y-3,x+3,y+3, outline=color, tags=tag)
-		#if(isinstance(p, AngledPoint)):
-		#	cTh = 6 * math.cos(p.theta)
-		#	sTh = 6 * math.sin(p.theta)
-		#	self.canvas.create_line(x - cTh, y + sTh, x + cTh, y - sTh, fill=color, tags=tag)
 	
 	def redraw(self):
 		#update status indicator
@@ -172,10 +184,6 @@ class App:
 		#redraw everything
 		self.canvas.delete(ALL) 
 
-		#draw planned self.moves, useful for debugging
-		#for m in self.moves:
-		#	self.drawPoint(m.point,"navy","plan")
-
 		#redraw self.waypoints
 		for w in self.waypoints:
 			color = "green" if w.action == Waypoint.MOVE else "red"
@@ -185,17 +193,7 @@ class App:
 		for f in self.currconfig:
 			self.drawPoint(f,"blue","foot")
 
-		#draw camera view effect
-		if len(self.moves) > 0 and (self.moves[0].action == MajorMove.VIEW):
-			x,y = self.moves[0].waypoint.toScreen()
-			fx, fy = self.moves[0].point.toScreen()
-			theta = self.currconfig[1].angleTo(self.currconfig[0]) #self.moves[0].point.theta
-			r = config.view.radius / window.scale
-			cTh = r * math.cos(theta)
-			sTh = r * math.sin(theta)
-			self.canvas.create_oval(x-r, y-r, x+r, y+r, outline="red", tags="view")
-			self.canvas.create_line(fx, fy, x - sTh, y - cTh, fill="red", tags="view")
-			self.canvas.create_line(fx, fy, x + sTh, y + cTh, fill="red", tags="view")
+		#camera view effect deprecated since Songjie's code will be displaying here
 
 
 	def update(self):
@@ -205,28 +203,14 @@ class App:
 			return
 
 		#update robot draw state
-		now = rospy.Time.now()
 		for node in frame_names.keys():
 			try:
-				self.tfList.waitForTransform('world', frame_names[node], now, rospy.Duration(0.1))
-				(loc, rot) = self.tfList.lookupTransform('world', frame_names[node], now)
+				(loc, rot) = self.tfList.lookupTransform('world', frame_names[node], rospy.Time(0))
 				idx = self.confignames.index(node)
 				self.currconfig[idx] = Point(loc[0], loc[1])
 			except Exception as e:
-				#rospy.logerr(e)
 				continue
 
-
-		if self.waypoints:
-			if self.currMove:
-				#print self.currMove.point.distTo(self.currconfig[self.currMove.node_id])
-				if self.currMove.point.distTo(self.currconfig[self.currMove.node_id]) < merr: #move complete
-			 		if self.currMove.isAtTarget():
-						self.waypoints.pop(0)
-					if self.moves:
-						self.setCurrMove(self.moves.pop(0))
-					else:
-						self.currMove = None
 		self.redraw()
 		self.root.after(50, self.update)
 			
@@ -236,74 +220,10 @@ class App:
 		x = canvas.canvasx(event.x)
 		y = canvas.canvasy(event.y)
 		action = Waypoint.MOVE if event.num == 1 else Waypoint.VIEW
-		self.planPath(Waypoint(x, y, action, Point.PX))
-		self.redraw()
-
-	#Plans the path to the next waypoint	
-	def planPath(self, wp):
+		wp = Waypoint(x, y, action, Point.PX)
 		self.waypoints.append(wp)
-		while True:
-			move = self.getNextMove(self.planconfig, wp)
-			self.moves.append(move)
-			move.applyTo(self.planconfig)
-			#move.publish()
-			if move.isAtTarget():
-				break
-		if not self.currMove:
-			self.setCurrMove(self.moves.pop(0))
-
-	#Returns the next major planning action
-	#Rconfig: Current Configuration
-	#wp: Waypoint 	
-	def getNextMove(self, rconfig, wp):
-		global config, ferr
-		outPoint = Point() 
-
-		#target state
-		tgtAngle = rconfig[1].angleTo(wp)
-		tgtDist = rconfig[1].distTo(wp) 
-		if wp.action == Waypoint.VIEW: #stop short of view self.waypoints to get in ideal image range
-			tgtDist -= config.view.opt
-		
-		#output pseudoparams
-		extend = config.extend.min  #desired extension
-		newtheta = tgtAngle	#init desired angle
-		node_id = MajorMove.FRONT
-		action = MajorMove.STEP
-
-		#distances and angle error terms
-		frontTheta = rconfig[1].angleTo(rconfig[0])
-		backTheta = rconfig[2].angleTo(rconfig[1]) #math.atan2(rconfig[1].y - rconfig[2].y, rconfig[1].x - rconfig[2].x)
-		frontRel = angleDiff(tgtAngle, frontTheta) #relative angle between front and target
-		backRel = angleDiff(tgtAngle, backTheta)  #relative angle between back and target
-		d1 = rconfig[1].distTo(rconfig[0])				 #distance between front and middle
-		d2 = rconfig[1].distTo(rconfig[2]) 				 #distance between middle and rear
-
-		if(abs(backRel) > ferr or abs(frontRel) > config.angle.max): 		#feet not pointing at the thing
-			if(abs(frontRel) >= abs(backRel)): 		#rotate feet, starting with whichever is farther away
-				newtheta = backTheta + math.copysign(min(abs(backRel), config.angle.max), backRel) #TODO
-			else:
-				newtheta = frontTheta + math.copysign(min(abs(frontRel), config.angle.max), frontRel) #TODO
-				node_id = MajorMove.REAR
-				extend = -config.extend.min
-		else:										#move towards the thing
-			if(wp.action == Waypoint.VIEW and tgtDist < config.view.max):	#view plan action
-				action = MajorMove.VIEW
-				extend = config.view.extend
-			elif (d1 < (config.extend.max - ferr)): #extend front segment, accounting for error
-				extend = config.extend.max
-			elif (d2 > config.extend.min + ferr): 	#retract rear foot
-				node_id = MajorMove.REAR
-				extend = -config.extend.min
-			else: 									#extend middle segment
-				node_id = MajorMove.MIDDLE
-				extend = min(tgtDist, config.extend.max - config.extend.min)
-
-		#derive final joint coordinates
-		outPoint.x = rconfig[1].x + (extend * math.cos(newtheta))
-		outPoint.y = rconfig[1].y + (extend * math.sin(newtheta))
-		move = MajorMove(outPoint, node_id, wp, action)
-		return move
+		rospy.loginfo("Added waypoint at: " + str((wp.x, wp.y)))
+		self.redraw()
 
 #set up window
 root = Tk()   

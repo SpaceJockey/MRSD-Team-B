@@ -5,8 +5,9 @@ import rospy
 from collections import deque, namedtuple
 import spacejockey
 from spacejockey.kinematics import IK, joint_vel, normalize
-from spacejockey.msg import MajorPlanAction
+from spacejockey.srv import *
 import tf
+import tf_weighted
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import Transform, TransformStamped
 import math
@@ -38,14 +39,21 @@ class MinorPlanner:
     self.isPaused = False
 
     self.jointPub = rospy.Publisher('joint_states', JointState)    
-    rospy.Subscriber('major_actions', MajorPlanAction, self.handle_major_action)
+    #rospy.Subscriber('major_actions', MajorPlanAction, self.handle_major_action)
     rospy.Subscriber('/joint_states', JointState, self.handle_joint_states)
     rospy.init_node('minor_planner')
+
+    rospy.wait_for_service('major_planner') 
+    try:
+      self.get_major_move = rospy.ServiceProxy('major_planner', MajorPlanner)
+    except rospy.ServiceException, e:
+      rospy.logerr("Service setup failed: " + str(e))
+    self.last_major_id = 0
 
     self.tf = tf.Transformer(True,  cache_time = rospy.Duration(1)) #local transformer for maths...
     self.tfTime = rospy.Time(0) #use the same timestamp for all internal tf calcs
     self.tfList = tf.TransformListener()
-    self.tfCast = tf.TransformBroadcaster()
+    self.tfCast = tf_weighted.StaticTransformBroadcaster() #tf.TransformBroadcaster()
     self.lastTf = [((self.config.extend.min,0,0), tf.transformations.quaternion_from_euler(0, 0, 0)),
                    ((0,0,0), tf.transformations.quaternion_from_euler(0, 0, 0)),
                    ((-self.config.extend.min,0,0), tf.transformations.quaternion_from_euler(0, 0, 0))]
@@ -60,14 +68,12 @@ class MinorPlanner:
         return False
     return True
 
-
-
   def eta(self):
     """estimated time until we've reached our next node"""
     times = [0.0]
     for j in self.joint_tgt.keys():
-      err = self.joint_tgt[j] - self.joints[j]
-      times.append(joint_vel[j] * err)
+      err = abs(self.joint_tgt[j] - self.joints[j])
+      times.append(err / joint_vel[j])
     return max(times) 
 
   def update_joints(self):
@@ -140,13 +146,11 @@ class MinorPlanner:
     #update the robot position...
     if act.name == 'center_foot':
       t_est = now + rospy.Duration.from_sec(self.eta())
-      self.tfCast.sendTransform(act.loc, (0,0,0,1), t_est, 'static/robot', 'world')
+      self.tfCast.sendTransform(act.loc, (0,0,0,1), t_est, 'robot', 'world')
 
   def execute_move_action(self, msg):
-    now = rospy.Time.now()
     frame_id = frame_names[msg.node_name] #TODO: recast minor actions to use frame names...
-    self.tfList.waitForTransform('world', frame_id, now, rospy.Duration(0.1))
-    (loc, rot) = self.tfList.lookupTransform('world', frame_id, now)
+    (loc, rot) = self.tfList.lookupTransform('world', frame_id, rospy.Time(0))
     loc = list(loc)
 
     #Skip detach step if node is already off the surface...
@@ -154,18 +158,22 @@ class MinorPlanner:
       loc[2] = self.config.move.detachHeight #detach
       minorqueue.append(MinorAction(msg.node_name, tuple(loc), True))
 
-    loc[2] = self.config.move.clearHeight #apex
-    loc[0] = (loc[0] + msg.x) / 2.0
-    loc[1] = (loc[1] + msg.y) / 2.0
+    loc[2] = self.config.move.clearHeight #rise to clear height
     minorqueue.append(MinorAction(msg.node_name, tuple(loc), False))
 
-    loc[2] = self.config.move.detachHeight #pre-landing
-    loc[0] = msg.x
-    loc[1] = msg.y
-    minorqueue.append(MinorAction(msg.node_name, tuple(loc), False))
+    resolution = 20
+    dx = (1.0*msg.x-loc[0])/resolution
+    dy = (1.0*msg.y-loc[1])/resolution
+    for i in range(1,resolution+1):
+      loc[0] = loc[0] + dx
+      loc[1] = loc[1] + dy
+      minorqueue.append(MinorAction(msg.node_name, tuple(loc), False))    
 
-    loc[2] = 0.0 #attach
-    minorqueue.append(MinorAction(msg.node_name, tuple(loc), False))
+    attach_res = 10
+    dz = 1.0*self.config.move.clearHeight/attach_res
+    for i in range(1,attach_res+1):
+      loc[2] = max(loc[2]-dz, 0.0)
+      minorqueue.append(MinorAction(msg.node_name, tuple(loc), False)) 
 
   def execute_view_action(self, msg):
     #calculate range to target
@@ -182,10 +190,6 @@ class MinorPlanner:
     minorqueue.append(PauseAction(3)) #TODO: perameterize pause duration...
     return
 
-  def handle_major_action(self, msg):
-    actionqueue.append(msg)
-
-
   def loop(self):
     rate = rospy.Rate(self.Hz)
     while not rospy.is_shutdown():
@@ -197,13 +201,15 @@ class MinorPlanner:
         #print('minor action')
         next = minorqueue.popleft() 
         self.execute_minor_action(next)
-      elif actionqueue:
-        msg = actionqueue.popleft()
-        #print('major action')
-        if(msg.action_type == MajorPlanAction.STEP):
-          self.execute_move_action(msg)
-        else:
-          self.execute_view_action(msg)
+      else:
+        move = self.get_major_move(self.last_major_id)
+        self.last_major_id = move.major_id
+        if move.action_type == MajorPlannerResponse.STEP:
+          self.execute_move_action(move)
+        elif move.action_type == MajorPlannerResponse.VIEW:
+          self.execute_view_action(move)
+        else: #sleep
+          minorqueue.append(PauseAction(1))
       rate.sleep()
 
 if __name__ == '__main__':
