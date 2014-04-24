@@ -47,22 +47,23 @@ class WorldWarp(object):
 
         dst = cv2.warpPerspective(cv_image,b,(self.width,self.height))
         if self.image != None:
+            a_new = 0.5 # weight for the pre image
+            a_cur = 1.0 - a_new   # weight for the current image
             # compare the temp pixel values and dst pixel values
-            for row in range(self.height):
-                for col in range(self.width):
-                    # if pixel is black on pre [000], then add dst's acoording pixel's value
-                    if self.image[row,col][0]==0 and self.image[row,col][1]==0 and self.image[row,col][2]==0:
-                        self.image[row,col]=dst[row,col]
-                    
-                    else:
-                        if dst[row,col][0]==0 and dst[row,col][1]==0 and dst[row,col][2]==0:
-                            self.image[row,col]=self.image[row,col]
-                        else:
-                            # if pixel is not black on pre, then add dst by using alpha's values
-                            # here is the weight, right now assume following values
-                            a_pre = 0.5 # weight for the pre image
-                            a_cur = 1.0 - a_pre   # weight for the current image
-                            self.image[row,col]=(self.image[row,col]*a_pre+dst[row,col]*a_cur) #/(a_pre+a_cur)
+
+            newGray = cv2.cvtColor(dst,cv2.COLOR_BGR2GRAY)
+            oldGray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
+            ret, newMask = cv2.threshold(newGray, 10, 255, cv2.THRESH_BINARY)
+            ret, oldMask = cv2.threshold(oldGray, 10, 255, cv2.THRESH_BINARY)
+            #mask = cv2.multiply(oldMask, newMask)
+            #mask_inv = cv2.bitwise_not(mask)
+
+            bg = cv2.bitwise_and(dst, dst, mask = cv2.bitwise_not(oldMask))
+            #fg = cv2.bitwise_and(dst, dst, mask = mask_inv)
+            
+            #FIXME: implment weighted averaging for common px....
+            self.image = cv2.add(self.image, bg)
+            #self.image = cv2.addWeighted(self.image, a_cur, fg, a_new, 0)
         else:
             self.image=dst
 

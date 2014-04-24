@@ -14,16 +14,14 @@
 	<node name="ip_camera" pkg="ipcam" type="ipcam.py" args="-c FILE://$(find spacejockey)/config/camera.yaml $(arg camera_url)" ns="camera" />
 	<!-- <include file="$(find spacejockey)/launch/ar_tags.launch" /> -->
 	<node name="world_warp" pkg="spacejockey" type="world_warp.py" />
-	<!-- <node name="flaw_detect" pkg="spacejockey" type="flaw_detect.py" output="screen" /> -->
-	<node name="flaw_detect_independent" pkg="spacejockey" type="flaw_detect_independent.py" output="screen" />
+	<node name="flaw_detect" pkg="spacejockey" type="flaw_detect.py" output="screen" />
+
+	<!-- visualization -->
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find spacejockey)/resources/spacejockey.rviz" relaunch="true" />
 
 	<!-- planners -->
 	<group ns="planner">
 		<node name="waypoint_planner" pkg="spacejockey" type="waypoint_planner.py" required="true" />
 		<node name="minor_planner" pkg="spacejockey" type="minor_planner.py" required="true" />
 	</group>
-	
-
-	<!-- visualization -->
-	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find spacejockey)/resources/spacejockey.rviz" required="true" />
 </launch>
