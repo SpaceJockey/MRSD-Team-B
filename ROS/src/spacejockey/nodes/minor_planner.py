@@ -50,6 +50,10 @@ class MinorPlanner:
       rospy.logerr("Service setup failed: " + str(e))
     self.last_major_id = 0
 
+    #queue up a view movement for inital localization
+    minorqueue.append(ViewAction(self.config.view.opt))
+    minorqueue.append(PauseAction(3))
+
     self.tf = tf.Transformer(True,  cache_time = rospy.Duration(1)) #local transformer for maths...
     self.tfTime = rospy.Time(0) #use the same timestamp for all internal tf calcs
     self.tfList = tf.TransformListener()

@@ -8,5 +8,5 @@
 	<node pkg="robot_state_publisher" type="robot_state_publisher" name="rob_st_pub" />
 	<node pkg="joint_state_publisher" type="joint_state_publisher" name="rob_joint_pub" />
 	<node name="weighted_tf_server" pkg="tf_weighted" type="weighted_tf_server.py" args="-r 50" />
-	<node name="sj_localization" pkg="spacejockey" type="localization.py" output="screen"/>
+	<node name="sj_localization" pkg="spacejockey" type="localization.py" output="screen" required="true"/>
 </launch>
