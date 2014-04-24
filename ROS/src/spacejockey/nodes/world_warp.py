@@ -55,15 +55,14 @@ class WorldWarp(object):
             oldGray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
             ret, newMask = cv2.threshold(newGray, 10, 255, cv2.THRESH_BINARY)
             ret, oldMask = cv2.threshold(oldGray, 10, 255, cv2.THRESH_BINARY)
-            #mask = cv2.multiply(oldMask, newMask)
-            #mask_inv = cv2.bitwise_not(mask)
+            mask = cv2.multiply(oldMask, newMask)
+            mask_inv = cv2.bitwise_not(mask)
 
-            bg = cv2.bitwise_and(dst, dst, mask = cv2.bitwise_not(oldMask))
-            #fg = cv2.bitwise_and(dst, dst, mask = mask_inv)
-            
-            #FIXME: implment weighted averaging for common px....
-            self.image = cv2.add(self.image, bg)
-            #self.image = cv2.addWeighted(self.image, a_cur, fg, a_new, 0)
+            bg = cv2.add(self.image, dst, mask = mask_inv) # cv2.bitwise_and(dst, dst, mask = cv2.bitwise_not(oldMask))
+            fg = cv2.addWeighted(self.image, a_cur, dst, a_new, 0)
+            blank = np.zeros(fg.shape, np.uint8)
+            fg = cv2.add(fg, blank, mask = mask)
+            self.image = cv2.add(fg, bg)
         else:
             self.image=dst
 

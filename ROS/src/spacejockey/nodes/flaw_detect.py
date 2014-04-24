@@ -65,6 +65,7 @@ class ImageComparison(object):
 
         r1 = cv2.subtract(dirty, clean, mask=dirtyMask)  
         r2 = cv2.subtract(clean, dirty, mask=dirtyMask)
+        #absD = cv2.absdiff(dirty, clean)
         ret, diff = cv2.threshold(cv2.add(r1, r2), threshold, 255, cv2.THRESH_BINARY) 
         
         #FIXME: this is still freakin slow!
