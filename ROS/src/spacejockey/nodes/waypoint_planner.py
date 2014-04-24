@@ -7,7 +7,6 @@ ferr = 0.0001 #floating point comparison error correction term
 #ROS Imports
 import rospy
 import spacejockey
-from spacejockey.msg import MajorPlanAction
 from spacejockey.srv import *
 from std_msgs.msg import Int16
 import tf
