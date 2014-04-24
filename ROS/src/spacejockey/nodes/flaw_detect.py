@@ -28,30 +28,30 @@ class ImageComparison(object):
     def __init__(self):
         self.bridge = CvBridge()
         self.defect_pub = rospy.Publisher('/visualization_marker', Marker)
-        self.K = 0
         # call the dirty_map
         #self.worldImage_sub = rospy.Subscriber("dirty_map",Image,self.callback)
 
         #test data
         self.dirty = cv2.imread(os.path.dirname(sys.argv[0])+"/../test/testsurface_baseline.png") 
         self.clean = cv2.imread(os.path.dirname(sys.argv[0])+"/../test/testsurface_baseline.png") 
-        #clean = cv2.imread(os.path.dirname(sys.argv[0])+"/../config/clean_map.png")
+
+        #real data
+        #TODO: perameterize config file name
+        #self.clean = cv2.imread(os.path.dirname(sys.argv[0])+"/../config/clean_map.png")
         self.height, self.width, self.depth = self.clean.shape
 
-    def tuneK(self):
-        pass
-
-       
     def callback(self,data):
         clean = self.clean
+        dirty = self.dirty
+        """
         try:
             dirty = self.bridge.imgmsg_to_cv2(data, "passthrough")
             if(dirty.shape != clean.shape):
-                raise Exception('Image size mismatch:' + str(dirty.shape) + " != " str(clean.shape))
+                raise Exception('Image size mismatch:' + str(dirty.shape) + " != " + str(clean.shape))
         except Exception as e:
             rospy.logerr(str(e))
             return
-        
+        """
         # set up the threshold
         threshold=10
         Z=[]
@@ -72,9 +72,9 @@ class ImageComparison(object):
         Z=np.float32(Z)
 
         #Tune K value k-means clustering method
-        #TODO: perameterize these!
-        # start trying with k=2
-        K = 1
+        #TODO: perameterize boxMaxLength!
+        K = 6
+        """
         # make the decision whether count for one group or not compare the maxlength of the bonding box
         boxMaxLength=60
         while(1):
@@ -98,66 +98,51 @@ class ImageComparison(object):
                 continue
             else:
                 break
-        print K
+                """
 
         # then do the k-means clustering again with most suitable K value from above
         criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.1)
-        ret,label,center=cv2.kmeans(Z,K,criteria,100,cv2.KMEANS_RANDOM_CENTERS)
-        print "center information of all the groups:......"
-        print center
+        ret, label, center = cv2.kmeans(Z,K,criteria,100,cv2.KMEANS_RANDOM_CENTERS)
+        #print "center information of all the groups:......"
+        #print center
         for j in xrange(K):
-            A = Z[label.ravel()==j]
+            A = Z[label.ravel() == j]
             #print A[:,1]
             y_max=int(A[:,1].max())
             y_min=int(A[:,1].min())
             x_max=int(A[:,0].max())
             x_min=int(A[:,0].min())
             # draw rectangle's function
-            cv2.rectangle(dst,(y_min,x_min),(y_max,x_max),(0,255,0),3)  
+            #cv2.rectangle(dst,(y_min,x_min),(y_max,x_max),(0,255,0),3)  
 
             ######################################
             # for the markers part
             ######################################
             marker = Marker()
             marker.header.frame_id = "world"  
-            marker.header.stamp = rospy.Time()
-            marker.ns = "my_namespace"
+            marker.header.stamp = rospy.Time.now()
+            marker.ns = "flaws"
             marker.id = j
             marker.type = marker.CUBE
-            marker.action = marker.ADD
+            #TODO: pull these from GUI perameters
             marker.pose.position.y = float(x_max+x_min-self.height)/2/self.height
-            marker.pose.position.x = 3*float(y_max+y_min-self.width)/2/self.width
-            marker.pose.position.z = 0
-            marker.pose.orientation.x = 0.0
-            marker.pose.orientation.y = 0.0
-            marker.pose.orientation.z = 0.0
+            marker.pose.position.x = 3 * float(y_max+y_min-self.width)/2/self.width
             marker.pose.orientation.w = 1.0
             marker.scale.y = float(x_max-x_min)/self.width
             marker.scale.x = 3*float(y_max-y_min)/self.height
-            marker.scale.z = 0.005
-            marker.color.a = 1.0
+            marker.scale.z = 0.01
+            marker.color.a = 0.75
             marker.color.r = 1.0
-            marker.color.g = 1.0
-            marker.color.b = 0.0
-            #print marker
             self.defect_pub.publish(marker)
 
-
-
-        # show images on the window
-        cv2.imshow('defect_image',dirty)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-
         # print dirty
-        plt.subplot(121),plt.imshow(clean),plt.title('Input')
-        plt.subplot(122),plt.imshow(dirty),plt.title('Output')
-        plt.show()
+        #plt.subplot(121),plt.imshow(clean),plt.title('Input')
+        #plt.subplot(122),plt.imshow(dirty),plt.title('Output')
+        #plt.show()
 
 if __name__ == '__main__':
-  rospy.init_node('ImageComparison_listener', anonymous=True)
-  ImageComparison_listener = ImageComparison()
+  rospy.init_node('flaw_detector', anonymous=True)
+  flaw_detector = ImageComparison()
+  rospy.sleep(3)
+  flaw_detector.callback(None)
   rospy.spin() 
-  cv2.destroyAllWindows()
-
-

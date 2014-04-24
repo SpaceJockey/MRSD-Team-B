@@ -9,19 +9,18 @@
 	</group>
 	
 	<!-- camera stuff -->
-	<arg name="camera_url" default="http://admin:admin@10.68.68.22/goform/video?channel=1.mjpg" />
-	<!-- <node name="ip_camera" pkg="ipcam" type="ipcam.py" args="-c FILE://$(find spacejockey)/config/camera.yaml $(arg camera_url)" ns="camera" /> -->
-	<node name="ip_camera" pkg="ipcam" type="ipcam.py" args="-c FILE://$(find spacejockey)/config/camera.yaml http://128.223.164.243/mjpg/video.mjpg" />
+	<!-- <arg name="camera_url" default="http://admin:admin@10.68.68.22/goform/video?channel=1.mjpg" /> -->
+	<arg name="camera_url" default="http://128.223.164.243/mjpg/video.mjpg" /> <!-- test data -->
+	<node name="ip_camera" pkg="ipcam" type="ipcam.py" args="-c FILE://$(find spacejockey)/config/camera.yaml $(arg camera_url)" ns="camera" />
 	<!-- <include file="$(find spacejockey)/launch/ar_tags.launch" /> -->
-	<node name="world_warp" pkg="spacejockey" type="world_warp.py" output="screen" />
-	<!-- <node name="flaw_detect_independent" pkg="spacejockey" type="flaw_detect_independent.py" output="screen" /> -->
-	<!-- <node name="flaw_detect" pkg="spacejockey" type="flaw_detect.py" output="screen" /> -->
+	<node name="world_warp" pkg="spacejockey" type="world_warp.py" />
+	<node name="flaw_detect" pkg="spacejockey" type="flaw_detect.py" output="screen" />
 
 
 	<!-- planners -->
 	<group ns="planner">
-		<node name="waypoint_planner" pkg="spacejockey" type="waypoint_planner.py" required="true" output="screen"/>
-		<node name="minor_planner" pkg="spacejockey" type="minor_planner.py" required="true" output="screen" />
+		<node name="waypoint_planner" pkg="spacejockey" type="waypoint_planner.py" required="true" />
+		<node name="minor_planner" pkg="spacejockey" type="minor_planner.py" required="true" />
 	</group>
 	
 

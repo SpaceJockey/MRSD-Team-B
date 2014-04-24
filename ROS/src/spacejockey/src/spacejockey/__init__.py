@@ -1,22 +1,21 @@
-import roslib
-#roslib.load_manifest('spacejockey')
 import rospy
 import rospkg
 from urdf_parser_py.urdf import URDF
+from tf_cache import LocalTfCache
 
 #ROS Global Config stuff
 
 #get configuration constants from the param server
 #this class recursively parses configuration attributes into properties, letting us use the easy . syntax
-class ParamNode:
+class _ParamNode:
     def __init__(self, **entries): 
         self.__dict__.update(entries)
         for key in self.__dict__:
         	if type(self.__dict__[key]) is dict:
-        		self.__dict__[key] = ParamNode(**self.__dict__[key])
+        		self.__dict__[key] = _ParamNode(**self.__dict__[key])
 
 def config(prefix = ""):
-	return ParamNode(**rospy.get_param(prefix))
+	return _ParamNode(**rospy.get_param(prefix))
 
 try:
 	urdf = URDF.from_parameter_server()
