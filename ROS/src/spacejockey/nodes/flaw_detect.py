@@ -2,103 +2,95 @@
 ####   Inspection for spacejockey
 ####   Songjie Zhong
 ####   03/19/2014
-####   update date 04/13/2014
+####   update date 04/22/2014
 ####   add k-means for the bonding box and center informations
-####   this is the version working for whole pipeline
-####   img1 is dirty map from rostopic, img2 is clean map from reading png in the folder
+####   compare the difference of the two world images for the independent testing
+####   integrated in ROS
 
 import numpy as np
 import cv2
-from matplotlib import pyplot as plt
 import os,sys
-import urllib 
 from sensor_msgs.msg import Image
 import roslib
 import rospy
-from std_msgs.msg import String
 from cv_bridge import CvBridge, CvBridgeError 
-import geometry_msgs.msg
-import copy
 
-# for the maker part
+# for the marker part
 from visualization_msgs.msg import Marker
-from visualization_msgs.msg import MarkerArray
 
 class ImageComparison(object):
     def __init__(self):
         self.bridge = CvBridge()
         self.defect_pub = rospy.Publisher('/visualization_marker', Marker)
-        # call the dirty_map
-        self.worldImage_sub = rospy.Subscriber("dirty_map",Image,self.callback)
-       
+
+        #test data
+        #self.dirty = cv2.imread(os.path.dirname(sys.argv[0])+"/../test/testsurface_dirty.png") 
+        #self.clean = cv2.imread(os.path.dirname(sys.argv[0])+"/../test/testsurface_clean.png") 
+
+        #real data
+        #TODO: perameterize config file name
+        self.clean = cv2.imread(os.path.dirname(sys.argv[0])+"/../config/clean_map.png")
+        self.dirty = np.zeros(self.clean.shape, dtype=np.uint8)
+        self.shape = self.clean.shape
+        self.updated = False
+
+
     def callback(self,data):
+        clean = self.clean
         try:
-            cv_image = self.bridge.imgmsg_to_cv2(data, "passthrough")
+            dirty = self.bridge.imgmsg_to_cv2(data, "passthrough")
+            if(dirty.shape != clean.shape):
+                raise Exception('Image size mismatch:' + str(dirty.shape) + " != " + str(clean.shape))
         except Exception as e:
             rospy.logerr(str(e))
             return
-        # choice 1, conneted with whole pipepline
-        # img1 is dirty map called from subscriber
-        # img2 is baseline map stored befoe under the folder
-        img1 = cv_image 
-        img2 = cv2.imread(os.path.dirname(sys.argv[0])+"/World_Image.png") 
-        h1, w1, depth1 = img1.shape
-        h2, w2, depth2 = img2.shape
-        # print h1,w1,depth1
-        # print h2,w2,depth2
-        # print img1
-        # print img2
+        self.dirty = dirty
+        self.updated = False
 
-        # # check whether img1, img2 are passing to here
-        # for row in range(h1):
-        #     for col in range(w1):
-        #         if img1[row,col][0]!=0 or img1[row,col][1]!=0 or img1[row,col][1]!=0:
-        #             print img1[row,col]
-        # # good ! there are values for img1
-        # for row in range(h2):
-        #     for col in range(w2):
-        #         if img2[row,col][0]!=0 or img2[row,col][1]!=0 or img2[row,col][1]!=0:
-        #             print img2[row,col]
-        # good ! there are values for img2
+    def update(self):
+        if self.updated:
+            return
+        self.updated = True
+        dirty = self.dirty
+        clean = self.clean
+        h,w,depth = self.shape
 
-
-
-
-        # we do not need to warp the img1 because img1 and img2 are already under same situation
-        # following code directly begins with pixel value comparions
-
-        # set up the threshold
-        threshold=10
+        #todo: perameterize threshold
+        threshold=100
         Z=[]
-        ## void the edge's influnce, so +-10 for the row, col number
-        for row in xrange(10+0,h1-10):
-            for col in xrange(10+0,w1-10):
-                if(((img1[row,col][0]-img2[row,col][0])*(img1[row,col][0]-img2[row,col][0])+(img1[row,col][1]-img2[row,col][1])*(img1[row,col][1]-img2[row,col][1])+(img1[row,col][2]-img2[row,col][2])*(img1[row,col][2]-img2[row,col][2]))>threshold):
-                    img1[row,col]= [255,0,0]
-                    Z=Z+[row,col]
-                else:
-                    pass
 
-        # N is the number of the points
-        N=len(Z)/2
-        Z=np.matrix(Z)
-        Z=Z.reshape((N,2))
-        Z=np.float32(Z)
-        print Z
+        dirtyGray = cv2.cvtColor(dirty,cv2.COLOR_BGR2GRAY)
+        cleanGray = cv2.cvtColor(clean, cv2.COLOR_BGR2GRAY)
+        ret, dirtyMask = cv2.threshold(dirtyGray, 10, 255, cv2.THRESH_BINARY)
+
+        r1 = cv2.subtract(dirty, clean, mask=dirtyMask)  
+        r2 = cv2.subtract(clean, dirty, mask=dirtyMask)
+        #absD = cv2.absdiff(dirty, clean)
+        ret, diff = cv2.threshold(cv2.add(r1, r2), threshold, 255, cv2.THRESH_BINARY) 
+        
+        #FIXME: this is still freakin slow!
+        for row in range(h):
+            for col in range(w):
+                if rospy.is_shutdown():
+                    sys.exit(0)             
+                if diff[row,col,0]: 
+                    Z.append([row,col])
+        if not len(Z):
+            rospy.loginfo('Clean surface, no defects found')
+            return
+
+        #matrix cast for numpy
+        Z = np.matrix(Z, dtype=np.float32)
 
         # how to determine k value by using k-means clustering method
-        # start trying with k=2
+        #TODO: perameterize max box size
         K = 1
-        # make the decision whether count for one group or not compare the maxlength of the bonding box
         boxMaxLength=60
-        while(1):
+        max_K = 5
+        rospy.loginfo('Calculating new K')
+        while not rospy.is_shutdown():
             criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.1)
             ret,label,center=cv2.kmeans(Z,K,criteria,100,cv2.KMEANS_RANDOM_CENTERS)
-
-            # print "center information of all the groups:......"
-            # print center
-            # print center[:,1]
-            # print center[:,0]
             count=0
             for j in xrange(K):
                 A = Z[label.ravel()==j]
@@ -111,18 +103,18 @@ class ImageComparison(object):
                 # draw rectangle's function
                 if (y_max-y_min)>boxMaxLength or (x_max-x_min)>boxMaxLength:
                     count=count+1
-            if count >0:
+            if count > 0:
                 K=K+1
-                continue
+                if K > max_K:
+                    break
             else:
                 break
-        print K
+
 
         # then do the k-means clustering again with most suitable K value from above
         criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.1)
         ret,label,center=cv2.kmeans(Z,K,criteria,100,cv2.KMEANS_RANDOM_CENTERS)
-        print "center information of all the groups:......"
-        print center
+        rospy.loginfo('Dumping Markers')
         for j in xrange(K):
             A = Z[label.ravel()==j]
             #print A[:,1]
@@ -130,8 +122,6 @@ class ImageComparison(object):
             y_min=int(A[:,1].min())
             x_max=int(A[:,0].max())
             x_min=int(A[:,0].min())
-            # draw rectangle's function
-            cv2.rectangle(dst,(y_min,x_min),(y_max,x_max),(0,255,0),3)  
 
             ######################################
             # for the markers part
@@ -139,43 +129,34 @@ class ImageComparison(object):
             marker = Marker()
             marker.header.frame_id = "world"  
             marker.header.stamp = rospy.Time()
-            marker.ns = "my_namespace"
+            marker.ns = "flaws"
             marker.id = j
             marker.type = marker.CUBE
             marker.action = marker.ADD
-            marker.pose.position.y = float(x_max+x_min-h1)/2/h1
-            marker.pose.position.x = 3*float(y_max+y_min-w1)/2/w1
-            marker.pose.position.z = 0
-            marker.pose.orientation.x = 0.0
-            marker.pose.orientation.y = 0.0
-            marker.pose.orientation.z = 0.0
+            #TODO: pull these scale values from GUI params
+            marker.pose.position.y = - float(x_max+x_min-h)/2/h
+            marker.pose.position.x = 3*float(y_max+y_min-w)/2/w
             marker.pose.orientation.w = 1.0
-            marker.scale.y = float(x_max-x_min)/w1
-            marker.scale.x = 3*float(y_max-y_min)/h1
-            marker.scale.z = 0.005
-            marker.color.a = 1.0
+            marker.scale.y = float(x_max-x_min)/h
+            marker.scale.x = 3*float(y_max-y_min)/w
+            marker.scale.z = 0.01
+            marker.color.a = 0.75
             marker.color.r = 1.0
-            marker.color.g = 1.0
-            marker.color.b = 0.0
-            #print marker
+          
+            # print marker
             self.defect_pub.publish(marker)
-
-
-
-        # show images on the window
-        cv2.imshow('defect_image',img1)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-
-        # print img1
-        plt.subplot(121),plt.imshow(img2),plt.title('Input')
-        plt.subplot(122),plt.imshow(img1),plt.title('Output')
-        plt.show()
+        print('Done')
 
 if __name__ == '__main__':
-  rospy.init_node('ImageComparison_listener', anonymous=True)
-  ImageComparison_listener = ImageComparison()
-  rospy.spin() 
-  cv2.destroyAllWindows()
+    rospy.init_node('flaw_detect')
+    flaw_detect = ImageComparison()
+    worldImage_sub = rospy.Subscriber("dirty_map", Image, flaw_detect.callback)
+    #TODO: perameterize rate
+    rate = rospy.Rate(10)
+    while not rospy.is_shutdown():
+        flaw_detect.update()
+        rate.sleep()
+
+
 
 
