@@ -5,7 +5,7 @@
 ####   update date 04/13/2014
 ####   add k-means for the bonding box and center informations
 ####   this is the version working for whole pipeline
-####   img1 is dirty map from rostopic, img2 is clean map from reading png in the folder
+####   dirty is dirty map from rostopic, clean is clean map from reading png in the folder
 
 import numpy as np
 import cv2
@@ -28,54 +28,40 @@ class ImageComparison(object):
     def __init__(self):
         self.bridge = CvBridge()
         self.defect_pub = rospy.Publisher('/visualization_marker', Marker)
+        self.K = 0
         # call the dirty_map
-        self.worldImage_sub = rospy.Subscriber("dirty_map",Image,self.callback)
+        #self.worldImage_sub = rospy.Subscriber("dirty_map",Image,self.callback)
+
+        #test data
+        self.dirty = cv2.imread(os.path.dirname(sys.argv[0])+"/../test/testsurface_baseline.png") 
+        self.clean = cv2.imread(os.path.dirname(sys.argv[0])+"/../test/testsurface_baseline.png") 
+        #clean = cv2.imread(os.path.dirname(sys.argv[0])+"/../config/clean_map.png")
+        self.height, self.width, self.depth = self.clean.shape
+
+    def tuneK(self):
+        pass
+
        
     def callback(self,data):
+        clean = self.clean
         try:
-            cv_image = self.bridge.imgmsg_to_cv2(data, "passthrough")
+            dirty = self.bridge.imgmsg_to_cv2(data, "passthrough")
+            if(dirty.shape != clean.shape):
+                raise Exception('Image size mismatch:' + str(dirty.shape) + " != " str(clean.shape))
         except Exception as e:
             rospy.logerr(str(e))
             return
-        # choice 1, conneted with whole pipepline
-        # img1 is dirty map called from subscriber
-        # img2 is baseline map stored befoe under the folder
-        img1 = cv_image 
-        img2 = cv2.imread(os.path.dirname(sys.argv[0])+"/World_Image.png") 
-        h1, w1, depth1 = img1.shape
-        h2, w2, depth2 = img2.shape
-        # print h1,w1,depth1
-        # print h2,w2,depth2
-        # print img1
-        # print img2
-
-        # # check whether img1, img2 are passing to here
-        # for row in range(h1):
-        #     for col in range(w1):
-        #         if img1[row,col][0]!=0 or img1[row,col][1]!=0 or img1[row,col][1]!=0:
-        #             print img1[row,col]
-        # # good ! there are values for img1
-        # for row in range(h2):
-        #     for col in range(w2):
-        #         if img2[row,col][0]!=0 or img2[row,col][1]!=0 or img2[row,col][1]!=0:
-        #             print img2[row,col]
-        # good ! there are values for img2
-
-
-
-
-        # we do not need to warp the img1 because img1 and img2 are already under same situation
-        # following code directly begins with pixel value comparions
-
+        
         # set up the threshold
         threshold=10
         Z=[]
+        
         ## void the edge's influnce, so +-10 for the row, col number
-        for row in xrange(10+0,h1-10):
-            for col in xrange(10+0,w1-10):
-                if(((img1[row,col][0]-img2[row,col][0])*(img1[row,col][0]-img2[row,col][0])+(img1[row,col][1]-img2[row,col][1])*(img1[row,col][1]-img2[row,col][1])+(img1[row,col][2]-img2[row,col][2])*(img1[row,col][2]-img2[row,col][2]))>threshold):
-                    img1[row,col]= [255,0,0]
-                    Z=Z+[row,col]
+        for row in xrange(10+0,self.height-10):
+            for col in xrange(10+0,self.width-10):
+                if(((dirty[row,col][0]-clean[row,col][0])*(dirty[row,col][0]-clean[row,col][0])+(dirty[row,col][1]-clean[row,col][1])*(dirty[row,col][1]-clean[row,col][1])+(dirty[row,col][2]-clean[row,col][2])*(dirty[row,col][2]-clean[row,col][2]))>threshold):
+                    dirty[row,col]= [255,0,0]
+                    Z = Z+[row,col]
                 else:
                     pass
 
@@ -84,9 +70,9 @@ class ImageComparison(object):
         Z=np.matrix(Z)
         Z=Z.reshape((N,2))
         Z=np.float32(Z)
-        print Z
 
-        # how to determine k value by using k-means clustering method
+        #Tune K value k-means clustering method
+        #TODO: perameterize these!
         # start trying with k=2
         K = 1
         # make the decision whether count for one group or not compare the maxlength of the bonding box
@@ -95,10 +81,6 @@ class ImageComparison(object):
             criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.1)
             ret,label,center=cv2.kmeans(Z,K,criteria,100,cv2.KMEANS_RANDOM_CENTERS)
 
-            # print "center information of all the groups:......"
-            # print center
-            # print center[:,1]
-            # print center[:,0]
             count=0
             for j in xrange(K):
                 A = Z[label.ravel()==j]
@@ -111,8 +93,8 @@ class ImageComparison(object):
                 # draw rectangle's function
                 if (y_max-y_min)>boxMaxLength or (x_max-x_min)>boxMaxLength:
                     count=count+1
-            if count >0:
-                K=K+1
+            if count > 0:
+                K = K+1
                 continue
             else:
                 break
@@ -143,15 +125,15 @@ class ImageComparison(object):
             marker.id = j
             marker.type = marker.CUBE
             marker.action = marker.ADD
-            marker.pose.position.y = float(x_max+x_min-h1)/2/h1
-            marker.pose.position.x = 3*float(y_max+y_min-w1)/2/w1
+            marker.pose.position.y = float(x_max+x_min-self.height)/2/self.height
+            marker.pose.position.x = 3*float(y_max+y_min-self.width)/2/self.width
             marker.pose.position.z = 0
             marker.pose.orientation.x = 0.0
             marker.pose.orientation.y = 0.0
             marker.pose.orientation.z = 0.0
             marker.pose.orientation.w = 1.0
-            marker.scale.y = float(x_max-x_min)/w1
-            marker.scale.x = 3*float(y_max-y_min)/h1
+            marker.scale.y = float(x_max-x_min)/self.width
+            marker.scale.x = 3*float(y_max-y_min)/self.height
             marker.scale.z = 0.005
             marker.color.a = 1.0
             marker.color.r = 1.0
@@ -163,13 +145,13 @@ class ImageComparison(object):
 
 
         # show images on the window
-        cv2.imshow('defect_image',img1)
+        cv2.imshow('defect_image',dirty)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
-        # print img1
-        plt.subplot(121),plt.imshow(img2),plt.title('Input')
-        plt.subplot(122),plt.imshow(img1),plt.title('Output')
+        # print dirty
+        plt.subplot(121),plt.imshow(clean),plt.title('Input')
+        plt.subplot(122),plt.imshow(dirty),plt.title('Output')
         plt.show()
 
 if __name__ == '__main__':
