@@ -3,17 +3,15 @@ uint32 complete_id
 ---
 
 #Enumerated action types
-uint16 STEP=0
-uint16 VIEW=1
-uint16 SLEEP=2
-
-#Enumerated node_ids
+uint8 STEP = 0
+uint8 VIEW = 1
+uint8 SLEEP = 2
 
 #major id is for chronological ordering later
 uint32 major_id
 
 #action type tells which subplanner should handle this move
-uint16 action_type
+uint8 action_type
 
 #which frame to move/target, and where to go
 string node_name

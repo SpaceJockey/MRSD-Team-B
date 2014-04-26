@@ -18,8 +18,12 @@ class _ParamNode:
 def config(prefix = ""):
 	return _ParamNode(**rospy.get_param(prefix))
 
+import geometry
+
 with std_redirect.SysRedirect(stderr=std_redirect.devnull): #squelch annoying URDF warnings
 	try:
 		urdf = URDF.from_parameter_server()
 	except KeyError:
 		urdf = URDF.from_xml_file(rospkg.RosPack().get_path('spacejockey') + '/resources/spacejockey.urdf')
+
+import kinematics

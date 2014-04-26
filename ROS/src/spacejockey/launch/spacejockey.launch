@@ -21,7 +21,8 @@
 
 	<!-- planners -->
 	<group ns="planner">
-		<node name="waypoint_planner" pkg="spacejockey" type="waypoint_planner.py" required="true" />
+		<node name="planner_gui" pkg="spacejockey" type="sj_gui.py" output="screen" required="true" />
+		<node name="major_planner" pkg="spacejockey" type="major_planner.py" output="screen" required="true" />
 		<node name="minor_planner" pkg="spacejockey" type="minor_planner.py" required="true" />
 	</group>
 </launch>

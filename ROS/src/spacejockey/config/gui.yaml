@@ -1,16 +1,5 @@
-#Soft constraints for major planning actions
-#distances are in meters
-
-frame_names/front_foot: 'front_foot'
-frame_names/center_foot: 'robot'
-frame_names/rear_foot: 'rear_foot'
-
-#body limits
-extend/max: .34 #linear actuator reach
-extend/min: .26
-angle/max: deg(15)
-
-#Tkinter window options
+#GUI window options
+title: "Spacejockey GUI"
 #1x3 meter configuration for SVE
 width: 1200
 height: 400

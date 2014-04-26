@@ -1,0 +1,8 @@
+# This service type is used to add a spacejockey goals to the 2D planner
+
+#request is a list of waypoints
+spacejockey/Waypoint[] waypoints
+
+---
+#Response is a simple boolean success message
+bool success
