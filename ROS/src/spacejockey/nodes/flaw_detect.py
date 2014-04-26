@@ -39,8 +39,7 @@ class ImageComparison(object):
         clean = self.clean
         try:
             dirty = self.bridge.imgmsg_to_cv2(data, "passthrough")
-            if(dirty.shape != clean.shape):
-                raise Exception('Image size mismatch:' + str(dirty.shape) + " != " + str(clean.shape))
+            assert dirty.shape == clean.shape, 'Image size mismatch:' + str(dirty.shape) + " != " + str(clean.shape)
         except Exception as e:
             rospy.logerr(str(e))
             return

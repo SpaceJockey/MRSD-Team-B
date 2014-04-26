@@ -76,7 +76,6 @@ class WorldWarp(object):
     #TODO: serverize this!
     #TODO: perameterize the file name
     def write_image(self):
-        ### this is save the World_Image for the final baseline 
         cv2.imwrite(os.path.dirname(sys.argv[0])+"/../config/clean_map.png",self.image)
 
 if __name__ == '__main__':

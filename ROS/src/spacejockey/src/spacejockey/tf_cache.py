@@ -3,9 +3,9 @@ import tf
 from geometry_msgs.msg import TransformStamped
 
 class LocalTfCache(tf.Transformer):
-	def __init__(self):
+	def __init__(self, listener = None):
 		tf.Transformer.__init__(self, True,  cache_time = rospy.Duration(1)) #local transformer for maths...
-		self.Listener = tf.TransformListener()
+		self.Listener = listener or tf.TransformListener()
 		self.tfTime = rospy.Time(0) #use the same timestamp for all internal tf calcs
 
 	def saveTransform(self, child_id, parent_id, loc, rot):
