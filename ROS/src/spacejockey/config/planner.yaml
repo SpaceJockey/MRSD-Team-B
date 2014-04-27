@@ -9,6 +9,7 @@ frame_names/rear_foot: 'rear_foot'
 extend/max: .34 #linear actuator reach
 extend/min: .26
 angle/max: deg(15)
+angle/dead: deg(1) #angular 'dead_zone' for planner error
 
 #camera reach
 view/extend: .3 # where to put the foot when viewing

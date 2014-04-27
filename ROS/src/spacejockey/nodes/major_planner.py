@@ -26,16 +26,13 @@ class Planner:
 		#used for updating the GUI
 		self.vizPub = rospy.Publisher('/visualization_marker', Marker)
 
-		#robot configuration locations are represented as tuples of AngledPoints representing each foot.
-		self.confignames = ("front_foot", "center_foot", "rear_foot")
-		self.currconfig = [Point(config.extend.min),Point(),Point(-config.extend.min)]
-
 		#set up queues
+		self.rFrames = {}
 		self.waypoints = []
 		self.wp_ids = {}	#used for tracking vizualization instances
 		self.curr_wp_id = 0
 
-	def publishWaypointMarker(self, wp, delete = False): #FIXME!
+	def publishWaypointMarker(self, wp, delete = False):
 		marker = Marker()
 		marker.header.frame_id = "world"  
 		marker.header.stamp = rospy.Time.now()
@@ -79,6 +76,14 @@ class Planner:
 		#req should contain the last completed major_ID
 		#TODO: check it!
 
+		for node in frame_names.keys():
+			try:
+				(loc, rot) = self.tfList.lookupTransform('world', frame_names[node], rospy.Time(0))
+				self.rFrames[node] = Point(loc[0], loc[1])
+			except Exception as e:
+				rospy.logwarn(e)
+				continue
+
 		#output pseudoparams
 		tgtPoint = Point()
 		node_name = "front_foot"
@@ -88,8 +93,8 @@ class Planner:
 			wp = self.waypoints[0]
 
 			#get target state
-			tgtAngle = self.currconfig[1].angleTo(wp)
-			tgtDist = self.currconfig[1].distTo(wp) 
+			tgtAngle = self.rFrames['center_foot'].angleTo(wp)
+			tgtDist = self.rFrames['center_foot'].distTo(wp) 
 			if wp.action == Waypoint.VIEW: #stop short of view self.waypoints to get in ideal image range
 				tgtDist -= config.view.opt
 
@@ -98,15 +103,15 @@ class Planner:
 			newtheta = tgtAngle	#init desired angle
 
 			#distances and angle error terms
-			frontTheta = self.currconfig[1].angleTo(self.currconfig[0])
-			backTheta = self.currconfig[2].angleTo(self.currconfig[1])
-			frontRel = angleDiff(tgtAngle, frontTheta) 					#relative angle between front and target
-			backRel = angleDiff(tgtAngle, backTheta)  					#relative angle between back and target
-			d1 = self.currconfig[1].distTo(self.currconfig[0])			#distance between front and middle
-			d2 = self.currconfig[1].distTo(self.currconfig[2]) 			#distance between middle and rear
+			frontTheta = self.rFrames['center_foot'].angleTo(self.rFrames['front_foot'])
+			backTheta = self.rFrames['rear_foot'].angleTo(self.rFrames['center_foot'])
+			frontRel = angleDiff(tgtAngle, frontTheta) 							#relative angle between front and target
+			backRel = angleDiff(tgtAngle, backTheta)  							#relative angle between back and target
+			d1 = self.rFrames['center_foot'].distTo(self.rFrames['front_foot'])			#distance between front and middle
+			d2 = self.rFrames['center_foot'].distTo(self.rFrames['rear_foot']) 			#distance between middle and rear
 
 			#move decision tree
-			if(abs(backRel) > ferr or abs(frontRel) > config.angle.max): 		#feet not pointing at the thing
+			if(abs(backRel) > config.angle.dead or abs(frontRel) > config.angle.max): 		#feet not pointing at the thing
 				if(abs(frontRel) >= abs(backRel)): 		#rotate feet, starting with whichever is farther away
 					newtheta = backTheta + math.copysign(min(abs(backRel), config.angle.max), backRel) #TODO
 				else:
@@ -129,10 +134,11 @@ class Planner:
 					extend = min(tgtDist, center_range)
 					if (extend < center_range - ferr): 	#is at target
 						self.waypoints.remove(wp)
+						self.publishWaypointMarker(wp, True)
 
 			#derive final joint coordinates
-			tgtPoint.x = self.currconfig[1].x + (extend * math.cos(newtheta))
-			tgtPoint.y = self.currconfig[1].y + (extend * math.sin(newtheta))
+			tgtPoint.x = self.rFrames['center_foot'].x + (extend * math.cos(newtheta))
+			tgtPoint.y = self.rFrames['center_foot'].y + (extend * math.sin(newtheta))
 		else: #empty waypoint queue
 			action = MajorPlannerResponse.SLEEP
 			wp = Waypoint()

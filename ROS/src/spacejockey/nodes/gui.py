@@ -84,9 +84,9 @@ class CV_App(object):
 
 		#draw robot position
 		c = cv.CV_RGB(0, 0, 196) #robot color
-		for node in frame_names.keys():
+		for node in frame_names.values():
 			try:
-				(loc, rot) = self.tfList.lookupTransform('world', frame_names[node], rospy.Time(0))
+				(loc, rot) = self.tfList.lookupTransform('world', node, rospy.Time(0))
 				self.rFrames[node] = MtoPx(loc[0], loc[1])
 			except Exception as e:
 				continue
