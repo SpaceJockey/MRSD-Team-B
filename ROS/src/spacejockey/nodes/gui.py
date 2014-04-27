@@ -43,7 +43,9 @@ class CV_App(object):
 		self.markers = {}
 		self.rFrames = {} #robot foot locations
 
-		self._startPt = (0, 0) #used by click-drag callback
+		#used by click-drag callback
+		self._startPt = None
+		self._currPt = (0, 0)
 		rospy.wait_for_service('add_waypoints') 
 		try:
 			self.add_waypoints = rospy.ServiceProxy('add_waypoints', AddWaypoints)
@@ -69,6 +71,10 @@ class CV_App(object):
 
 		#this is our output image
 		canvas = cv2.addWeighted(self.clean, .25, self.dirty, .75, 0)
+
+		#draw click-drag bounding box
+		if self._startPt != None:
+			cv2.rectangle(canvas, self._startPt, self._currPt, cv.CV_RGB(0, 255, 0))
 
 		#draw battery status indicator
 		g = 255 if self.batt > .25 else 0 #yellow or green > 25%
@@ -140,6 +146,7 @@ class CV_App(object):
 		waypoints = []
 		mX, mY = PxtoM(x, y)
 		if event == CV_App.MOVE:
+			self._currPt = (x, y) #PX
 			return
 		elif event == CV_App.RIGHT_RELEASE: #add a single move waypoint
 			waypoints = [Waypoint(Waypoint.MOVE, mX, mY)]
@@ -148,6 +155,7 @@ class CV_App(object):
 		elif event == CV_App.LEFT_RELEASE: #store start point for click-drags
 			#TODO: add click-drag support
 			waypoints = [Waypoint(Waypoint.VIEW, mX, mY)]
+			self._startPt = None
 		print "clicked at: " + str((x, y))
 		print "out point: " + str((mX, mY))
 		self.add_waypoints(waypoints) #run waypoint service callback
