@@ -21,18 +21,29 @@ class WorldWarp(object):
         self.height = rospy.get_param("/gui/height")
         self.scale  = 1.0 / rospy.get_param("/gui/scale")
         self.origin = spacejockey.config("/gui/origin")
+
+        #using an image for this so we can specify complex patterns if desired
+        #I.E. if we want to weight nearby (higher res) data higher or somesuch
+        #Or even weight specific color bands higher
+        self.vignette = np.float32(cv2.imread(rospy.get_param('/vignette_img'))) / 255.0
         self.image = None
+        self.mask = None #alpha channel composite of vignettes
 
     def callback(self,data):
         try:
-            cv_image = self.bridge.imgmsg_to_cv2(data, "passthrough")
+            camera_img = self.bridge.imgmsg_to_cv2(data, "passthrough")
             (trans, rot) = self.tfList.lookupTransform('/camera', '/world', rospy.Time(0))
             h = tf.TransformerROS().fromTranslationRotation(trans, rot)
         except Exception as e:
             rospy.logwarn(str(e))
             return
 
-        height, width, depth = cv_image.shape
+        height, width, depth = camera_img.shape
+        if camera_img.size != self.vignette.size: #resize vignette to match camera data
+            rospy.loginfo('resizing vignette mask to: ' + str((width, height)))
+            self.vignette = cv2.resize(self.vignette, (width, height))
+
+
         ## GET first two columns of R and column of T to form matrix_RT
         ## Since Z=0, we can delete third column of R
         matrix_RT=np.matrix([[h[0,0],h[0,1],h[0,3]],[h[1,0],h[1,1],h[1,3]],[h[2,0],h[2,1],h[2,3]]])
@@ -45,26 +56,26 @@ class WorldWarp(object):
         # inverse the 3*3 matrix
         b = c*a.I 
 
-        dst = cv2.warpPerspective(cv_image,b,(self.width,self.height))
+        #warp the images to the world frame
+        camera_warp = cv2.warpPerspective(camera_img,b,(self.width,self.height))
+        vignette_warp = cv2.warpPerspective(self.vignette,b,(self.width,self.height))
+
+        #combine the images
+        #TODO: pull this weight from the robot state 
+        a_new = 0.2 # weight for the pre image
+        a_cur = 1.0 - a_new
+        cMask = vignette_warp * a_new           #camera mask
+
         if self.image != None:
-            a_new = 0.5 # weight for the pre image
-            a_cur = 1.0 - a_new   # weight for the current image
-            # compare the temp pixel values and dst pixel values
-
-            newGray = cv2.cvtColor(dst,cv2.COLOR_BGR2GRAY)
-            oldGray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
-            ret, newMask = cv2.threshold(newGray, 10, 255, cv2.THRESH_BINARY)
-            ret, oldMask = cv2.threshold(oldGray, 10, 255, cv2.THRESH_BINARY)
-            mask = cv2.multiply(oldMask, newMask)
-            mask_inv = cv2.bitwise_not(mask)
-
-            bg = cv2.add(self.image, dst, mask = mask_inv) # cv2.bitwise_and(dst, dst, mask = cv2.bitwise_not(oldMask))
-            fg = cv2.addWeighted(self.image, a_cur, dst, a_new, 0)
-            blank = np.zeros(fg.shape, np.uint8)
-            fg = cv2.add(fg, blank, mask = mask)
+            #Get overlap mask
+            wMask = np.subtract(np.ones(self.image.shape), cMask)     #world mask
+            fg = np.uint8(np.multiply(camera_warp, cMask))
+            bg = np.uint8(np.multiply(self.image, wMask))
             self.image = cv2.add(fg, bg)
+            self.mask = np.add(cMask, self.mask)
         else:
-            self.image=dst
+            self.image = np.uint8(np.multiply(camera_warp, cMask))
+            self.mask = vignette_warp * a_new
 
     def publish_image(self):
         if self.image != None:
