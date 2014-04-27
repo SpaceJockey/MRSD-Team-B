@@ -29,7 +29,7 @@ class ImageComparison(object):
 
         #real data
         #TODO: perameterize config file name
-        self.clean = cv2.imread(os.path.dirname(sys.argv[0])+"/../config/clean_map.png")
+        self.clean = cv2.imread(rospy.get_param('/clean_env_map'))
         self.dirty = np.zeros(self.clean.shape, dtype=np.uint8)
         self.shape = self.clean.shape
         self.updated = False

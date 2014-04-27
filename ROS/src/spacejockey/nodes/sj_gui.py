@@ -66,8 +66,7 @@ class CV_App(object):
 		cv2.namedWindow(window.title) # Create a OpenCV highgui window	
 		cv.SetMouseCallback(window.title, self.click_cb)
 
-		#TODO: perameterize config file name
-		self.clean = cv2.imread(os.path.dirname(sys.argv[0])+"/../config/clean_map.png")
+		self.clean = cv2.imread(rospy.get_param('/clean_env_map'))
 		self.shape = self.clean.shape
 		self.dirty = np.zeros(self.shape, np.uint8)
 		self.redraw()
