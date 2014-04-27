@@ -10,8 +10,8 @@ import numpy as np
 #ROS Imports
 import rospy
 import spacejockey
-from spacejockey.geometry import *
-from spacejockey.srv import *
+from spacejockey.srv import AddWaypoints
+import spacejockey.msg
 from sensor_msgs.msg import Image
 from std_msgs.msg import Int16
 from visualization_msgs.msg import Marker
@@ -19,6 +19,31 @@ import tf
 
 window = spacejockey.config("/gui")
 frame_names = rospy.get_param('/planner/frame_names')
+
+#TODO: this might be a bit overkill, trim it down?
+#this is used to easily convert to/from screen dimensions...
+class Point(object):
+	PX = 1
+	M = 2
+	def __init__(self, x = 0, y = 0, units = M):
+		if (units == Point.PX):
+			self.x = (x - window.origin.x) * window.scale
+			self.y = (window.origin.y - y) * window.scale
+		else:
+			self.x = x
+			self.y = y
+
+	#returns output values in screen coordinates
+	def toScreen(self):
+		n_x = (self.x  / window.scale) + window.origin.x
+		n_y = window.origin.y - (self.y / window.scale)
+		return (int(n_x), int(n_y))
+
+#this wrapper allows us to easily 
+class Waypoint(Point, spacejockey.msg.Waypoint):
+	def __init__(self, x = 0, y = 0, action = spacejockey.msg.Waypoint.MOVE, units = Point.M):
+		spacejockey.msg.Waypoint.__init__(self, 0, 0, action) #set up action type
+		Point.__init__(self, x, y, units) #use unit casting to get things in meters...
 
 class CV_App(object):
 	def __init__(self):
@@ -76,8 +101,38 @@ class CV_App(object):
 		for foot in self.rframes.values():
 			cv2.circle(canvas, foot.toScreen(), 4, c, thickness = -1)
 
+		#draw/delete viz markers
+		i = 0
+		keys = self.markers.keys()
+		while i < len(self.markers):
+			key = keys[i]
+			if self.draw_marker(canvas, self.markers[key]):
+				i += 1
+			else:
+				del self.markers[key] #delete expired marker
+
 		cv2.imshow(window.title, canvas)
 		cv2.waitKey(1)
+
+	#currently, only CUBE and SPHERE are implemented
+	#returns a boolean on whether or not to delete the marker
+	def draw_marker(self, image, marker):
+		if marker.action == Marker.DELETE or (marker.lifetime != rospy.Duration(0) and (marker.header.stamp + marker.lifetime) < rospy.Time.now()):
+			return False
+		r = int(marker.color.r * 255)
+		g = int(marker.color.g * 255)
+		b = int(marker.color.b * 255)
+		c = cv.CV_RGB(r, g, b)
+
+		x_size = int(marker.scale.x / window.scale) / 2
+		y_size = int(marker.scale.y / window.scale) / 2
+		center = Point(marker.pose.position.x, marker.pose.position.y)
+		if marker.type == Marker.CUBE:
+			x, y = center.toScreen()
+			cv2.rectangle(image, (x-x_size , y-y_size), (x+x_size, y+y_size), c, thickness = 2) #probably a surface flaw
+		else:
+			cv2.circle(image, center.toScreen(), x_size, c)
+		return True
 
 	#Click callback static values
 	MOVE = 0
