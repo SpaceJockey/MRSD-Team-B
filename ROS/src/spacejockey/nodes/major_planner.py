@@ -88,6 +88,7 @@ class Planner:
 		tgtPoint = Point()
 		node_name = "front_foot"
 		action = MajorPlannerResponse.STEP
+		sleep = rospy.Duration(0)
 
 		if self.waypoints: #waypoints is not empty, plan a move
 			wp = self.waypoints[0]
@@ -121,6 +122,7 @@ class Planner:
 			else:										#move towards the thing
 				if(wp.action == Waypoint.VIEW and tgtDist < config.view.max):	#view plan action
 					action = MajorPlannerResponse.VIEW
+					sleep = rospy.Duration(3)
 					extend = config.view.extend
 					self.waypoints.remove(wp) 			#is at target
 				elif (d1 < (config.extend.max - ferr)): #extend front segment, accounting for error
@@ -141,13 +143,14 @@ class Planner:
 			tgtPoint.y = self.rFrames['center_foot'].y + (extend * math.sin(newtheta))
 		else: #empty waypoint queue
 			action = MajorPlannerResponse.SLEEP
+			sleep = rospy.Duration(1)
 			wp = Waypoint()
 
 		x, y = (wp.x, wp.y)
 		if action == MajorPlannerResponse.STEP:
 			x, y = (tgtPoint.x, tgtPoint.y) 
 
-		resp = MajorPlannerResponse(self.current_major_id, action, node_name, x,y)
+		resp = MajorPlannerResponse(self.current_major_id, action, node_name, x,y, sleep)
 		self.current_major_id += 1
 		return resp
 

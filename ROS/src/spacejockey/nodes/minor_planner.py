@@ -44,7 +44,7 @@ class MinorPlanner:
 
     #queue up a view movement for inital localization
     minorqueue.append(ViewAction(self.config.view.opt))
-    minorqueue.append(PauseAction(3))
+    minorqueue.append(PauseAction(rospy.Duration(3)))
 
     self.tfList = tf.TransformListener()
     self.tf = spacejockey.LocalTfCache(self.tfList)
@@ -85,7 +85,7 @@ class MinorPlanner:
     now = rospy.Time.now()
     if isinstance(act, PauseAction):
       self.isPaused = True
-      rospy.Timer(rospy.Duration(act.duration), self.unpause, True) #oneshot timer
+      rospy.Timer(act.duration, self.unpause, True) #oneshot timer
       return
 
     if isinstance(act, ViewAction):
@@ -150,7 +150,7 @@ class MinorPlanner:
     minorqueue.append(ViewAction(trange))
 
     #queue up a pause action
-    minorqueue.append(PauseAction(3)) #TODO: perameterize pause duration...
+    minorqueue.append(PauseAction(msg.sleep))
     return
 
   def loop(self):
@@ -172,7 +172,7 @@ class MinorPlanner:
         elif move.action_type == MajorPlannerResponse.VIEW:
           self.execute_view_action(move)
         else: #sleep
-          minorqueue.append(PauseAction(1))
+          minorqueue.append(PauseAction(move.sleep))
       rate.sleep()
 
 if __name__ == '__main__':
