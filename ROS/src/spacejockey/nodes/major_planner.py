@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-from Tkinter import *
-from copy import deepcopy
 import math
 ferr = 0.0001 #floating point comparison error correction term
 
@@ -10,6 +8,7 @@ import spacejockey
 from spacejockey.geometry import *
 from spacejockey.srv import *
 from spacejockey.msg import Waypoint
+from visualization_msgs.msg import Marker
 import tf
 
 config = spacejockey.config("/planner")
@@ -18,13 +17,14 @@ frame_names = rospy.get_param('/planner/frame_names')
 #main application class
 class Planner:
 	def __init__(self):
-
-		self.outputSrv = rospy.Service('major_planner', MajorPlanner, self.handleMajorRequest)
 		self.current_major_id = 1
-
+		self.outputSrv = rospy.Service('major_planner', MajorPlanner, self.handleMajorRequest)
+		
 		self.inputSrv = rospy.Service('add_waypoints', AddWaypoints, self.handleWaypointRequest)
-
 		self.tfList = tf.TransformListener()
+
+		#used for updating the GUI
+		self.vizPub = rospy.Publisher('/visualization_marker', Marker)
 
 		#robot configuration locations are represented as tuples of AngledPoints representing each foot.
 		self.confignames = ("front_foot", "center_foot", "rear_foot")
@@ -32,15 +32,46 @@ class Planner:
 
 		#set up queues
 		self.waypoints = []
+		self.wp_ids = {}	#used for tracking vizualization instances
+		self.curr_wp_id = 0
 
-	def publishWaypointMarkers(self): #FIXME!
-		pass
+	def publishWaypointMarker(self, wp, delete = False): #FIXME!
+		marker = Marker()
+		marker.header.frame_id = "world"  
+		marker.header.stamp = rospy.Time.now()
+		marker.ns = "waypoints"
+		marker.id = self.wp_ids[wp]
+		marker.lifetime = rospy.Duration(0)
+		if delete:
+			marker.action = marker.DELETE
+		else:
+			marker.type = marker.SPHERE
+			marker.action = marker.ADD
+			marker.pose.position.x = wp.x
+			marker.pose.position.y = wp.y
+			marker.pose.orientation.w = 1.0
+			marker.scale.y = 0.02
+			marker.scale.x = 0.02
+			marker.scale.z = 0.01
+			marker.color.a = 1.0
+			if wp.action == Waypoint.VIEW:
+				marker.color.g = 1.0
+			else:
+				marker.color.r = 1.0
+
+		# print marker
+		self.vizPub.publish(marker)
 
 	def handleWaypointRequest(self, req):
-		#TODO: implement this...
 		for wp in req.waypoints:
 			self.waypoints.append(wp)
-			rospy.loginfo("Added waypoint at: " + str((wp.x, wp.y)))
+			self.wp_ids[wp] = self.curr_wp_id
+			self.curr_wp_id += 1
+			if wp.action == Waypoint.VIEW:
+				rospy.loginfo("Added view waypoint at: " + str((wp.x, wp.y)))
+			else:
+				rospy.loginfo("Added move waypoint at: " + str((wp.x, wp.y)))
+			self.publishWaypointMarker(wp)
 		return AddWaypointsResponse(True)
 
 	def handleMajorRequest(self, req):
@@ -114,10 +145,11 @@ class Planner:
 		self.current_major_id += 1
 		return resp
 
+#TODO: add rate arguments, others useful args?
 if __name__ == '__main__':
 	rospy.init_node('major_planner')
 
-	#set up window
+	#start up planner
 	planner = Planner()
 
 	rospy.loginfo('Major Planner Online')

@@ -11,7 +11,7 @@ import numpy as np
 import rospy
 import spacejockey
 from spacejockey.srv import AddWaypoints
-import spacejockey.msg
+from spacejockey.msg import Waypoint
 from sensor_msgs.msg import Image
 from std_msgs.msg import Int16
 from visualization_msgs.msg import Marker
@@ -20,30 +20,19 @@ import tf
 window = spacejockey.config("/gui")
 frame_names = rospy.get_param('/planner/frame_names')
 
-#TODO: this might be a bit overkill, trim it down?
-#this is used to easily convert to/from screen dimensions...
-class Point(object):
-	PX = 1
-	M = 2
-	def __init__(self, x = 0, y = 0, units = M):
-		if (units == Point.PX):
-			self.x = (x - window.origin.x) * window.scale
-			self.y = (window.origin.y - y) * window.scale
-		else:
-			self.x = x
-			self.y = y
 
-	#returns output values in screen coordinates
-	def toScreen(self):
-		n_x = (self.x  / window.scale) + window.origin.x
-		n_y = window.origin.y - (self.y / window.scale)
-		return (int(n_x), int(n_y))
+def MtoPx(x, y):
+	"""convert an x,y point to screen coordinates"""
+	n_x = (x  / window.scale) + window.origin.x
+	n_y = window.origin.y - (y / window.scale)
+	return (int(n_x), int(n_y))
 
-#this wrapper allows us to easily 
-class Waypoint(Point, spacejockey.msg.Waypoint):
-	def __init__(self, x = 0, y = 0, action = spacejockey.msg.Waypoint.MOVE, units = Point.M):
-		spacejockey.msg.Waypoint.__init__(self, 0, 0, action) #set up action type
-		Point.__init__(self, x, y, units) #use unit casting to get things in meters...
+
+def PxtoM(x, y):
+	"""convert an x,y point from screen coordinates"""
+	n_x = (x - window.origin.x) * window.scale
+	n_y = (window.origin.y - y) * window.scale
+	return (n_x, n_y)
 
 class CV_App(object):
 	def __init__(self):
@@ -51,7 +40,7 @@ class CV_App(object):
 
 		self.battery = 100
 		self.markers = {}
-		self.rframes = {} #robot foot locations
+		self.rFrames = {} #robot foot locations
 
 		self._startPt = (0, 0) #used by click-drag callback
 		rospy.wait_for_service('add_waypoints') 
@@ -94,11 +83,11 @@ class CV_App(object):
 		for node in frame_names.keys():
 			try:
 				(loc, rot) = self.tfList.lookupTransform('world', frame_names[node], rospy.Time(0))
-				self.rframes[node] = Point(loc[0], loc[1])
+				self.rFrames[node] = MtoPx(loc[0], loc[1])
 			except Exception as e:
 				continue
-		for foot in self.rframes.values():
-			cv2.circle(canvas, foot.toScreen(), 4, c, thickness = -1)
+		for foot in self.rFrames.values():
+			cv2.circle(canvas, foot, 4, c, thickness = -1)
 
 		#draw/delete viz markers
 		i = 0
@@ -125,12 +114,12 @@ class CV_App(object):
 
 		x_size = int(marker.scale.x / window.scale) / 2
 		y_size = int(marker.scale.y / window.scale) / 2
-		center = Point(marker.pose.position.x, marker.pose.position.y)
+		center = MtoPx(marker.pose.position.x, marker.pose.position.y)
 		if marker.type == Marker.CUBE:
-			x, y = center.toScreen()
+			x, y = center
 			cv2.rectangle(image, (x-x_size , y-y_size), (x+x_size, y+y_size), c, thickness = 2) #probably a surface flaw
 		else:
-			cv2.circle(image, center.toScreen(), x_size, c)
+			cv2.circle(image, center, x_size, c)
 		return True
 
 	#Click callback static values
@@ -145,15 +134,18 @@ class CV_App(object):
 
 	def click_cb(self, event, x, y, button, args):
 		waypoints = []
+		mX, mY = PxtoM(x, y)
 		if event == CV_App.MOVE:
 			return
-		elif event == CV_App.RIGHT_RELEASE: #add a single view waypoint
-			waypoints = [Waypoint(x, y, Waypoint.VIEW, Point.PX)]
+		elif event == CV_App.RIGHT_RELEASE: #add a single move waypoint
+			waypoints = [Waypoint(Waypoint.MOVE, mX, mY)]
 		elif event == CV_App.LEFT_CLICK: #store start point for click-drags
-			self._startPt = Point(x, y)
+			self._startPt = (x, y) #PX
 		elif event == CV_App.LEFT_RELEASE: #store start point for click-drags
 			#TODO: add click-drag support
-			waypoints = [Waypoint(self._startPt.x, self._startPt.y, Waypoint.VIEW, Point.PX)]
+			waypoints = [Waypoint(Waypoint.VIEW, mX, mY)]
+		print "clicked at: " + str((x, y))
+		print "out point: " + str((mX, mY))
 		self.add_waypoints(waypoints) #run waypoint service callback
 			
 	def img_cb(self, msg):
