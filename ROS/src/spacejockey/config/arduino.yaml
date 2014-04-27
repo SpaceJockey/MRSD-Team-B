@@ -1,0 +1,15 @@
+
+#TODO: find a more readable way to structure this
+
+#PWM board wiring setup
+#this is the joint-names -> adafruit PWM channel # mapping
+# channels in order, 0 -> 15, could be redone as a dict()
+joint_wiring: ['front_attach', 'front_pitch', 'fore_extend', 'fore_base_pitch', 'center_swivel', 'center_attach', '', '', 'aft_base_pitch', 'aft_extend', 'rear_pitch', 'rear_attach', '', '', '', 'pwm_feedback']
+servo/min: 900
+servo/max: 2100
+
+
+#Battery Calibration Values
+#TODO: recalibrate these from the Arduino!
+battery/max: 1870  #8.5V = 100%
+battery/min: 1755  #6.8V = ~10% (Battery critically low, rapid falloff after this)

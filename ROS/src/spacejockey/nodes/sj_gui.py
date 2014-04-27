@@ -13,7 +13,7 @@ import spacejockey
 from spacejockey.srv import AddWaypoints
 from spacejockey.msg import Waypoint
 from sensor_msgs.msg import Image
-from std_msgs.msg import Int16
+from std_msgs.msg import Float32
 from visualization_msgs.msg import Marker
 import tf
 
@@ -38,7 +38,8 @@ class CV_App(object):
 	def __init__(self):
 		self.bridge = CvBridge() #used for getting ROS image topics as CV images
 
-		self.battery = 100
+		self.battSize = (64, 8) #size of the battery indicator
+		self.batt = 0.0
 		self.markers = {}
 		self.rFrames = {} #robot foot locations
 
@@ -70,13 +71,16 @@ class CV_App(object):
 		canvas = cv2.addWeighted(self.clean, .25, self.dirty, .75, 0)
 
 		#draw battery status indicator
-		g = 255 if self.battery > 25 else 0 #yellow or green > 25%
-		r = 255 if self.battery < 50 else 0 #yellow or red < 50%
+		g = 255 if self.batt > .25 else 0 #yellow or green > 25%
+		r = 255 if self.batt < .50 else 0 #yellow or red < 50%
 		c = cv.CV_RGB(r, g, 0) #indicator color
 
-		cv2.rectangle(canvas, (10 , 10), (114, 26), c)
-		cv2.rectangle(canvas, (114 , 14), (116, 22), c, thickness = -1)
-		cv2.rectangle(canvas, (12 , 12), (self.battery + 12, 24), c, thickness = -1)
+		w = int(self.batt * self.battSize[0]) #indicator width
+		if w < 0:
+			w = 0
+		cv2.rectangle(canvas, (10 , 10), (14 + self.battSize[0], 14 + self.battSize[1]), c)
+		cv2.rectangle(canvas, (14 + self.battSize[0], 12 + (self.battSize[1] / 4)), (16 + self.battSize[0], 12 + ((3 * self.battSize[1])/4)), c, thickness = -1)
+		cv2.rectangle(canvas, (12 , 12), (w + 12, 12 + self.battSize[1]), c, thickness = -1)
 
 		#draw robot position
 		c = cv.CV_RGB(0, 0, 196) #robot color
@@ -173,7 +177,7 @@ if __name__ == '__main__':
 
 	#Setup ROS Callbacks...
 	rospy.Subscriber("/dirty_map", Image, app.img_cb) 				  #inspection image
-	rospy.Subscriber('/battery_state', Int16, app.batt_cb)  		  #battery state
+	rospy.Subscriber('/battery_state', Float32, app.batt_cb)  		  #battery state
 	rospy.Subscriber('/visualization_marker', Marker, app.marker_cb)  #flaw markers
 
 	rospy.loginfo('GUI window Online')

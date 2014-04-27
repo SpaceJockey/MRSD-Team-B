@@ -13,12 +13,6 @@ joints/ratios:     [3.0,              2.0,            2.0,             2.0,     
 joints/lash/radii: [2.25,           1.5,              1.5,             1.5,          1.5,         100,           100]
 joints/lash/lash: 0.01
 
-#this is the joint-names -> adafruit PWM channel # mapping
-# channels in order, 0 -> 15, could be redone as a dict()
-arduino/joint_wiring: ['front_attach', 'front_pitch', 'fore_extend', 'fore_base_pitch', 'center_swivel', 'center_attach', '', '', 'aft_base_pitch', 'aft_extend', 'rear_pitch', 'rear_attach', '', '', '', 'pwm_feedback']
-arduino/servo/min: 900
-arduino/servo/max: 2100
-
 #these are used by joint_state_publisher to set the default joint 'safe position'
 zeros/robot_rot: 0.0
 zeros/center_swivel: 0.0

@@ -4,7 +4,6 @@
 //Arduino pin defines
 #define STATUS_LED 13
 #define BATT_PIN A8    //pin for battery monitoring
-#define BATT_LED 12    //pin for led indicator for battery
 
 #include <Arduino.h>
 #include <Scheduler.h>
