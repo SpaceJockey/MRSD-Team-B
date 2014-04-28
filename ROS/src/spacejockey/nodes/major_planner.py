@@ -59,6 +59,11 @@ class Planner:
 		# print marker
 		self.vizPub.publish(marker)
 
+	def removeWaypoint(self, wp):
+		self.waypoints.remove(wp)
+		self.publishWaypointMarker(wp, True)
+		del self.wp_ids[wp]
+
 	def handleWaypointRequest(self, req):
 		for wp in req.waypoints:
 			self.waypoints.append(wp)
@@ -124,7 +129,7 @@ class Planner:
 					action = MajorPlannerResponse.VIEW
 					sleep = rospy.Duration(3)
 					extend = config.view.extend
-					self.waypoints.remove(wp) 			#is at target
+					self.removeWaypoint(wp)
 				elif (d1 < (config.extend.max - ferr)): #extend front segment, accounting for error
 					extend = config.extend.max
 				elif (d2 > config.extend.min + ferr): 	#retract rear foot
@@ -135,8 +140,7 @@ class Planner:
 					center_range = config.extend.max - config.extend.min
 					extend = min(tgtDist, center_range)
 					if (extend < center_range - ferr): 	#is at target
-						self.waypoints.remove(wp)
-						self.publishWaypointMarker(wp, True)
+						self.removeWaypoint(wp)
 
 			#derive final joint coordinates
 			tgtPoint.x = self.rFrames['center_foot'].x + (extend * math.cos(newtheta))
