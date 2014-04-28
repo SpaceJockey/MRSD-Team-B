@@ -103,7 +103,7 @@
 
   <joint name="center_swivel" type="revolute">
     <axis xyz="0 0 1"/>
-    <limit effort="1000.0" lower="-.8" upper=".8" velocity="2.094"/>
+    <limit effort="1000.0" lower="-.35" upper=".35" velocity="2.094"/>
     <parent link="center_aft"/>
     <child link="center_seg"/>
   </joint>
@@ -124,7 +124,7 @@
 
   <joint name="front_pitch" type="revolute">
     <axis xyz="0 1 0"/>
-    <limit effort="1000.0" lower="-.6" upper=".6" velocity="2.094"/>
+    <limit effort="1000.0" lower="-.52" upper=".78" velocity="2.094"/>
     <parent link="fore_base_prism"/>
     <child link="front_seg"/>
   </joint>
