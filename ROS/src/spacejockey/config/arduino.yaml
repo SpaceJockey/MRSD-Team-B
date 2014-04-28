@@ -11,5 +11,5 @@ servo/max: 2100
 
 #Battery Calibration Values
 #TODO: recalibrate these from the Arduino!
-battery/max: 1870  #8.5V = 100%
-battery/min: 1755  #6.8V = ~10% (Battery critically low, rapid falloff after this)
+battery/max: 3360  #8.5V = 100%
+battery/min: 2995  #6.8V = ~10% (Battery critically low, rapid falloff after this)
