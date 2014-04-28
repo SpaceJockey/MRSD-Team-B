@@ -100,23 +100,25 @@ class CV_App(object):
 			cv2.circle(canvas, foot, 4, c, thickness = -1)
 
 		#draw/delete viz markers
-		i = 0
-		keys = self.markers.keys()
-		while i < len(self.markers):
-			key = keys[i]
-			if self.draw_marker(canvas, self.markers[key]):
-				i += 1
-			else:
-				del self.markers[key] #delete expired marker
+		self.clean_markers()
+		for marker in self.markers.values():
+			self.draw_marker(canvas, marker)
 
 		cv2.imshow(window.title, canvas)
 		cv2.waitKey(1)
 
+	#delete expired markers...
+	def clean_markers(self):
+		now = rospy.Time.now()
+		for key in self.markers.keys():
+			marker = self.markers[key]
+			if (marker.lifetime != rospy.Duration(0) and (marker.header.stamp + marker.lifetime) < now):
+				rospy.loginfo('Deleting expired marker: ' + key)
+				del self.markers[key] #delete expired marker
+
 	#currently, only CUBE and SPHERE are implemented
 	#returns a boolean on whether or not to delete the marker
 	def draw_marker(self, image, marker):
-		if marker.action == Marker.DELETE or (marker.lifetime != rospy.Duration(0) and (marker.header.stamp + marker.lifetime) < rospy.Time.now()):
-			return False
 		r = int(marker.color.r * 255)
 		g = int(marker.color.g * 255)
 		b = int(marker.color.b * 255)
@@ -130,7 +132,6 @@ class CV_App(object):
 			cv2.rectangle(image, (x-x_size , y-y_size), (x+x_size, y+y_size), c, thickness = 2) #probably a surface flaw
 		else:
 			cv2.circle(image, center, x_size, c)
-		return True
 
 	#Click callback static values
 	MOVE = 0
@@ -156,8 +157,6 @@ class CV_App(object):
 			#TODO: add click-drag support
 			waypoints = [Waypoint(Waypoint.VIEW, mX, mY)]
 			self._startPt = None
-		print "clicked at: " + str((x, y))
-		print "out point: " + str((mX, mY))
 		self.add_waypoints(waypoints) #run waypoint service callback
 			
 	def img_cb(self, msg):
@@ -176,7 +175,17 @@ class CV_App(object):
 	#vizualization_messages are used for drawing defects and waypoints...
 	def marker_cb(self, msg):
 		name = msg.ns + "_" + str(msg.id)
-		self.markers[name] = msg
+		if msg.header.frame_id == 'world': #only show global markers, no AR tags...
+			if msg.action == Marker.DELETE:
+				try:
+					del self.markers[name]
+					rospy.loginfo('Deleting marker: ' + name)
+				except KeyError:
+					pass
+			else:
+				self.markers[name] = msg	
+		else:
+			rospy.loginfo('Ignoring non-world frame marker: ' + name)
 
 if __name__ == '__main__':
 	#set up window
