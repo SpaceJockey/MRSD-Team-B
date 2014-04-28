@@ -1,8 +1,12 @@
 #GUI window options
 title: "Spacejockey GUI"
+
 #2x2 meter configuration for SVE Redux
-width: 720
-height: 720
-scale: 0.0028  #25 cm / 100px
-origin/x: 360
-origin/y: 360
+width: 700
+height: 700
+scale: 0.00286  #28.6 cm / 100px
+origin/x: 350
+origin/y: 350
+
+#how close to space view waypoints for range inspection
+inspectionSize: .3 #30 cm
