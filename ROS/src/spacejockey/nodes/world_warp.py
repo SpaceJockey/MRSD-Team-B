@@ -5,15 +5,24 @@ from sensor_msgs.msg import Image, CameraInfo
 import rospy
 from cv_bridge import CvBridge, CvBridgeError 
 import spacejockey
+from spacejockey.srv import RobotStatus
 import tf
 import os,sys
 
 
 class WorldWarp(object):
     def __init__(self):
+        rospy.wait_for_service('robot_status') 
+        try:
+            self.get_status = rospy.ServiceProxy('robot_status', RobotStatus)
+        except Exception, e:
+            rospy.logerr("Service setup failed: " + str(e))
+            sys.exit(-1)
+
         self.bridge = CvBridge()
         self.image_pub = rospy.Publisher("dirty_map",Image)
         self.image_sub = rospy.Subscriber("camera/image_raw",Image,self.callback)
+
         k = rospy.get_param("/camera_matrix/data")
         self.K=np.matrix([[k[0],k[1],k[2]],[k[3],k[4],k[5]],[k[6],k[7],k[8]]])
         self.tfList = tf.TransformListener() # for the getting big H
@@ -28,6 +37,10 @@ class WorldWarp(object):
         self.vignette = np.float32(cv2.imread(rospy.get_param('/vignette_img'))) / 255.0
         self.image = None
         self.mask = None #alpha channel composite of vignettes
+
+    def get_weight(self):
+        status = self.get_status(rospy.Time.now())
+        return status.image_weight
 
     def callback(self,data):
         try:
@@ -61,8 +74,7 @@ class WorldWarp(object):
         vignette_warp = cv2.warpPerspective(self.vignette,b,(self.width,self.height))
 
         #combine the images
-        #TODO: pull this weight from the robot state 
-        a_new = 0.2 # weight for the pre image
+        a_new = self.get_weight() # weight for the pre image
         a_cur = 1.0 - a_new
         cMask = vignette_warp * a_new           #camera mask
 

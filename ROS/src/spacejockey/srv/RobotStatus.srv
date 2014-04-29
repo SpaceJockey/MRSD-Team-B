@@ -1,0 +1,6 @@
+#this service is used to poll the current robot status and get weights for localization and image mapping
+time stamp
+---
+string status_msg
+float32 locale_weight
+float32 image_weight

@@ -29,11 +29,16 @@ class MinorPlanner:
     self.joint_tgt = dict()
     self.joints = dict()
     self.isPaused = False
+    self.last_minor_act = None
 
     self.jointPub = rospy.Publisher('joint_states', JointState)    
     #rospy.Subscriber('major_actions', MajorPlanAction, self.handle_major_action)
     rospy.Subscriber('/joint_states', JointState, self.handle_joint_states)
     rospy.init_node('minor_planner')
+
+    #set up status service
+    self.status = RobotStatusResponse('idle', 0.0, 0.0)
+    self.statusSrv = rospy.Service('/robot_status', RobotStatus, self.handle_status_request)
 
     rospy.wait_for_service('major_planner') 
     try:
@@ -49,6 +54,10 @@ class MinorPlanner:
     self.tfList = tf.TransformListener()
     self.tf = spacejockey.LocalTfCache(self.tfList)
     self.tfCast = tf_weighted.StaticTransformBroadcaster() #tf.TransformBroadcaster()
+
+  def handle_status_request(self, req):
+    #TODO: check time maybe?
+    return self.status
 
   def handle_joint_states(self, msg):
     for i in range(len(msg.name)):
@@ -86,13 +95,25 @@ class MinorPlanner:
     if isinstance(act, PauseAction):
       self.isPaused = True
       rospy.Timer(act.duration, self.unpause, True) #oneshot timer
+      if isinstance(self.last_minor_act, ViewAction):
+        self.status.image_weight = 0.70 #TODO: perameterize these weights!
+        self.status.locale_weight = 0.70
       return
 
     if isinstance(act, ViewAction):
       self.joint_tgt = IK(front = self.view_tf_loc, tgtRange = act.range)
+      self.status.image_weight = 0.3
+      self.status.locale_weight = 0.3
       return
 
-    #move action...
+    #ELSE: move action
+    if act.frame == 'front_foot' and act.loc[2] > float_error:
+      self.status.image_weight = 0.1
+      self.status.locale_weight = 0.1
+    else:
+      self.status.image_weight = 0.0
+      self.status.locale_weight = 0.0
+
     self.tf.clear()
     #pull needed values into our Transformer
     for node in frame_names.values():
@@ -110,11 +131,13 @@ class MinorPlanner:
     if act.frame == 'robot':
       t_est = now + rospy.Duration.from_sec(self.eta())
       self.tfCast.sendTransform(act.loc, (0,0,0,1), t_est, 'robot', 'world')
+    self.last_minor_act = act
 
   def execute_move_action(self, msg):
     frame_id = frame_names[msg.node_name]
     (loc, rot) = self.tfList.lookupTransform('world', frame_id, rospy.Time(0))
     loc = list(loc)
+    self.status.status_msg = 'Moving'
 
     #Skip detach step if node is already off the surface...
     if(loc[2] < self.config.move.detachHeight):
@@ -145,6 +168,7 @@ class MinorPlanner:
     self.tf.saveTransform('view_tgt', 'world', (msg.x, msg.y, 0.0), (0,0,0,1))
     (vloc, foobar) = self.tf.computeTransform('view_tgt', 'robot')
     trange = math.sqrt(vloc[0]**2 + vloc[1]**2)
+    self.status.status_msg = 'Viewing'
 
     #queue up a view movement
     minorqueue.append(ViewAction(trange))
@@ -172,6 +196,7 @@ class MinorPlanner:
         elif move.action_type == MajorPlannerResponse.VIEW:
           self.execute_view_action(move)
         else: #sleep
+          self.status.status_msg = 'Idle'
           minorqueue.append(PauseAction(move.sleep))
       rate.sleep()
 

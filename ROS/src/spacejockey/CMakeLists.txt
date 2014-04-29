@@ -20,6 +20,7 @@ add_service_files(
   FILES
   MajorPlanner.srv
   AddWaypoints.srv
+  RobotStatus.srv
 )
 
 ## Generate actions in the 'action' folder
