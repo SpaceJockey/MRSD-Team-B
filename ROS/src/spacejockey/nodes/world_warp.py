@@ -99,7 +99,8 @@ class WorldWarp(object):
     #TODO: serverize this!
     #TODO: perameterize the file name
     def write_image(self):
-        cv2.imwrite(os.path.dirname(sys.argv[0])+"/../config/clean_map.png",self.image)
+        cv2.imwrite(os.path.dirname(sys.argv[0])+"/../test/clean_map.png",self.image)
+        # cv2.imwrite(os.path.dirname(sys.argv[0])+"/../config/clean_map.png",self.image)
 
 if __name__ == '__main__':
     rospy.init_node('world_warp', anonymous=True)
@@ -111,4 +112,4 @@ if __name__ == '__main__':
             rate.sleep()
         except:
             break
-    #world_warp.write_image()
+    world_warp.write_image()

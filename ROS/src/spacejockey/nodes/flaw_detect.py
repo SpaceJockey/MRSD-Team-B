@@ -24,13 +24,13 @@ class ImageComparison(object):
         self.defect_pub = rospy.Publisher('/visualization_marker', Marker)
 
         #test data
-        #self.dirty = cv2.imread(os.path.dirname(sys.argv[0])+"/../test/testsurface_dirty.png") 
-        #self.clean = cv2.imread(os.path.dirname(sys.argv[0])+"/../test/testsurface_clean.png") 
+        self.dirty = cv2.imread(os.path.dirname(sys.argv[0])+"/../test/testsurface_dirty.png") 
+        self.clean = cv2.imread(os.path.dirname(sys.argv[0])+"/../test/testsurface_clean.png") 
 
         #real data
         #TODO: perameterize config file name
-        self.clean = cv2.imread(rospy.get_param('/clean_env_map'))
-        self.dirty = np.zeros(self.clean.shape, dtype=np.uint8)
+        # self.clean = cv2.imread(rospy.get_param('/clean_env_map'))
+        # self.dirty = np.zeros(self.clean.shape, dtype=np.uint8)
         self.shape = self.clean.shape
         self.updated = False
 
@@ -53,30 +53,52 @@ class ImageComparison(object):
         dirty = self.dirty
         clean = self.clean
         h,w,depth = self.shape
+    
+        # this is for RGB
+        # #todo: perameterize threshold
+        # threshold=100
+        # Z=[]
 
-        #todo: perameterize threshold
-        threshold=100
-        Z=[]
+        # dirtyGray = cv2.cvtColor(dirty,cv2.COLOR_BGR2GRAY)
+        # cleanGray = cv2.cvtColor(clean, cv2.COLOR_BGR2GRAY)
+        # ret, dirtyMask = cv2.threshold(dirtyGray, 10, 255, cv2.THRESH_BINARY)
 
-        dirtyGray = cv2.cvtColor(dirty,cv2.COLOR_BGR2GRAY)
-        cleanGray = cv2.cvtColor(clean, cv2.COLOR_BGR2GRAY)
-        ret, dirtyMask = cv2.threshold(dirtyGray, 10, 255, cv2.THRESH_BINARY)
-
-        r1 = cv2.subtract(dirty, clean, mask=dirtyMask)  
-        r2 = cv2.subtract(clean, dirty, mask=dirtyMask)
-        #absD = cv2.absdiff(dirty, clean)
-        ret, diff = cv2.threshold(cv2.add(r1, r2), threshold, 255, cv2.THRESH_BINARY) 
+        # r1 = cv2.subtract(dirty, clean, mask=dirtyMask)  
+        # r2 = cv2.subtract(clean, dirty, mask=dirtyMask)
+        # #absD = cv2.absdiff(dirty, clean)
+        # ret, diff = cv2.threshold(cv2.add(r1, r2), threshold, 255, cv2.THRESH_BINARY) 
         
-        #FIXME: this is still freakin slow!
+        # #FIXME: this is still freakin slow!
+        # for row in range(h):
+        #     for col in range(w):
+        #         if rospy.is_shutdown():
+        #             sys.exit(0)
+        #         # print diff[row,col,0]             
+        #         if diff[row,col,0]: 
+        #             Z.append([row,col])
+        # if not len(Z):
+        #     rospy.loginfo('Clean surface, no defects found')
+        #     return
+
+        # this is for HSV
+        threshold = 10
+        Z = []
+        dirtyhsv = cv2.cvtColor(dirty,cv2.COLOR_BGR2HSV)
+        cleanhsv = cv2.cvtColor(clean,cv2.COLOR_BGR2HSV)
         for row in range(h):
             for col in range(w):
                 if rospy.is_shutdown():
-                    sys.exit(0)             
-                if diff[row,col,0]: 
+                    sys.exit(0)          
+                if abs(dirtyhsv[row,col][0]-cleanhsv[row,col][0])>threshold:
+                    # print dirtyhsv[row,col][0]-cleanhsv[row,col][0]
                     Z.append([row,col])
+        
         if not len(Z):
             rospy.loginfo('Clean surface, no defects found')
             return
+        # print Z
+
+
 
         #matrix cast for numpy
         Z = np.matrix(Z, dtype=np.float32)
@@ -84,6 +106,7 @@ class ImageComparison(object):
         # how to determine k value by using k-means clustering method
         #TODO: perameterize max box size
         K = 1
+        print K
         boxMaxLength=60
         max_K = 5
         rospy.loginfo('Calculating new K')
@@ -109,7 +132,7 @@ class ImageComparison(object):
             else:
                 break
 
-
+        # print K
         # then do the k-means clustering again with most suitable K value from above
         criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.1)
         ret,label,center=cv2.kmeans(Z,K,criteria,100,cv2.KMEANS_RANDOM_CENTERS)
@@ -121,6 +144,16 @@ class ImageComparison(object):
             y_min=int(A[:,1].min())
             x_max=int(A[:,0].max())
             x_min=int(A[:,0].min())
+            # # test
+            # print y_max
+            # print y_min
+            # print x_max
+            # print x_min
+            cv2.rectangle(dirty,(y_min,x_min),(y_max,x_max),(0,255,0),3)
+            cv2.imshow('defect_image',dirty)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
+
 
             ######################################
             # for the markers part
@@ -149,7 +182,7 @@ class ImageComparison(object):
 if __name__ == '__main__':
     rospy.init_node('flaw_detect')
     flaw_detect = ImageComparison()
-    worldImage_sub = rospy.Subscriber("dirty_map", Image, flaw_detect.callback)
+    # worldImage_sub = rospy.Subscriber("dirty_map", Image, flaw_detect.callback)
     #TODO: perameterize rate
     rate = rospy.Rate(10)
     while not rospy.is_shutdown():
