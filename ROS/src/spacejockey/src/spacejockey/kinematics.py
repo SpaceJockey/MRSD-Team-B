@@ -45,72 +45,95 @@ def normalize(angle):
     angle += math.pi
   return angle
 
-def clip_limits(positions):
-  for j in positions.keys():
+def clip_limits(joint_pos):
+  for j in joint_pos.keys():
     try:
-      if positions[j] > joint_upper[j]:
-        positions[j] = joint_upper[j]
-      if positions[j] < joint_lower[j]:
-        positions[j] = joint_lower[j]
+      if joint_pos[j] > joint_upper[j]:
+        joint_pos[j] = joint_upper[j]
+      if joint_pos[j] < joint_lower[j]:
+        joint_pos[j] = joint_lower[j]
     except KeyError:
       continue
-  return positions
+  return joint_pos
+
+
 
 #TODO: parameterize link offsets from URDF!
 def IK(front = None, rear = None, doDetach = False, checkLimits = True, tgtRange = None):
   """Takes X, Y, Z tuples (in the local robot frame), and returns a partial set of joint angles"""
-  positions = dict()
-  positions['center_attach'] = 0.0 #default off...
+
+  #pull in critical dimensions from urdf:
+  try:
+    urdf_center_z = urdf.joint_map['robot_rot'].origin.position[2]
+    urdf_front_z = urdf.joint_map['front_attach'].origin.position[2]
+    urdf_front_x = urdf.joint_map['front_attach'].origin.position[0]
+    urdf_fore_base_x = urdf.joint_map['fore_base_pitch'].origin.position[0]
+    urdf_cam_y = urdf.joint_map['camera_fixed'].origin.position[1]
+    #urdf_cam_theta = urdf.joint_map['camera_fixed'].origin.rotation[1] - (math.pi / 2.0)
+    urdf_cam_theta = math.radians(20) #FIXME!
+  except KeyError, e:
+    raise Exception('Malformed URDF joint configuration: ' + str(e))
+
+  #calculate offsets
+  z_offset = urdf_center_z + urdf_front_z
+  xy_offset = urdf_front_x + urdf_fore_base_x
+
+  #init output dictionary
+  joint_pos = dict()
+  joint_pos['center_attach'] = 0.0 #default off...
+
+  #throw errors
+  assert (not tgtRange) or front != None, "Front foot location is requred when setting a target range"
+  assert not (tgtRange and doDetach), "Detachment and range arguments must not be used at the same time"
+
   if(front):
-    f_xy_dist = math.sqrt(front[0]**2 + front[1]**2) - .07054
-    f_z_dist = front[2] - .0194
-    positions['fore_extend'] = math.sqrt(f_xy_dist**2 + f_z_dist**2)
+    f_xy_dist = math.sqrt(front[0]**2 + front[1]**2) - xy_offset
+    f_z_dist = front[2] - z_offset
+    joint_pos['fore_extend'] = math.sqrt(f_xy_dist**2 + f_z_dist**2)
     ptheta = math.atan2(f_z_dist, f_xy_dist)
-    positions['fore_base_pitch'] = -ptheta
-    positions['front_pitch'] = ptheta
+    joint_pos['fore_base_pitch'] = -ptheta
+    joint_pos['front_pitch'] = ptheta
     
     ftheta = math.atan2(front[1], front[0])
-    #positions['robot_rot'] = 0.0
-    positions['center_swivel'] = ftheta
+    #joint_pos['robot_rot'] = 0.0
+    joint_pos['center_swivel'] = ftheta
     
     if doDetach:
       if front[2] < -detach_height + float_err: #detach the center foot
-        positions['center_attach'] = 0.1 
+        joint_pos['center_attach'] = 0.1 
       if front[2] >= detach_height - float_err: #twist the front foot to detach
-        positions['front_pitch'] -= 0.1
-    elif tgtRange: #FIXME: implement viewing angle for view moves
-      tgtTheta = math.atan2(f_z_dist, tgtRange - f_xy_dist) - math.radians(20) #TODO: pull camera angle from URDF
-      positions['front_pitch'] += tgtTheta
+        joint_pos['front_pitch'] -= 0.1
 
   if(rear):
-    r_xy_dist = math.sqrt(rear[0]**2 + rear[1]**2) - .07054
-    r_z_dist = rear[2] - .0194
-    positions['aft_extend'] = math.sqrt(r_xy_dist**2 + r_z_dist**2)
+    r_xy_dist = math.sqrt(rear[0]**2 + rear[1]**2) - xy_offset
+    r_z_dist = rear[2] - z_offset
+    joint_pos['aft_extend'] = math.sqrt(r_xy_dist**2 + r_z_dist**2)
     ptheta = math.atan2(r_z_dist, r_xy_dist)
-    positions['aft_base_pitch'] = ptheta
-    positions['rear_pitch'] = -ptheta
+    joint_pos['aft_base_pitch'] = ptheta
+    joint_pos['rear_pitch'] = -ptheta
 
     rtheta = math.atan2(-rear[1], -rear[0])
-    positions['robot_rot'] = rtheta
-    positions['center_swivel'] = -rtheta
+    joint_pos['robot_rot'] = rtheta
+    joint_pos['center_swivel'] = -rtheta
 
     if doDetach:
       if rear[2] < -detach_height + float_err: #detach the center foot
-        positions['center_attach'] = 0.1 
+        joint_pos['center_attach'] = 0.1 
       if rear[2] >= detach_height - float_err: #twist the rear foot to detach
-        positions['rear_pitch'] += 0.1
+        joint_pos['rear_pitch'] += 0.1
 
-  #TODO: what happens to the center joint if both front and back are set?
   if front and rear:
-    positions['center_swivel'] = ftheta - rtheta
+    joint_pos['center_swivel'] = ftheta - rtheta
 
-  #adjust center swivel by some offset to properly point the camera at the target
+  #point the camera at the target
   if tgtRange:
-    c_offset = urdf.joint_map['camera_fixed'].origin.position[1]
-    oTheta = math.atan(c_offset/tgtRange)
-    positions['center_swivel'] -= oTheta
+    tgtTheta = math.atan2(f_z_dist, tgtRange - f_xy_dist) - urdf_cam_theta
+    joint_pos['front_pitch'] += tgtTheta
+    oTheta = math.atan(urdf_cam_y/tgtRange)
+    joint_pos['center_swivel'] -= oTheta
 
+  #clip to limits and return
   if(checkLimits):
-  	return clip_limits(positions)
+  	return clip_limits(joint_pos)
   else:
-  	return positions
+  	return joint_pos

@@ -5,6 +5,7 @@ import rospy
 import spacejockey
 from spacejockey.kinematics import IK
 import tf
+import tf_weighted
 from sensor_msgs.msg import JointState
 import math
 from interactive_markers.interactive_marker_server import *
@@ -75,7 +76,7 @@ def poseToTf(pose):
 def processFeedback(feedback):
     #update marker location
     (loc, rot) = poseToTf(feedback.pose)
-    tfCast.sendTransform(loc, rot, rospy.Time(0), '/static/' + feedback.marker_name, feedback.header.frame_id)
+    tfCast.sendTransform(loc, rot, rospy.Time.now(), feedback.marker_name, feedback.header.frame_id)
 
     try:
       (floc, frot) = tfList.lookupTransform('robot', 'front_tgt', rospy.Time(0))
@@ -104,7 +105,7 @@ def publishJoints(ik_soln):
 rospy.init_node("ik_test")
 
 # IPython.embed()
-tfCast = tf.TransformBroadcaster()
+tfCast = tf_weighted.StaticTransformBroadcaster()
 tfList = tf.TransformListener()
 # create an interactive marker server on the topic namespace simple_marker
 server = InteractiveMarkerServer("ik_test")
