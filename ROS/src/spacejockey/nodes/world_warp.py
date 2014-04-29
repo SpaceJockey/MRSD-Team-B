@@ -43,7 +43,7 @@ class WorldWarp(object):
             rospy.loginfo('resizing vignette mask to: ' + str((width, height)))
             self.vignette = cv2.resize(self.vignette, (width, height))
 
-
+        camera_img = cv2.flip(camera_img, -1) #flip around both axes
         ## GET first two columns of R and column of T to form matrix_RT
         ## Since Z=0, we can delete third column of R
         matrix_RT=np.matrix([[h[0,0],h[0,1],h[0,3]],[h[1,0],h[1,1],h[1,3]],[h[2,0],h[2,1],h[2,3]]])
