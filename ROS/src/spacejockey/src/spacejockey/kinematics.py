@@ -104,6 +104,12 @@ def IK(front = None, rear = None, doDetach = False, checkLimits = True, tgtRange
   if front and rear:
     positions['center_swivel'] = ftheta - rtheta
 
+  #adjust center swivel by some offset to properly point the camera at the target
+  if tgtRange:
+    c_offset = urdf.joint_map['camera_fixed'].origin.position[1]
+    oTheta = math.atan(c_offset/tgtRange)
+    positions['center_swivel'] -= oTheta
+
   if(checkLimits):
   	return clip_limits(positions)
   else:
