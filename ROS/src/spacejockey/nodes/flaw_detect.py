@@ -18,10 +18,13 @@ from cv_bridge import CvBridge, CvBridgeError
 # for the marker part
 from visualization_msgs.msg import Marker
 
-class ImageComparison(object):
+class FlawDetector(object):
     def __init__(self):
         self.bridge = CvBridge()
         self.defect_pub = rospy.Publisher('/visualization_marker', Marker)
+
+        #cache K value, should never find less defects than previous iteration...
+        self.K = 1
 
         #test data
         self.dirty = cv2.imread(os.path.dirname(sys.argv[0])+"/../test/testsurface_dirty.png") 
@@ -46,119 +49,87 @@ class ImageComparison(object):
         self.dirty = dirty
         self.updated = False
 
+    def kMeans(self, K, Z):
+        criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.1) #TODO: test different iteration counts...
+        ret, label, center = cv2.kmeans(Z, K, criteria, 100, cv2.KMEANS_RANDOM_CENTERS)
+
+        bboxes = []
+        maxDim = 0
+        for j in range(K):
+            A = Z[label.ravel() == j]
+            
+            x_min=int(A[:,0].min())
+            x_max=int(A[:,0].max())
+            if (x_max - x_min > maxDim):
+                maxDim = x_max - x_min
+
+            y_min=int(A[:,1].min())
+            y_max=int(A[:,1].max())
+            if (y_max - y_min > maxDim):
+                maxDim = y_max - y_min
+
+            bboxes.append(((y_min,x_min), (y_max,x_max)))
+        return (maxDim, bboxes)
+
+
+
     def update(self):
+        rospy.loginfo('Updating')
         if self.updated:
             return
-        self.updated = True
+        #self.updated = True
+
         dirty = self.dirty
         clean = self.clean
         h,w,depth = self.shape
-    
-        # this is for RGB
-        # #todo: perameterize threshold
-        # threshold=100
-        # Z=[]
 
-        # dirtyGray = cv2.cvtColor(dirty,cv2.COLOR_BGR2GRAY)
-        # cleanGray = cv2.cvtColor(clean, cv2.COLOR_BGR2GRAY)
-        # ret, dirtyMask = cv2.threshold(dirtyGray, 10, 255, cv2.THRESH_BINARY)
-
-        # r1 = cv2.subtract(dirty, clean, mask=dirtyMask)  
-        # r2 = cv2.subtract(clean, dirty, mask=dirtyMask)
-        # #absD = cv2.absdiff(dirty, clean)
-        # ret, diff = cv2.threshold(cv2.add(r1, r2), threshold, 255, cv2.THRESH_BINARY) 
-        
-        # #FIXME: this is still freakin slow!
-        # for row in range(h):
-        #     for col in range(w):
-        #         if rospy.is_shutdown():
-        #             sys.exit(0)
-        #         # print diff[row,col,0]             
-        #         if diff[row,col,0]: 
-        #             Z.append([row,col])
-        # if not len(Z):
-        #     rospy.loginfo('Clean surface, no defects found')
-        #     return
-
-        # this is for HSV
-        threshold = 10
+        threshold = 60
         Z = []
+
+        #TODO: gaussian filtering to avoid single-pixel defects
+        #TODO: mask over saturated values to avoid false hue values
         dirtyhsv = cv2.cvtColor(dirty,cv2.COLOR_BGR2HSV)
         cleanhsv = cv2.cvtColor(clean,cv2.COLOR_BGR2HSV)
+        diffhsv = cv2.absdiff(dirtyhsv, cleanhsv)
+        diffH = cv2.split(diffhsv)[0]
+
         for row in range(h):
             for col in range(w):
                 if rospy.is_shutdown():
                     sys.exit(0)          
-                if abs(dirtyhsv[row,col][0]-cleanhsv[row,col][0])>threshold:
-                    # print dirtyhsv[row,col][0]-cleanhsv[row,col][0]
+                if diffH[row,col] > threshold:
                     Z.append([row,col])
-        
         if not len(Z):
             rospy.loginfo('Clean surface, no defects found')
             return
-        # print Z
-
-
 
         #matrix cast for numpy
         Z = np.matrix(Z, dtype=np.float32)
 
         # how to determine k value by using k-means clustering method
         #TODO: perameterize max box size
-        K = 1
-        print K
-        boxMaxLength=60
-        max_K = 5
-        rospy.loginfo('Calculating new K')
-        while not rospy.is_shutdown():
-            criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.1)
-            ret,label,center=cv2.kmeans(Z,K,criteria,100,cv2.KMEANS_RANDOM_CENTERS)
-            count=0
-            for j in xrange(K):
-                A = Z[label.ravel()==j]
-                #print A[:,1]
-                y_max=int(A[:,1].max())
-                y_min=int(A[:,1].min())
-                x_max=int(A[:,0].max())
-                x_min=int(A[:,0].min())
-                # print y_max,y_min,x_max,x_min
-                # draw rectangle's function
-                if (y_max-y_min)>boxMaxLength or (x_max-x_min)>boxMaxLength:
-                    count=count+1
-            if count > 0:
-                K=K+1
-                if K > max_K:
-                    break
-            else:
-                break
+        boxMax = 100
+        rospy.loginfo('Running K-Means')
 
-        # print K
-        # then do the k-means clustering again with most suitable K value from above
-        criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.1)
-        ret,label,center=cv2.kmeans(Z,K,criteria,100,cv2.KMEANS_RANDOM_CENTERS)
+        #bboxes = self.kMeans(self.K, Z)
+        maxDim, bboxes = self.kMeans(self.K, Z)
+
+        #make sure K groupings are small enough
+        while maxDim > boxMax and not rospy.is_shutdown():
+            rospy.logdebug('Updating K value: ' + str(self.K))
+            self.K += 1 
+            maxDim, bboxes = self.kMeans(self.K, Z)
+
+        #output markers
         rospy.loginfo('Dumping Markers')
-        for j in xrange(K):
-            A = Z[label.ravel()==j]
-            #print A[:,1]
-            y_max=int(A[:,1].max())
-            y_min=int(A[:,1].min())
-            x_max=int(A[:,0].max())
-            x_min=int(A[:,0].min())
+        canvas = np.copy(diffhsv)
+        for b in bboxes:
             # # test
-            # print y_max
-            # print y_min
-            # print x_max
-            # print x_min
-            cv2.rectangle(dirty,(y_min,x_min),(y_max,x_max),(0,255,0),3)
-            cv2.imshow('defect_image',dirty)
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
-
-
+            cv2.rectangle(canvas,b[0],b[1],(0,0,255),2)
             ######################################
             # for the markers part
             ######################################
-            marker = Marker()
+            """marker = Marker()
             marker.header.frame_id = "world"  
             marker.header.stamp = rospy.Time()
             marker.ns = "flaws"
@@ -176,19 +147,21 @@ class ImageComparison(object):
             marker.color.r = 1.0
           
             # print marker
-            self.defect_pub.publish(marker)
-        print('Done')
+            self.defect_pub.publish(marker)"""
+        #print('Done')
+        cv2.imshow('Defects Found',canvas)
+        cv2.waitKey(1)
 
 if __name__ == '__main__':
     rospy.init_node('flaw_detect')
-    flaw_detect = ImageComparison()
+    flaw_detect = FlawDetector()
     # worldImage_sub = rospy.Subscriber("dirty_map", Image, flaw_detect.callback)
     #TODO: perameterize rate
     rate = rospy.Rate(10)
     while not rospy.is_shutdown():
         flaw_detect.update()
         rate.sleep()
-
+    cv2.destroyAllWindows()
 
 
 
