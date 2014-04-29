@@ -174,7 +174,7 @@ class CV_App(object):
 			
 	def img_cb(self, msg):
 		try:
-			dirty = self.bridge.imgmsg_to_cv2(msg, "passthrough")
+			dirty = self.bridge.imgmsg_to_cv2(msg, "bgr8") #passthrough")
 			assert dirty.shape == self.shape, 'Image size mismatch:' + str(dirty.shape) + " != " + str(self.shape)
 		except Exception as e:
 			rospy.logerr(str(e))

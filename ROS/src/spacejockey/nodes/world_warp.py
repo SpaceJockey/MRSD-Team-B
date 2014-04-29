@@ -87,12 +87,16 @@ class WorldWarp(object):
             self.mask = np.add(cMask, self.mask)
         else:
             self.image = np.uint8(np.multiply(camera_warp, cMask))
-            self.mask = vignette_warp * a_new
+            self.mask = cMask
 
     def publish_image(self):
         if self.image != None:
             try:
-                self.image_pub.publish(self.bridge.cv2_to_imgmsg(self.image, "passthrough"))
+                #merge mask into image type
+                b, g, r = cv2.split(self.image)
+                a = np.uint8(cv2.split(self.mask)[0] * 255.0)
+                rgba = cv2.merge([r, g, b, a])
+                self.image_pub.publish(self.bridge.cv2_to_imgmsg(rgba, "rgba8"))
             except Exception as e:
                 rospy.logwarn(str(e))
 

@@ -10,8 +10,8 @@
 	
 	<!-- camera stuff -->
 	<!-- <arg name="camera_url" default="http://admin:admin@10.68.68.22/goform/video?channel=1.mjpg" /> -->
-	<arg name="camera_url" default="http://admin:admin@128.237.123.168/goform/video" /> <!--  test data -->
-	<!-- <arg name="camera_url" default="http://lioncam1.lmu.edu/axis-cgi/mjpg/video.cgi?resolution=704x480" /> --><!-- night test data -->
+	<!-- <arg name="camera_url" default="http://admin:admin@128.237.123.168/goform/video" /> --><!--  test data -->
+	<arg name="camera_url" default="http://lioncam1.lmu.edu/axis-cgi/mjpg/video.cgi?resolution=704x480" /><!-- night test data -->
 
 	<node name="ip_camera" pkg="ipcam" type="ipcam.py" args="-c FILE://$(find spacejockey)/config/camera.yaml $(arg camera_url)" ns="camera" />
 	<include file="$(find spacejockey)/launch/ar_tags.launch" />

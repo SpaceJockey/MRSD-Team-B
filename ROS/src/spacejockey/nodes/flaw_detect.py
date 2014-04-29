@@ -74,7 +74,7 @@ class FlawDetector(object):
 
 
     def update(self):
-        rospy.loginfo('Updating')
+        rospy.logdebug('Updating')
         if self.updated:
             return
         #self.updated = True
@@ -109,19 +109,19 @@ class FlawDetector(object):
         # how to determine k value by using k-means clustering method
         #TODO: perameterize max box size
         boxMax = 100
-        rospy.loginfo('Running K-Means')
+        rospy.logdebug('Running K-Means')
 
         #bboxes = self.kMeans(self.K, Z)
         maxDim, bboxes = self.kMeans(self.K, Z)
 
         #make sure K groupings are small enough
         while maxDim > boxMax and not rospy.is_shutdown():
-            rospy.logdebug('Updating K value: ' + str(self.K))
+            rospy.loginfo('Updating K value: ' + str(self.K))
             self.K += 1 
             maxDim, bboxes = self.kMeans(self.K, Z)
 
         #output markers
-        rospy.loginfo('Dumping Markers')
+        rospy.logdebug('Dumping Markers')
         canvas = np.copy(diffhsv)
         for b in bboxes:
             # # test
