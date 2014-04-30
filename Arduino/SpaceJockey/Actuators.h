@@ -23,7 +23,6 @@
 #define _SERVOMAX_CLUE  2700
 
 #define _SERVO_FEEDBACK_CHAN 15
-#define _SERVO_FEEDBACK_PIN 22
 
 //Adafruit PWM driver
 static Adafruit_PWMServoDriver _pwm_driver;
@@ -36,7 +35,7 @@ static unsigned int _servo_max = _SERVOMAX_CLUE;;
 static void feedbackInt(){
 	unsigned int currus = micros();
 	static unsigned int startus;
-	if(digitalRead(_SERVO_FEEDBACK_PIN)) { //rising edge
+	if(digitalRead(SERVO_FEEDBACK_PIN)) { //rising edge
 		startus = currus;
 	}else{
 		_pulse_us = currus - startus;
@@ -45,9 +44,9 @@ static void feedbackInt(){
 
 static int getPWMerror(int pulse, int target){
 		_pwm_driver.setPWM(_SERVO_FEEDBACK_CHAN, 0, pulse); //should take 100us in fast mode
-		attachInterrupt(_SERVO_FEEDBACK_PIN, feedbackInt, CHANGE);
+		attachInterrupt(SERVO_FEEDBACK_PIN, feedbackInt, CHANGE);
 		delay(9); //should give enough time for the pulse width to change and 2 pulses to hit;
-		detachInterrupt(_SERVO_FEEDBACK_PIN);
+		detachInterrupt(SERVO_FEEDBACK_PIN);
 		return target - _pulse_us;
 }
 

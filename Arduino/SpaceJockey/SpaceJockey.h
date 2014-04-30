@@ -3,7 +3,8 @@
 
 //Arduino pin defines
 #define STATUS_LED 13
-#define BATT_PIN A8    //pin for battery monitoring
+#define BATT_PIN A0    //pin for battery monitoring
+#define SERVO_FEEDBACK_PIN A5 //pin for servo calibration
 
 #include <Arduino.h>
 #include <Scheduler.h>
