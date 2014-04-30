@@ -26,27 +26,42 @@ class FlawDetector(object):
         #cache K value, should never find less defects than previous iteration...
         self.K = 1
 
+        #TODO: perameterize Gaussian perams
+        self.ksize = (7,7)
+        self.sigma = 3
+
         #test data
-        self.dirty = cv2.imread(os.path.dirname(sys.argv[0])+"/../test/testsurface_dirty.png") 
-        self.clean = cv2.imread(os.path.dirname(sys.argv[0])+"/../test/testsurface_clean.png") 
+        dirty = cv2.imread(os.path.dirname(sys.argv[0])+"/../test/testsurface_dirty.png") 
+        clean = cv2.imread(os.path.dirname(sys.argv[0])+"/../test/testsurface_clean.png") 
+        
+        #preprocess dirty image
+        self.dirtyImage = cv2.GaussianBlur(dirty, self.ksize, self.sigma)
+        self.dirtyHue = cv2.split(cv2.cvtColor(self.dirtyImage, cv2.COLOR_BGR2HSV))[0]
 
         #real data
         #TODO: perameterize config file name
-        # self.clean = cv2.imread(rospy.get_param('/clean_env_map'))
+        # clean = cv2.imread(rospy.get_param('/clean_env_map'))
         # self.dirty = np.zeros(self.clean.shape, dtype=np.uint8)
-        self.shape = self.clean.shape
+        
+        #preprocess clean image
+        self.cleanImage = cv2.GaussianBlur(clean, self.ksize, self.sigma)
+        self.cleanHue = cv2.split(cv2.cvtColor(self.cleanImage, cv2.COLOR_BGR2HSV))[0]
+        self.shape = clean.shape
+        self.size = clean.size
         self.updated = False
 
 
     def callback(self,data):
-        clean = self.clean
         try:
             dirty = self.bridge.imgmsg_to_cv2(data, "passthrough")
-            assert dirty.shape == clean.shape, 'Image size mismatch:' + str(dirty.shape) + " != " + str(clean.shape)
+            assert dirty.size == self.size, 'Image size mismatch:' + str(dirty.size) + " != " + str(self.size)
         except Exception as e:
             rospy.logerr(str(e))
             return
-        self.dirty = dirty
+        
+        #preprocess dirty image
+        self.dirtyImage = cv2.GaussianBlur(dirty, self.ksize, self.sigma)
+        self.dirtyHue = cv2.split(cv2.cvtColor(self.dirtyImage, cv2.COLOR_BGR2HSV))[0]
         self.updated = False
 
     def kMeans(self, K, Z):
@@ -79,28 +94,24 @@ class FlawDetector(object):
             return
         #self.updated = True
 
-        dirty = self.dirty
-        clean = self.clean
-        h,w,depth = self.shape
+        dirty = self.dirtyHue
+        h, w, foobar = self.shape
 
-        threshold = 60
+        threshold = 30
         Z = []
 
-        #TODO: gaussian filtering to avoid single-pixel defects
-        #TODO: mask over saturated values to avoid false hue values
-        dirtyhsv = cv2.cvtColor(dirty,cv2.COLOR_BGR2HSV)
-        cleanhsv = cv2.cvtColor(clean,cv2.COLOR_BGR2HSV)
-        diffhsv = cv2.absdiff(dirtyhsv, cleanhsv)
-        diffH = cv2.split(diffhsv)[0]
+        diff = cv2.absdiff(dirty, self.cleanHue)
 
         for row in range(h):
             for col in range(w):
                 if rospy.is_shutdown():
                     sys.exit(0)          
-                if diffH[row,col] > threshold:
+                if diff[row,col] > threshold:
                     Z.append([row,col])
         if not len(Z):
             rospy.loginfo('Clean surface, no defects found')
+            cv2.imshow('Defects Found', self.cleanImage)
+            cv2.waitKey(1)
             return
 
         #matrix cast for numpy
@@ -122,7 +133,7 @@ class FlawDetector(object):
 
         #output markers
         rospy.logdebug('Dumping Markers')
-        canvas = np.copy(diffhsv)
+        canvas = np.copy(self.dirtyImage)
         for b in bboxes:
             # # test
             cv2.rectangle(canvas,b[0],b[1],(0,0,255),2)
