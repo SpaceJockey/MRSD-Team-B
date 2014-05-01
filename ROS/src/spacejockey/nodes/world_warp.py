@@ -48,12 +48,12 @@ class WorldWarp(object):
             (trans, rot) = self.tfList.lookupTransform('/camera', '/world', rospy.Time(0))
             h = tf.TransformerROS().fromTranslationRotation(trans, rot)
         except Exception as e:
-            rospy.logwarn(str(e))
+            rospy.logdebug(str(e))
             return
 
         height, width, depth = camera_img.shape
         if camera_img.size != self.vignette.size: #resize vignette to match camera data
-            rospy.loginfo('resizing vignette mask to: ' + str((width, height)))
+            rospy.logdebug('resizing vignette mask to: ' + str((width, height)))
             self.vignette = cv2.resize(self.vignette, (width, height))
 
         camera_img = cv2.flip(camera_img, -1) #flip around both axes

@@ -214,7 +214,7 @@ if __name__ == '__main__':
 	rospy.Subscriber('/battery_state', Float32, app.batt_cb)  		  #battery state
 	rospy.Subscriber('/visualization_marker', Marker, app.marker_cb)  #flaw markers
 
-	rospy.loginfo('GUI window Online')
+	rospy.loginfo('GUI Online')
 	rate = rospy.Rate(30) #update at 30 frames a second
 	while not rospy.is_shutdown():
 		app.redraw()

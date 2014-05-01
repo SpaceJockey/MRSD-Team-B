@@ -113,13 +113,13 @@ class MinorPlanner:
     if isinstance(act, ViewAction):
       rloc, foobar = self.tf.computeTransform('rear_foot', 'robot')
       self.joint_tgt = IK(act.loc, rloc, tgtRange = act.range)
-      self.status.image_weight = 0.3
+      self.status.image_weight = 0.2
       self.status.locale_weight = 0.3
       return
 
     #ELSE: move action
     if act.frame == 'front_foot' and act.loc[2] > float_error:
-      self.status.image_weight = 0.1
+      self.status.image_weight = 0.0
       self.status.locale_weight = 0.1
     else:
       self.status.image_weight = 0.0
@@ -216,5 +216,6 @@ if __name__ == '__main__':
   args, unknown = parser.parse_known_args()
   try:
     planner = MinorPlanner(args.rate)
+    rospy.loginfo('Minor Planner Online')
     planner.loop()
   except rospy.ROSInterruptException: pass

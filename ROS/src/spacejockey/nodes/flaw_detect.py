@@ -33,7 +33,7 @@ class FlawDetector(object):
         self.ksize = tuple(self.config.filter_size)
         self.sigma = self.config.filter_sigma
         self.threshold = self.config.detect_threshold
-        self.max_size = self.config.detect_max_size
+        self.max_size = self.config.detect_max_size / self.gui.scale
 
         #test data
         #dirty = cv2.imread(os.path.dirname(sys.argv[0])+"/../test/testsurface_dirty.png") 
@@ -118,6 +118,7 @@ class FlawDetector(object):
         if not len(Z):
             rospy.loginfo('Clean surface, no defects found')
             return
+        rospy.loginfo('Defects found, running K-Means...')
 
         #matrix cast for numpy
         Z = np.matrix(Z, dtype=np.float32)
@@ -129,10 +130,11 @@ class FlawDetector(object):
 
         #make sure K groupings are small enough
         while maxDim > self.max_size and not rospy.is_shutdown():
-            rospy.loginfo('Updating K value: ' + str(self.K))
+            rospy.logdebug('Updating K value: ' + str(self.K))
             self.K += 1 
             maxDim, bboxes = self.kMeans(self.K, Z)
 
+        rospy.loginfo('found ' + str(self.K) +' Defects.')
         #output markers
         rospy.logdebug('Dumping Markers')
         for b in bboxes:
@@ -161,6 +163,7 @@ class FlawDetector(object):
 if __name__ == '__main__':
     rospy.init_node('flaw_detect')
     flaw_detect = FlawDetector()
+    rospy.loginfo('Flaw Detection Online')
     worldImage_sub = rospy.Subscriber("dirty_map", Image, flaw_detect.callback)
     rate = rospy.Rate(10)
     while not rospy.is_shutdown():
