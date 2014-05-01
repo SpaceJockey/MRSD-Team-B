@@ -170,7 +170,7 @@ class MinorPlanner:
       loc = self.interpolate_move('front_foot', loc, [loc[0], loc[1], self.config.move.detachHeight], 3, True)
 
     #calculate range to target
-    loc, rot = self.tf.computeTransform('robot', 'world')
+    loc, rot = self.tfList.lookupTransform('robot', 'world', rospy.Time(0))
     trange = math.sqrt((loc[0] - msg.x)**2 + (loc[1] - msg.y)**2)
 
     theta = math.atan2(msg.y - loc[1], msg.x - loc[0])

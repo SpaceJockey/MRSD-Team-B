@@ -177,7 +177,7 @@ class Planner:
 			x, y = (tgtPoint.x, tgtPoint.y) 
 
 		resp = MajorPlannerResponse(self.current_major_id, action, node_name, x,y, sleep)
-		rospy.loginfo('Major Move: ' + str(resp))
+		rospy.logdebug('Major Move: ' + str(resp))
 		self.current_major_id += 1
 		return resp
 
