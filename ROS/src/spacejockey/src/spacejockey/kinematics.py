@@ -99,7 +99,7 @@ def IK(front, rear = None, doDetach = False, checkLimits = True, tgtRange = None
     if front[2] < -detach_height + float_err: #detach the center foot
       joint_pos['center_attach'] = 0.1 
     if front[2] >= detach_height - float_err: #twist the front foot to detach
-      joint_pos['front_pitch'] -= 0.1
+      joint_pos['front_pitch'] += 0.1
 
   if(rear):
     r_xy_dist = math.sqrt(rear[0]**2 + rear[1]**2) - xy_offset

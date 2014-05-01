@@ -47,7 +47,7 @@ class MinorPlanner:
     self.last_major_id = 0
 
     #queue up a view movement for inital localization
-    #minorqueue.append(ViewAction((self.config.view.extend, 0.0, self.config.view.extendHeight), self.config.view.opt))
+    minorqueue.append(ViewAction((self.config.view.extend, 0.0, self.config.view.extendHeight), self.config.view.opt))
     #minorqueue.append(PauseAction(rospy.Duration(3)))
 
     self.tfList = tf.TransformListener()
@@ -143,6 +143,8 @@ class MinorPlanner:
         rloc[2] = 0.0
 
     self.joint_tgt = IK(floc, rloc, doDetach = act.detach)
+    if act.frame == 'robot' and act.detach:
+      self.joint_tgt['center_attach'] = 0.006
 
     if act.frame == 'robot': #update the robot position...
       self.tfCast.sendTransform(act.loc, (0,0,0,1), now, 'robot', 'world')
@@ -170,12 +172,14 @@ class MinorPlanner:
     #    (loc, rot) = self.tfList.lookupTransform('world', frame, rospy.Time(0))
     #    if loc[2] > float_error:
     #      self.interpolate_move(frame, loc, [loc[0], loc[1], 0.0], 10, False)
+    height = self.config.move.clearHeight
+    if frame_id != 'robot':
+      height = 0.08
 
     #Skip detach step if node is already off the surface...
     if(loc[2] < self.config.move.detachHeight):
-      loc = self.interpolate_move(frame_id, loc, [loc[0], loc[1], self.config.move.clearHeight], 7, True)
-
-    loc = self.interpolate_move(frame_id, loc, [msg.x, msg.y, self.config.move.clearHeight], 15, False)
+      loc = self.interpolate_move(frame_id, loc, [loc[0], loc[1], height], 10, True)
+    loc = self.interpolate_move(frame_id, loc, [msg.x, msg.y, height], 15, False)
     loc = self.interpolate_move(frame_id, loc, [msg.x, msg.y, 0.0], 7, False)
 
 

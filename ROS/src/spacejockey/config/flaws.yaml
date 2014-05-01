@@ -1,5 +1,5 @@
 filter_size: [7, 7]
 filter_sigma: 3
 
-detect_threshold: 30 #uint8 threshold
+detect_threshold: 100 #uint8 threshold
 detect_max_size: .20 #20 cm in meters
