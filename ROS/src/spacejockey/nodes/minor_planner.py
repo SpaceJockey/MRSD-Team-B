@@ -47,7 +47,7 @@ class MinorPlanner:
     self.last_major_id = 0
 
     #queue up a view movement for inital localization
-    minorqueue.append(ViewAction(self.config.view.opt))
+    minorqueue.append(ViewAction((self.config.view.extend, 0.0, self.config.view.extendHeight), self.config.view.opt))
     minorqueue.append(PauseAction(rospy.Duration(3)))
 
     self.tfList = tf.TransformListener()

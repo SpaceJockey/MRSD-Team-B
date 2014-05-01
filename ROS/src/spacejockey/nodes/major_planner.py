@@ -82,10 +82,13 @@ class Planner:
 		#req should contain the last completed major_ID
 		#TODO: check it!
 
+		frontViewing = False
 		for node in frame_names.keys():
 			try:
 				(loc, rot) = self.tfList.lookupTransform('world', frame_names[node], rospy.Time(0))
 				self.rFrames[node] = Point(loc[0], loc[1])
+				if node == 'front_foot' and loc[2] > ferr: #front foot is off the ground
+					frontViewing = True
 			except Exception as e:
 				rospy.logwarn(e)
 				continue
@@ -119,7 +122,7 @@ class Planner:
 
 			#move decision tree
 			if(abs(backRel) > config.angle.dead or abs(frontRel) > (config.angle.max - config.angle.dead)): 		#feet not pointing at the thing
-				if(abs(frontRel) >= abs(backRel)): 		#rotate feet, starting with whichever is farther away
+				if(abs(frontRel) >= abs(backRel) or frontViewing): 		#rotate feet, starting with whichever is farther away
 					newtheta = backTheta + math.copysign(min(abs(backRel), config.angle.max), backRel)
 				else:
 					newtheta = frontTheta + math.copysign(min(abs(frontRel), config.angle.max), frontRel)
