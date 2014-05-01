@@ -3,6 +3,7 @@
 	<rosparam command="load" file="$(find spacejockey)/config/joints.yaml" />
 	<rosparam command="load" file="$(find spacejockey)/config/planner.yaml" ns="planner" />
 	<rosparam command="load" file="$(find spacejockey)/config/arduino.yaml" ns="arduino" />
+	<rosparam command="load" file="$(find spacejockey)/config/flaws.yaml" ns="flaws" />
 	<rosparam command="load" file="$(find spacejockey)/config/gui.yaml" ns="gui"/>
 	<rosparam command="load" file="$(find spacejockey)/config/camera.yaml" />
 	<param name="robot_description" textfile="$(find spacejockey)/resources/spacejockey.urdf" />

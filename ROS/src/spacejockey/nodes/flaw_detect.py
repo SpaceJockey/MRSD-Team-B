@@ -8,12 +8,13 @@
 ####   integrated in ROS
 
 import numpy as np
-import cv2
+import cv, cv2
 import os,sys
 from sensor_msgs.msg import Image
 import roslib
 import rospy
-from cv_bridge import CvBridge, CvBridgeError 
+from cv_bridge import CvBridge, CvBridgeError
+from spacejockey import config
 
 # for the marker part
 from visualization_msgs.msg import Marker
@@ -26,34 +27,46 @@ class FlawDetector(object):
         #cache K value, should never find less defects than previous iteration...
         self.K = 1
 
-        #TODO: perameterize Gaussian perams
-        self.ksize = (7,7)
-        self.sigma = 3
+        self.config = config('/flaws')
+        self.gui = config('/gui')
+
+        self.ksize = tuple(self.config.filter_size)
+        self.sigma = self.config.filter_sigma
+        self.threshold = self.config.detect_threshold
+        self.max_size = self.config.detect_max_size
 
         #test data
-        dirty = cv2.imread(os.path.dirname(sys.argv[0])+"/../test/testsurface_dirty.png") 
-        clean = cv2.imread(os.path.dirname(sys.argv[0])+"/../test/testsurface_clean.png") 
-        
-        #preprocess dirty image
-        self.dirtyImage = cv2.GaussianBlur(dirty, self.ksize, self.sigma)
-        self.dirtyHue = cv2.split(cv2.cvtColor(self.dirtyImage, cv2.COLOR_BGR2HSV))[0]
+        #dirty = cv2.imread(os.path.dirname(sys.argv[0])+"/../test/testsurface_dirty.png") 
+        #clean = cv2.imread(os.path.dirname(sys.argv[0])+"/../test/testsurface_clean.png") 
+        #
+        ##preprocess dirty image
+        #self.dirtyImage = cv2.GaussianBlur(dirty, self.ksize, self.sigma)
+        #self.dirtyHue = cv2.split(cv2.cvtColor(self.dirtyImage, cv2.COLOR_BGR2HSV))[0]
 
         #real data
         #TODO: perameterize config file name
-        # clean = cv2.imread(rospy.get_param('/clean_env_map'))
+        clean = cv2.imread(rospy.get_param('/clean_env_map'))
         # self.dirty = np.zeros(self.clean.shape, dtype=np.uint8)
         
         #preprocess clean image
         self.cleanImage = cv2.GaussianBlur(clean, self.ksize, self.sigma)
         self.cleanHue = cv2.split(cv2.cvtColor(self.cleanImage, cv2.COLOR_BGR2HSV))[0]
+
+        #init other stuff...
+        self.dirtyImage = None
+        self.dirtyHue = None
+        self.alphaMask = None
         self.shape = clean.shape
         self.size = clean.size
-        self.updated = False
+        self.updated = True
 
 
     def callback(self,data):
         try:
-            dirty = self.bridge.imgmsg_to_cv2(data, "passthrough")
+            dirty = cv2.split(self.bridge.imgmsg_to_cv2(data, "passthrough"))
+            alpha = dirty[3]
+            foobar, self.alphaMask = cv2.threshold(alpha, 128, 255, cv.CV_THRESH_BINARY) #alpha channel
+            dirty = cv2.merge([dirty[2], dirty[1], dirty[0]])
             assert dirty.size == self.size, 'Image size mismatch:' + str(dirty.size) + " != " + str(self.size)
         except Exception as e:
             rospy.logerr(str(e))
@@ -73,17 +86,14 @@ class FlawDetector(object):
         for j in range(K):
             A = Z[label.ravel() == j]
             
-            x_min=int(A[:,0].min())
-            x_max=int(A[:,0].max())
-            if (x_max - x_min > maxDim):
-                maxDim = x_max - x_min
+            width = int(A[:,0].max()) - int(A[:,0].min())
+            if (width > maxDim):
+                maxDim = width
 
-            y_min=int(A[:,1].min())
-            y_max=int(A[:,1].max())
-            if (y_max - y_min > maxDim):
-                maxDim = y_max - y_min
-
-            bboxes.append(((y_min,x_min), (y_max,x_max)))
+            height = int(A[:,1].max()) - int(A[:,1].min())
+            if (height > maxDim):
+                maxDim = height
+            bboxes.append((center[j], (width,height), j))
         return (maxDim, bboxes)
 
 
@@ -92,82 +102,66 @@ class FlawDetector(object):
         rospy.logdebug('Updating')
         if self.updated:
             return
-        #self.updated = True
-
-        dirty = self.dirtyHue
-        h, w, foobar = self.shape
-
-        threshold = 30
+        self.updated = True
+        
+        diff = cv2.absdiff(self.dirtyHue, self.cleanHue)
+        diff = cv2.bitwise_and(diff, diff, mask = self.alphaMask)
+        
         Z = []
-
-        diff = cv2.absdiff(dirty, self.cleanHue)
-
-        for row in range(h):
-            for col in range(w):
+        for x in range(self.shape[0]):
+            for y in range(self.shape[1]):
                 if rospy.is_shutdown():
                     sys.exit(0)          
-                if diff[row,col] > threshold:
-                    Z.append([row,col])
+                if diff[x, y] > self.threshold:
+                    Z.append([x, y])
+
         if not len(Z):
             rospy.loginfo('Clean surface, no defects found')
-            cv2.imshow('Defects Found', self.cleanImage)
-            cv2.waitKey(1)
             return
 
         #matrix cast for numpy
         Z = np.matrix(Z, dtype=np.float32)
 
         # how to determine k value by using k-means clustering method
-        #TODO: perameterize max box size
-        boxMax = 100
         rospy.logdebug('Running K-Means')
 
-        #bboxes = self.kMeans(self.K, Z)
         maxDim, bboxes = self.kMeans(self.K, Z)
 
         #make sure K groupings are small enough
-        while maxDim > boxMax and not rospy.is_shutdown():
+        while maxDim > self.max_size and not rospy.is_shutdown():
             rospy.loginfo('Updating K value: ' + str(self.K))
             self.K += 1 
             maxDim, bboxes = self.kMeans(self.K, Z)
 
         #output markers
         rospy.logdebug('Dumping Markers')
-        canvas = np.copy(self.dirtyImage)
         for b in bboxes:
-            # # test
-            cv2.rectangle(canvas,b[0],b[1],(0,0,255),2)
             ######################################
             # for the markers part
             ######################################
-            """marker = Marker()
+            marker = Marker()
             marker.header.frame_id = "world"  
             marker.header.stamp = rospy.Time()
             marker.ns = "flaws"
-            marker.id = j
+            marker.id = b[2]
             marker.type = marker.CUBE
             marker.action = marker.ADD
-            #TODO: pull these scale values from GUI params
-            marker.pose.position.y = - float(x_max+x_min-h)/2/h
-            marker.pose.position.x = 3*float(y_max+y_min-w)/2/w
+            marker.pose.position.x = float(b[0][1] - self.gui.origin.x) * self.gui.scale
+            marker.pose.position.y = float(self.gui.origin.y - b[0][0]) * self.gui.scale
             marker.pose.orientation.w = 1.0
-            marker.scale.y = float(x_max-x_min)/h
-            marker.scale.x = 3*float(y_max-y_min)/w
+            marker.scale.x = float(b[1][1]) * self.gui.scale
+            marker.scale.y = float(b[1][0]) * self.gui.scale
             marker.scale.z = 0.01
             marker.color.a = 0.75
             marker.color.r = 1.0
           
             # print marker
-            self.defect_pub.publish(marker)"""
-        #print('Done')
-        cv2.imshow('Defects Found',canvas)
-        cv2.waitKey(1)
+            self.defect_pub.publish(marker)
 
 if __name__ == '__main__':
     rospy.init_node('flaw_detect')
     flaw_detect = FlawDetector()
-    # worldImage_sub = rospy.Subscriber("dirty_map", Image, flaw_detect.callback)
-    #TODO: perameterize rate
+    worldImage_sub = rospy.Subscriber("dirty_map", Image, flaw_detect.callback)
     rate = rospy.Rate(10)
     while not rospy.is_shutdown():
         flaw_detect.update()
