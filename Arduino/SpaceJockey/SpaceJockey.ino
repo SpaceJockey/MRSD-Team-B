@@ -25,7 +25,7 @@ void setup() {
 
   //init monitoring threads
   Battery.begin();
-  IMU.begin();
+  //IMU.begin();
 
   //spin until rosserial connection is live
   while (!nh.connected()) nh.spinOnce();
