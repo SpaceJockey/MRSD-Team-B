@@ -9,6 +9,7 @@ import tf_weighted
 from sensor_msgs.msg import JointState
 import math
 import argparse
+import numpy as np
 
 frame_names = rospy.get_param('/planner/frame_names')
 minorqueue = deque()
@@ -112,7 +113,8 @@ class MinorPlanner:
       return
 
     if isinstance(act, ViewAction):
-      self.joint_tgt = IK(front = self.view_tf_loc, tgtRange = act.range)
+      rloc, foobar = self.tf.computeTransform('rear_foot', 'robot')
+      self.joint_tgt = IK(self.view_tf_loc, rloc, tgtRange = act.range)
       self.status.image_weight = 0.3
       self.status.locale_weight = 0.3
       return
@@ -125,13 +127,10 @@ class MinorPlanner:
       self.status.image_weight = 0.0
       self.status.locale_weight = 0.0
 
-    #self.tf.clear()
-    #pull needed values into our Transformer
+    #pull needed value into our Transformer
     for node in frame_names.values():
       if node == act.frame:
         self.tf.saveTransform(node, 'world', act.loc, (0,0,0,1))
-      #else:
-      #  self.tf.pullTransform(node, 'world')
 
     #calculate robot-frame transforms...
     (floc, foobar) = self.tf.computeTransform('front_foot', 'robot')
@@ -142,6 +141,16 @@ class MinorPlanner:
     if act.frame == 'robot': #update the robot position...
       self.tfCast.sendTransform(act.loc, (0,0,0,1), now, 'robot', 'world')
 
+  #TODO: make this support splines??
+  def interpolate_move(self, frame_id, start, end, steps, doDetach):
+    locs = np.array([start, end])
+    steps = np.linspace(0.0, 1.0, steps)
+    for i in steps:
+      loc = np.average(locs, axis=0, weights=[1.0-i, i])
+      minorqueue.append(MinorAction(frame_id, tuple(loc), doDetach))
+    return end
+
+
   def execute_move_action(self, msg):
     frame_id = frame_names[msg.node_name]
     (loc, rot) = self.tfList.lookupTransform('world', frame_id, rospy.Time(0))
@@ -150,34 +159,21 @@ class MinorPlanner:
 
     #Skip detach step if node is already off the surface...
     if(loc[2] < self.config.move.detachHeight):
-      loc[2] = self.config.move.detachHeight #detach
-      minorqueue.append(MinorAction(frame_id, tuple(loc), True))
+      loc = self.interpolate_move(frame_id, loc, [loc[0], loc[1], self.config.move.clearHeight], 5, True)
 
-    loc[2] = self.config.move.clearHeight #rise to clear height
-    minorqueue.append(MinorAction(frame_id, tuple(loc), False))
+    loc = self.interpolate_move(frame_id, loc, [msg.x, msg.y, self.config.move.clearHeight], 10, False)
+    loc = self.interpolate_move(frame_id, loc, [msg.x, msg.y, 0.0], 7, False)
 
-    resolution = 20
-    dx = (1.0*msg.x-loc[0])/resolution
-    dy = (1.0*msg.y-loc[1])/resolution
-    for i in range(1,resolution+1):
-      loc[0] = loc[0] + dx
-      loc[1] = loc[1] + dy
-      minorqueue.append(MinorAction(frame_id, tuple(loc), False))    
-
-    attach_res = 10
-    dz = 1.0*self.config.move.clearHeight/attach_res
-    for i in range(1,attach_res+1):
-      loc[2] = max(loc[2]-dz, 0.0)
-      minorqueue.append(MinorAction(frame_id, tuple(loc), False)) 
-    minorqueue.append(PauseAction(rospy.Duration(1)))
 
   def execute_view_action(self, msg):
+    #detach
+    loc, rot = self.tfList.lookupTransform('world', 'front_foot', rospy.Time(0))
+    if(loc[2] < self.config.move.detachHeight):
+      loc = self.interpolate_move('front_foot', loc, [loc[0], loc[1], self.config.move.detachHeight], 3, True)
+
     #calculate range to target
-    self.tf.clear()
-    self.tf.pullTransform('robot', 'world')
-    self.tf.saveTransform('view_tgt', 'world', (msg.x, msg.y, 0.0), (0,0,0,1))
-    (vloc, foobar) = self.tf.computeTransform('view_tgt', 'robot')
-    trange = math.sqrt(vloc[0]**2 + vloc[1]**2)
+    loc, rot = self.tf.computeTransform('robot', 'world')
+    trange = math.sqrt((loc[0] - msg.x)**2 + (loc[1] - msg.y)**2)
     self.status.status_msg = 'Viewing'
 
     #queue up a view movement
@@ -185,7 +181,6 @@ class MinorPlanner:
 
     #queue up a pause action
     minorqueue.append(PauseAction(msg.sleep))
-    return
 
   def loop(self):
     rate = rospy.Rate(self.Hz)
