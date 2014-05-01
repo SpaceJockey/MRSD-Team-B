@@ -26,8 +26,8 @@ class Planner:
 		#used for updating the GUI
 		self.vizPub = rospy.Publisher('/visualization_marker', Marker)
 
-		#set up queues
-		self.rFrames = {}
+		#set up queues #ignore tfs for now, since they're busted...
+		self.rFrames = {'rear_foot': Point(-0.2667, 0.0), 'center_foot': Point(0.0, 0.0), 'front_foot': Point(0.2681, 0.0)}
 		self.waypoints = []
 		self.wp_ids = {}	#used for tracking vizualization instances
 		self.curr_wp_id = 0
@@ -70,9 +70,9 @@ class Planner:
 			self.wp_ids[wp] = self.curr_wp_id
 			self.curr_wp_id += 1
 			if wp.action == Waypoint.VIEW:
-				rospy.loginfo("Added view waypoint at: " + str((wp.x, wp.y)))
+				rospy.logdebug("Added view waypoint at: " + str((wp.x, wp.y)))
 			else:
-				rospy.loginfo("Added move waypoint at: " + str((wp.x, wp.y)))
+				rospy.logdebug("Added move waypoint at: " + str((wp.x, wp.y)))
 			self.publishWaypointMarker(wp)
 		return AddWaypointsResponse(True)
 
@@ -92,15 +92,16 @@ class Planner:
 		#TODO: check it!
 
 		frontViewing = False
-		for node in frame_names.keys():
-			try:
-				(loc, rot) = self.tfList.lookupTransform('world', frame_names[node], rospy.Time(0))
-				self.rFrames[node] = Point(loc[0], loc[1])
-				if node == 'front_foot' and loc[2] > ferr: #front foot is off the ground
-					frontViewing = True
-			except Exception as e:
-				rospy.logwarn(e)
-				continue
+		#for node in frame_names.keys():
+		#	try:
+		#		(loc, rot) = self.tfList.lookupTransform('world', frame_names[node], rospy.Time(0))
+		#		self.rFrames[node] = Point(loc[0], loc[1])
+		#		if node == 'front_foot' and loc[2] > ferr: #front foot is off the ground
+		#			frontViewing = True
+		#	except Exception as e:
+		#		rospy.logwarn(e)
+		#		continue
+		#	print self.rFrames
 
 		#output pseudoparams
 		tgtPoint = Point()
@@ -159,6 +160,9 @@ class Planner:
 			#derive final joint coordinates
 			tgtPoint.x = self.rFrames['center_foot'].x + (extend * math.cos(newtheta))
 			tgtPoint.y = self.rFrames['center_foot'].y + (extend * math.sin(newtheta))
+
+			#update frame position
+			self.rFrames[node_name] = tgtPoint
 		else: #empty waypoint queue
 			action = MajorPlannerResponse.SLEEP
 			sleep = rospy.Duration(1)

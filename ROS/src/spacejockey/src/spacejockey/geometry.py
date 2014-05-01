@@ -14,6 +14,9 @@ class Point(object):
 	def angleTo(self, other):
 		return math.atan2(other.y - self.y, other.x - self.x) 
 
+	def __repr__(self):
+		return str((self.x, self.y))
+
 #returns the difference between two angles
 def angleDiff(x, y): 
 	return math.atan2(math.sin(x-y), math.cos(x-y))

@@ -126,13 +126,21 @@ class MinorPlanner:
       self.status.locale_weight = 0.0
 
     #pull needed value into our Transformer
-    for node in frame_names.values():
-      if node == act.frame:
-        self.tf.saveTransform(node, 'world', act.loc, (0,0,0,1))
+    self.tf.saveTransform(act.frame, 'world', act.loc, (0,0,0,1))
 
     #calculate robot-frame transforms...
     (floc, foobar) = self.tf.computeTransform('front_foot', 'robot')
     (rloc, foobar) = self.tf.computeTransform('rear_foot', 'robot')
+
+    #hard catch foot-popping errors
+    #TODO: figure out why these are happening!
+    if act.frame != 'robot':
+      if floc[2] < 0.0:
+        floc = list(floc)
+        floc[2] = 0.0
+      if rloc[2] < 0.0:
+        rloc = list(rloc)
+        rloc[2] = 0.0
 
     self.joint_tgt = IK(floc, rloc, doDetach = act.detach)
 
@@ -151,15 +159,23 @@ class MinorPlanner:
 
   def execute_move_action(self, msg):
     frame_id = frame_names[msg.node_name]
-    (loc, rot) = self.tfList.lookupTransform('world', frame_id, rospy.Time(0))
+    (loc, rot) = self.tf.lookupTransform('world', frame_id, rospy.Time(0)) #self.tfList.lookupTransform('world', frame_id, rospy.Time(0))
     loc = list(loc)
     self.status.status_msg = 'Moving'
 
+    #put other feet down
+    #FIXME
+    #for frame in frame_names.values():
+    #  if frame != frame_id:
+    #    (loc, rot) = self.tfList.lookupTransform('world', frame, rospy.Time(0))
+    #    if loc[2] > float_error:
+    #      self.interpolate_move(frame, loc, [loc[0], loc[1], 0.0], 10, False)
+
     #Skip detach step if node is already off the surface...
     if(loc[2] < self.config.move.detachHeight):
-      loc = self.interpolate_move(frame_id, loc, [loc[0], loc[1], self.config.move.clearHeight], 5, True)
+      loc = self.interpolate_move(frame_id, loc, [loc[0], loc[1], self.config.move.clearHeight], 7, True)
 
-    loc = self.interpolate_move(frame_id, loc, [msg.x, msg.y, self.config.move.clearHeight], 10, False)
+    loc = self.interpolate_move(frame_id, loc, [msg.x, msg.y, self.config.move.clearHeight], 15, False)
     loc = self.interpolate_move(frame_id, loc, [msg.x, msg.y, 0.0], 7, False)
 
 
@@ -185,6 +201,10 @@ class MinorPlanner:
 
     #queue up a pause action
     minorqueue.append(PauseAction(msg.sleep))
+
+    #put the foot down
+    v_loc = self.interpolate_move('front_foot', v_loc, [v_loc[0], v_loc[1], self.config.move.clearHeight], 5, False)
+    self.interpolate_move('front_foot', v_loc, [v_loc[0], v_loc[1], 0.0], 7, False)
 
   def loop(self):
     rate = rospy.Rate(self.Hz)
