@@ -15,7 +15,7 @@ frame_names = rospy.get_param('/planner/frame_names')
 minorqueue = deque()
 
 MinorAction = namedtuple('MinorAction', 'frame loc detach') 
-ViewAction = namedtuple('ViewAction', 'range')
+ViewAction = namedtuple('ViewAction', 'loc range')
 PauseAction = namedtuple('PauseAction', 'duration')
 float_error = .0001
 
@@ -24,8 +24,6 @@ class MinorPlanner:
   def __init__(self, rate):
     self.Hz = rate
     self.config = spacejockey.config("/planner")
-    #static view position transform
-    self.view_tf_loc = (self.config.view.extend, 0.0, self.config.view.extendHeight) #TODO: maybe rename these params
 
     self.joint_tgt = dict()
     self.joints = dict()
@@ -114,7 +112,7 @@ class MinorPlanner:
 
     if isinstance(act, ViewAction):
       rloc, foobar = self.tf.computeTransform('rear_foot', 'robot')
-      self.joint_tgt = IK(self.view_tf_loc, rloc, tgtRange = act.range)
+      self.joint_tgt = IK(act.loc, rloc, tgtRange = act.range)
       self.status.image_weight = 0.3
       self.status.locale_weight = 0.3
       return
@@ -174,10 +172,16 @@ class MinorPlanner:
     #calculate range to target
     loc, rot = self.tf.computeTransform('robot', 'world')
     trange = math.sqrt((loc[0] - msg.x)**2 + (loc[1] - msg.y)**2)
+
+    theta = math.atan2(msg.y - loc[1], msg.x - loc[0])
+
+    #static view position transform
+    extend = self.config.view.extend
+    v_loc = (loc[0] + math.cos(theta)*extend, loc[0] + math.sin(theta)*extend, self.config.view.extendHeight)
     self.status.status_msg = 'Viewing'
 
     #queue up a view movement
-    minorqueue.append(ViewAction(trange))
+    minorqueue.append(ViewAction(v_loc, trange))
 
     #queue up a pause action
     minorqueue.append(PauseAction(msg.sleep))
