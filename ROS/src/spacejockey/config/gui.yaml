@@ -9,4 +9,4 @@ origin/x: 535
 origin/y: 350
 
 #how close to space view waypoints for range inspection
-inspectionSize: .3 #30 cm
+inspectionSize: .2 #20 cm

@@ -13,8 +13,8 @@ angle/dead: deg(1) #angular 'dead_zone' for planner error
 
 #camera reach
 view/extend: .3 # where to put the foot when viewing
-view/extendHeight: .125
-view/max: 1 #camera view range
+view/extendHeight: .12
+view/max: .7 #camera view range
 view/min: .5
 view/opt: .6 # optimum camera viewing angle
 view/radius: .2
