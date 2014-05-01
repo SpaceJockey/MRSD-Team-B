@@ -65,14 +65,6 @@ class Planner:
 		del self.wp_ids[wp]
 
 	def handleWaypointRequest(self, req):
-		#sort waypoints by range
-		try:
-			(loc, rot) = self.tfList.lookupTransform('world', 'robot', rospy.Time(0))
-			robot = Point(loc[0], loc[1])
-			req.waypoints.sort(key = lambda wp: robot.distTo(wp))
-		except:
-			pass
-
 		for wp in req.waypoints:
 			self.waypoints.append(wp)
 			self.wp_ids[wp] = self.curr_wp_id
@@ -83,6 +75,16 @@ class Planner:
 				rospy.loginfo("Added move waypoint at: " + str((wp.x, wp.y)))
 			self.publishWaypointMarker(wp)
 		return AddWaypointsResponse(True)
+
+	def sortWaypoints(self, robot, front):
+		def wpWeight(wp):
+			d = robot.distTo(wp)
+			if wp.action == Waypoint.VIEW and d < config.view.min:
+				return 100.0
+			else:
+				return  d + 0.4*abs(angleDiff(robot.angleTo(wp), robot.angleTo(front)))
+
+		self.waypoints.sort(key = wpWeight)
 
 	def handleMajorRequest(self, req):
 		global config, ferr
@@ -107,21 +109,11 @@ class Planner:
 		sleep = rospy.Duration(0)
 
 		if self.waypoints: #waypoints is not empty, plan a move
-			wp = self.waypoints[0]
+			self.sortWaypoints(self.rFrames['center_foot'], self.rFrames['front_foot'])
+			wp = self.waypoints[0] #get nearest waypoint...
 			#get target state
 			tgtAngle = self.rFrames['center_foot'].angleTo(wp)
 			tgtDist = self.rFrames['center_foot'].distTo(wp)
-			
-			#FIXME: this is way hacktackular!
-			i = 0
-			while wp.action == Waypoint.VIEW and tgtDist < config.view.min and i < 30: 
-				#too close, reque waypoint for later...
-				self.waypoints.remove(wp)
-				self.waypoints.append(wp)
-				wp = self.waypoints[0]
-				tgtDist = self.rFrames['center_foot'].distTo(wp)
-				i += 1 #iteration limit to prevent infinite loop...
-
 
 			if wp.action == Waypoint.VIEW:
 				tgtDist -= config.view.opt
