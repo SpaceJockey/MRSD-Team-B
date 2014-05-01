@@ -154,21 +154,25 @@ class CV_App(object):
 		elif event == CV_App.LEFT_CLICK: #store start point for click-drags
 			self._startPt = (x, y) #PX
 		elif event == CV_App.LEFT_RELEASE:
+		
 			sX, sY = PxtoM(*self._startPt)
-			
-			count = np.ceil(abs(sX-mX) / window.inspectionSize)
-			start = min(sX, mX)
-			end = max(sX, mX)
-			X = np.linspace(start, end, num=count)
+		
+			if (abs(sX-mX) + abs(sY - mY)) < window.inspectionSize:
+				waypoints.append(Waypoint(Waypoint.VIEW,mX,mY))
+			else:
+				count = np.ceil(abs(sX-mX) / window.inspectionSize)
+				start = min(sX, mX)
+				end = max(sX, mX)
+				X = np.linspace(start, end, num=count)
 
-			count = np.ceil(abs(sY-mY) / window.inspectionSize)
-			start = min(sY, mY)
-			end = max(sY, mY)
-			Y = np.linspace(start, end, num=count)
+				count = np.ceil(abs(sY-mY) / window.inspectionSize)
+				start = min(sY, mY)
+				end = max(sY, mY)
+				Y = np.linspace(start, end, num=count)
 
-			for x in X:
-				for y in Y:
-					waypoints.append(Waypoint(Waypoint.VIEW, x, y))
+				for x in X:
+					for y in Y:
+						waypoints.append(Waypoint(Waypoint.VIEW, x, y))
 			self._startPt = None
 		self.add_waypoints(waypoints) #run waypoint service callback
 			
