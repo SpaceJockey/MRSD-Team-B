@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import math
-ferr = 0.0001 #floating point comparison error correction term
+ferr = 0.01 #floating point comparison error correction term, 1 cm accuracy
 
 #ROS Imports
 import rospy
@@ -64,6 +64,7 @@ class Planner:
 		self.publishWaypointMarker(wp, True)
 		del self.wp_ids[wp]
 
+	#TODO: sort these by range to the robot
 	def handleWaypointRequest(self, req):
 		for wp in req.waypoints:
 			self.waypoints.append(wp)
@@ -97,11 +98,11 @@ class Planner:
 
 		if self.waypoints: #waypoints is not empty, plan a move
 			wp = self.waypoints[0]
-
 			#get target state
 			tgtAngle = self.rFrames['center_foot'].angleTo(wp)
 			tgtDist = self.rFrames['center_foot'].distTo(wp) 
 			if wp.action == Waypoint.VIEW: #stop short of view self.waypoints to get in ideal image range
+				#if tgtDist < config.view.min: #TODO: too close! back up
 				tgtDist -= config.view.opt
 
 			#more pseudoparams
@@ -117,15 +118,15 @@ class Planner:
 			d2 = self.rFrames['center_foot'].distTo(self.rFrames['rear_foot']) 			#distance between middle and rear
 
 			#move decision tree
-			if(abs(backRel) > config.angle.dead or abs(frontRel) > config.angle.max): 		#feet not pointing at the thing
+			if(abs(backRel) > config.angle.dead or abs(frontRel) > (config.angle.max - config.angle.dead)): 		#feet not pointing at the thing
 				if(abs(frontRel) >= abs(backRel)): 		#rotate feet, starting with whichever is farther away
-					newtheta = backTheta + math.copysign(min(abs(backRel), config.angle.max), backRel) #TODO
+					newtheta = backTheta + math.copysign(min(abs(backRel), config.angle.max), backRel)
 				else:
-					newtheta = frontTheta + math.copysign(min(abs(frontRel), config.angle.max), frontRel) #TODO
+					newtheta = frontTheta + math.copysign(min(abs(frontRel), config.angle.max), frontRel)
 					node_name = "rear_foot"
 					extend = -config.extend.min
 			else:										#move towards the thing
-				if(wp.action == Waypoint.VIEW and tgtDist < config.view.max):	#view plan action
+				if(wp.action == Waypoint.VIEW and tgtDist < (config.view.max - config.view.opt)):	#view plan action
 					action = MajorPlannerResponse.VIEW
 					sleep = rospy.Duration(3)
 					extend = config.view.extend

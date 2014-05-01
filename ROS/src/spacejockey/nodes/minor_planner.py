@@ -53,6 +53,13 @@ class MinorPlanner:
 
     self.tfList = tf.TransformListener()
     self.tf = spacejockey.LocalTfCache(self.tfList)
+
+    #hacktastic!
+    self.tfList.waitForTransform('front_foot', 'world', rospy.Time(0), rospy.Duration(1))
+    self.tf.pullTransform('front_foot', 'world')
+    self.tf.pullTransform('rear_foot', 'world')
+    self.tf.pullTransform('robot', 'world')
+
     self.tfCast = tf_weighted.StaticTransformBroadcaster() #tf.TransformBroadcaster()
 
   def handle_status_request(self, req):
@@ -92,12 +99,16 @@ class MinorPlanner:
 
   def execute_minor_action(self, act):
     now = rospy.Time.now()
+    prev_act = self.last_minor_act
+    self.last_minor_act = act
+    
     if isinstance(act, PauseAction):
       self.isPaused = True
       rospy.Timer(act.duration, self.unpause, True) #oneshot timer
-      if isinstance(self.last_minor_act, ViewAction):
+      if isinstance(prev_act, ViewAction):
         self.status.image_weight = 0.70 #TODO: perameterize these weights!
         self.status.locale_weight = 0.70
+
       return
 
     if isinstance(act, ViewAction):
@@ -114,24 +125,22 @@ class MinorPlanner:
       self.status.image_weight = 0.0
       self.status.locale_weight = 0.0
 
-    self.tf.clear()
+    #self.tf.clear()
     #pull needed values into our Transformer
     for node in frame_names.values():
       if node == act.frame:
         self.tf.saveTransform(node, 'world', act.loc, (0,0,0,1))
-      else:
-        self.tf.pullTransform(node, 'world') #, now) FIXME:?
+      #else:
+      #  self.tf.pullTransform(node, 'world')
 
     #calculate robot-frame transforms...
     (floc, foobar) = self.tf.computeTransform('front_foot', 'robot')
     (rloc, foobar) = self.tf.computeTransform('rear_foot', 'robot')
-    self.joint_tgt = IK(front = floc, rear=rloc, doDetach = act.detach)
 
-    #update the robot position...
-    if act.frame == 'robot':
-      t_est = now + rospy.Duration.from_sec(self.eta())
-      self.tfCast.sendTransform(act.loc, (0,0,0,1), t_est, 'robot', 'world')
-    self.last_minor_act = act
+    self.joint_tgt = IK(floc, rloc, doDetach = act.detach)
+
+    if act.frame == 'robot': #update the robot position...
+      self.tfCast.sendTransform(act.loc, (0,0,0,1), now, 'robot', 'world')
 
   def execute_move_action(self, msg):
     frame_id = frame_names[msg.node_name]
@@ -160,6 +169,7 @@ class MinorPlanner:
     for i in range(1,attach_res+1):
       loc[2] = max(loc[2]-dz, 0.0)
       minorqueue.append(MinorAction(frame_id, tuple(loc), False)) 
+    minorqueue.append(PauseAction(rospy.Duration(1)))
 
   def execute_view_action(self, msg):
     #calculate range to target

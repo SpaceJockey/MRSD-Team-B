@@ -3,8 +3,8 @@ import tf
 from geometry_msgs.msg import TransformStamped
 
 class LocalTfCache(tf.Transformer):
-	def __init__(self, listener = None):
-		tf.Transformer.__init__(self, True,  cache_time = rospy.Duration(1)) #local transformer for maths...
+	def __init__(self, listener = None, interpolate = True):
+		tf.Transformer.__init__(self, interpolate,  cache_time = rospy.Duration(1)) #local transformer for maths...
 		self.Listener = listener or tf.TransformListener()
 		self.tfTime = rospy.Time(0) #use the same timestamp for all internal tf calcs
 
