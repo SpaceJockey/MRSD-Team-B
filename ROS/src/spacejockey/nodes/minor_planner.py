@@ -47,8 +47,8 @@ class MinorPlanner:
     self.last_major_id = 0
 
     #queue up a view movement for inital localization
-    minorqueue.append(ViewAction((self.config.view.extend, 0.0, self.config.view.extendHeight), self.config.view.opt))
-    minorqueue.append(PauseAction(rospy.Duration(3)))
+    #minorqueue.append(ViewAction((self.config.view.extend, 0.0, self.config.view.extendHeight), self.config.view.opt))
+    #minorqueue.append(PauseAction(rospy.Duration(3)))
 
     self.tfList = tf.TransformListener()
     self.tf = spacejockey.LocalTfCache(self.tfList)
@@ -165,7 +165,7 @@ class MinorPlanner:
 
   def execute_view_action(self, msg):
     #detach
-    loc, rot = self.tfList.lookupTransform('world', 'front_foot', rospy.Time(0))
+    (loc, rot) = self.tfList.lookupTransform('world', 'front_foot', rospy.Time(0))
     if(loc[2] < self.config.move.detachHeight):
       loc = self.interpolate_move('front_foot', loc, [loc[0], loc[1], self.config.move.detachHeight], 3, True)
 
@@ -177,7 +177,7 @@ class MinorPlanner:
 
     #static view position transform
     extend = self.config.view.extend
-    v_loc = (loc[0] + math.cos(theta)*extend, loc[0] + math.sin(theta)*extend, self.config.view.extendHeight)
+    v_loc = (math.cos(theta)*extend, math.sin(theta)*extend, self.config.view.extendHeight) #robot frame
     self.status.status_msg = 'Viewing'
 
     #queue up a view movement
