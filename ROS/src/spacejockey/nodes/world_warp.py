@@ -7,7 +7,7 @@ from cv_bridge import CvBridge, CvBridgeError
 import spacejockey
 from spacejockey.srv import RobotStatus
 import tf
-import os,sys
+#import os,sys
 
 
 class WorldWarp(object):
@@ -30,6 +30,9 @@ class WorldWarp(object):
         self.height = rospy.get_param("/gui/height")
         self.scale  = 1.0 / rospy.get_param("/gui/scale")
         self.origin = spacejockey.config("/gui/origin")
+        self.test_mode = rospy.get_param("/flaws/test_data")
+        if self.test_mode:
+            self.test_image = cv2.imread(rospy.get_param('/dirty_env_map'))
 
         #using an image for this so we can specify complex patterns if desired
         #I.E. if we want to weight nearby (higher res) data higher or somesuch
@@ -69,8 +72,13 @@ class WorldWarp(object):
         # inverse the 3*3 matrix
         b = c*a.I 
 
+        camera_warp = []
         #warp the images to the world frame
-        camera_warp = cv2.warpPerspective(camera_img,b,(self.width,self.height))
+        if self.test_mode:
+            camera_warp = self.test_image
+        else:
+            camera_warp = cv2.warpPerspective(camera_img,b,(self.width,self.height))
+        
         vignette_warp = cv2.warpPerspective(self.vignette,b,(self.width,self.height))
 
         #combine the images

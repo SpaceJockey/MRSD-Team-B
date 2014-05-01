@@ -8,6 +8,7 @@
 	<rosparam command="load" file="$(find spacejockey)/config/camera.yaml" />
 	<param name="robot_description" textfile="$(find spacejockey)/resources/spacejockey.urdf" />
 	<param name="clean_env_map" value="$(find spacejockey)/resources/clean_map.png" />
+	<param name="dirty_env_map" value="$(find spacejockey)/resources/dirty_map.png" /> <!-- for testing -->
 	<param name="vignette_img" value="$(find spacejockey)/resources/vignette.png" />
 	<node pkg="robot_state_publisher" type="robot_state_publisher" name="rob_st_pub" />
 	<node pkg="joint_state_publisher" type="joint_state_publisher" name="rob_joint_pub" />

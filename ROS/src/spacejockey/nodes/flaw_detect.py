@@ -9,7 +9,6 @@
 
 import numpy as np
 import cv, cv2
-import os,sys
 from sensor_msgs.msg import Image
 import roslib
 import rospy
@@ -35,18 +34,7 @@ class FlawDetector(object):
         self.threshold = self.config.detect_threshold
         self.max_size = self.config.detect_max_size / self.gui.scale
 
-        #test data
-        #dirty = cv2.imread(os.path.dirname(sys.argv[0])+"/../test/testsurface_dirty.png") 
-        #clean = cv2.imread(os.path.dirname(sys.argv[0])+"/../test/testsurface_clean.png") 
-        #
-        ##preprocess dirty image
-        #self.dirtyImage = cv2.GaussianBlur(dirty, self.ksize, self.sigma)
-        #self.dirtyHue = cv2.split(cv2.cvtColor(self.dirtyImage, cv2.COLOR_BGR2HSV))[0]
-
-        #real data
-        #TODO: perameterize config file name
         clean = cv2.imread(rospy.get_param('/clean_env_map'))
-        # self.dirty = np.zeros(self.clean.shape, dtype=np.uint8)
         
         #preprocess clean image
         self.cleanImage = cv2.GaussianBlur(clean, self.ksize, self.sigma)
@@ -65,7 +53,7 @@ class FlawDetector(object):
         try:
             dirty = cv2.split(self.bridge.imgmsg_to_cv2(data, "passthrough"))
             alpha = dirty[3]
-            foobar, self.alphaMask = cv2.threshold(alpha, 128, 255, cv.CV_THRESH_BINARY) #alpha channel
+            foobar, self.alphaMask = cv2.threshold(alpha, 80, 255, cv.CV_THRESH_BINARY) #alpha channel
             dirty = cv2.merge([dirty[2], dirty[1], dirty[0]])
             assert dirty.size == self.size, 'Image size mismatch:' + str(dirty.size) + " != " + str(self.size)
         except Exception as e:
@@ -106,7 +94,10 @@ class FlawDetector(object):
         
         diff = cv2.absdiff(self.dirtyHue, self.cleanHue)
         diff = cv2.bitwise_and(diff, diff, mask = self.alphaMask)
-        
+        if self.config.test_data:
+            cv2.imshow('Defects Debugging', cv2.merge([diff, diff, diff]))
+            cv2.waitKey(1)
+
         Z = []
         for x in range(self.shape[0]):
             for y in range(self.shape[1]):
