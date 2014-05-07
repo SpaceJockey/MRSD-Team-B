@@ -2,7 +2,8 @@
 import rospy
 from collections import deque, namedtuple
 import spacejockey
-from spacejockey.kinematics import IK, joint_vel, normalize
+from spacejockey.kinematics import IK, joint_vel
+from spacejockey.geometry import normalizeAngle
 from spacejockey.srv import *
 import tf
 import tf_weighted
@@ -79,14 +80,14 @@ class MinorPlanner:
     """estimated time until we've reached our next node"""
     times = [0.0]
     for j in self.joint_tgt.keys():
-      err = abs(self.joint_tgt[j] - self.joints[j])
+      err = abs(normalizeAngle(self.joint_tgt[j] - self.joints[j]))
       times.append(err / joint_vel[j])
     return max(times) 
 
   def update_joints(self):
     joints = self.joints
     for j in self.joint_tgt.keys():
-      err = normalize(self.joint_tgt[j] - self.joints[j]) 
+      err = normalizeAngle(self.joint_tgt[j] - self.joints[j]) 
       joints[j] += math.copysign(min(abs(err), (joint_vel[j] / self.Hz)), err)
     j_msg = JointState()
     j_msg.name = joints.keys()

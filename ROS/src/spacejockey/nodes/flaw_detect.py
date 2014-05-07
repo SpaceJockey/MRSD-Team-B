@@ -37,8 +37,11 @@ class FlawDetector(object):
         clean = cv2.imread(rospy.get_param('/clean_env_map'))
         
         #preprocess clean image
-        self.cleanImage = cv2.GaussianBlur(clean, self.ksize, self.sigma)
-        self.cleanHue = cv2.split(cv2.cvtColor(self.cleanImage, cv2.COLOR_BGR2HSV))[0]
+        self.cleanHSV = cv2.cvtColor(cv2.GaussianBlur(clean, self.ksize, self.sigma), cv2.COLOR_BGR2HSV)
+        self.cleanHue = cv2.split(self.cleanHSV)[0]
+
+        self.ar_mask = cv2.imread(rospy.get_param('/ar_env_mask'))
+        self.hsvWeights = self.config.hsvWeights
 
         #init other stuff...
         self.dirtyImage = None
@@ -53,7 +56,7 @@ class FlawDetector(object):
         try:
             dirty = cv2.split(self.bridge.imgmsg_to_cv2(data, "passthrough"))
             alpha = dirty[3]
-            foobar, self.alphaMask = cv2.threshold(alpha, 80, 255, cv.CV_THRESH_BINARY) #alpha channel
+            foobar, self.alphaMask = cv2.threshold(alpha, 40, 255, cv.CV_THRESH_BINARY) #alpha channel
             dirty = cv2.merge([dirty[2], dirty[1], dirty[0]])
             assert dirty.size == self.size, 'Image size mismatch:' + str(dirty.size) + " != " + str(self.size)
         except Exception as e:
@@ -61,8 +64,8 @@ class FlawDetector(object):
             return
         
         #preprocess dirty image
-        self.dirtyImage = cv2.GaussianBlur(dirty, self.ksize, self.sigma)
-        self.dirtyHue = cv2.split(cv2.cvtColor(self.dirtyImage, cv2.COLOR_BGR2HSV))[0]
+        self.dirtyHSV = cv2.cvtColor(cv2.GaussianBlur(dirty, self.ksize, self.sigma), cv2.COLOR_BGR2HSV)
+        self.dirtyHue = cv2.split(self.dirtyHSV)[0]
         self.updated = False
 
     def kMeans(self, K, Z):
@@ -92,18 +95,20 @@ class FlawDetector(object):
             return
         self.updated = True
         
-        diff = cv2.absdiff(self.dirtyHue, self.cleanHue)
-        diff = cv2.bitwise_and(diff, diff, mask = self.alphaMask)
-        if self.config.test_data:
-            cv2.imshow('Defects Debugging', cv2.merge([diff, diff, diff]))
-            cv2.waitKey(1)
+        diff = cv2.absdiff(self.dirtyHSV, self.cleanHSV)
+        diff = cv2.bitwise_and(diff, self.ar_mask, mask = self.alphaMask) #mask out AR_tags and uninspected regions
+
+        #if self.config.test_data:
+        #    cv2.imshow('Defects Debugging', diff)
+        #    cv2.waitKey(1)
 
         Z = []
         for x in range(self.shape[0]):
             for y in range(self.shape[1]):
                 if rospy.is_shutdown():
                     sys.exit(0)          
-                if diff[x, y] > self.threshold:
+                total = np.sum(diff[x,y] * self.hsvWeights)
+                if total > self.threshold:
                     Z.append([x, y])
 
         if not len(Z):

@@ -37,14 +37,6 @@ for j in urdf.joint_map.keys():
   except AttributeError:
     continue
 
-def normalize(angle):
-  """normalize an angle to the range -pi - pi"""
-  if angle > math.pi:
-    angle -= math.pi
-  elif angle < -math.pi:
-    angle += math.pi
-  return angle
-
 def clip_limits(joint_pos):
   for j in joint_pos.keys():
     try:

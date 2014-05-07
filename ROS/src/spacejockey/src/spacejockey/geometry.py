@@ -19,4 +19,13 @@ class Point(object):
 
 #returns the difference between two angles
 def angleDiff(x, y): 
-	return math.atan2(math.sin(x-y), math.cos(x-y))
+	return normalizeAngle(x-y) #math.atan2(math.sin(x-y), math.cos(x-y))
+
+
+def normalizeAngle(angle):
+  """normalize an angle to the range -pi - pi"""
+  if angle > math.pi:
+    angle -= 2 * math.pi
+  elif angle < -math.pi:
+    angle += 2 * math.pi
+  return angle

@@ -1,7 +1,9 @@
 filter_size: [7, 7]
 filter_sigma: 3
 
-detect_threshold: 80 #uint8 threshold
+hsvWeights: [1.0, 0.8, 0.0]
+
+detect_threshold: 40 #uint8 threshold
 detect_max_size: .20 #20 cm in meters
 
 test_data: True

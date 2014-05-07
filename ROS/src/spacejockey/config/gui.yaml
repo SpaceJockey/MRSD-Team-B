@@ -5,7 +5,8 @@ title: "Spacejockey GUI"
 width: 1070
 height: 700
 scale: 0.002  #20 cm / 100px
-origin/x: 535
+#origin/x: 535
+origin/x: 0
 origin/y: 350
 
 #how close to space view waypoints for range inspection
