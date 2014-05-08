@@ -19,3 +19,6 @@
 [submodule "ROS/src/geometry_experimental"]
 	path = ROS/src/geometry_experimental
 	url = https://github.com/SpaceJockey/geometry_experimental.git
+[submodule "CAD/SolidWorks/Stock Parts"]
+	path = CAD/SolidWorks/Stock Parts
+	url = https://github.com/SpaceJockey/MRSD-Parts-Library.git
