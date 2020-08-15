@@ -1,0 +1,11 @@
+---
+title: Project Updates
+---
+
+{% for post in site.posts %}
+<article>
+	<h4>{{ post.title }}</h4>
+	<div class="timestamp">posted {{ post.date }} by {{ post.author }}</div>
+	{{ post.excerpt }}
+</article>
+{% endfor %}

@@ -1,0 +1,23 @@
+---
+title: Software Architecture Overvew
+date: Nov 20, 2013, 8:47 AM
+author: Brian Boyle
+---
+Pictured below is a high-level diagram of our software architecture for the Space Jockey Robot, depicting the movement of information through ROS nodes and topics in the form of messages. A more detailed description follows below.<br />
+
+<img src="images/software_architecture.png" width="100%" />
+
+<h4>Information Flow Overview</h4>
+<ol>
+	<li>The user issues commands through the G.U.I which are published to the "sched_command" node</li>
+	<li>Two nodes subscribe to "sched_command", the Scheduler and the Gait Generator</li>
+	<ol>
+		<li>Urgent commands that directly manage the scheduler, such as Halt, Resume, or Clear, are picked up by the Scheduler node</li>
+		<li>Commands that command the robot to move to user-defined positions, or perform part of a gait sequence, are picked up by the Gait Generator</li>
+		<li>The Gait Generator creates joint trajectories, which are sent to "sched_joints", which is subscribed to by the Scheduler</li>
+	</ol>
+	<li>The Scheduler queues commands from the Gait Generator, which it issues to "serial_link"</li>
+	<li>An Arduino sketch within the Robot acts as a node which subscribes to "serial_link" and receives joint commands from the scheduler</li>
+	<li>The Robot publishes its latest pose to the "joint_states" topic</li>
+	<li>Both the G.U.I. and Rviz update their respective representations of the robot using information from "joint_states"</li>
+</ol>
