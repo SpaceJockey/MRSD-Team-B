@@ -1,0 +1,117 @@
+---
+Title: Subsystems
+---
+<h2>Subsystem Breakdown</h2>
+<p>The system’s subsystem breakdown is shown in figure 6. Note that command center&nbsp;subsystems constitute software processes implemented in ROS, while those of the robot are&nbsp;primarily hardware components. Peripherals (cameras, IMUs), manipulation, and autonomy&nbsp;(localization, planning) subsystems are planned for implementation in the Spring semester.</p>
+
+<div style="text-align: center;">
+	<img src="images/subsystem_breakdown.png" width="70%">
+	<h4 style=""><i>Subsystems Breakdown</i></h4>
+</div>
+
+<h2>Robot Subsystems</h2>
+<h3>Power</h3>
+<p>The robot is powered by a 7.4V hobby Lipo battery. All power is routed through the power distribution board, which provides two fused 7.4V channels for the Arduino and servo control boards, and one regulated 5V channel for the inspection  camera.
+</p>
+<div class="row">
+  <div class="column" style="text-align: center;">
+		<img src="images/power_board.png" width="90%">
+		<h4 style=""><i>Completed Power Distribution Module</i></h4>
+	</div>
+	<div class="column" style="text-align: center;">
+		<img src="images/power_board_layout.png" width="90%">
+		<h4 style=""><i>PDM Board Layout</i></h4>
+	</div>
+</div>
+
+<h3>Computing</h3>
+<p>
+	The microcontroller for our chassis is an<a href="http://arduino.cc/en/Main/arduinoBoardDue" rel="nofollow"> Arduino Due</a>. The system is controlled by the Arduino and communicated to a laptop through serial radio communication running the operator interface. The Due uses a 32 bit ARM core chip, allowing for quick floating point calculations and larger math operations onboard. The Due is small and lightweight, and provides ample computing power to implement a simple ROS node and serial communications, making it an ideal choice for this project.
+</p>
+<p>
+	The interface between the microcontroller and servo motors is the Adafruit Industries <a href="http://www.adafruit.com/products/1411" rel="nofollow">16 Channel Servo/PWM controller</a> shield. The shield’s 12-bit interface allows a servo control accuracy better than ±0.1°, although the servos themselves are only accurate to ±0.3°. It communicates over an I2C interface, making it easy to offload PWM servo control tasks for our robot, allowing finer granularity than could be achieved using the Arduino alone. To minimize control system frequency drift due to temperature changes or clock instability, one PWM channel is fed back into the Arduino, allowing us to precisely calibrate our servo board every time the robot boots up.
+</p>
+
+<h3>Mobility</h3>
+<p>
+	Because we were unable to find a linear actuator that met our weight goals and requirements, we designed and built custom linear actuators using modified hobby servos and a rack-and-pinion gear. This approach worked well, and helped to minimize the total mass of the robot. The final robot’s mass, including all motors and electronics, is about 1.65kg.
+</p>
+<h3>Chassis</h3>
+<div style="text-align: center;">
+	<img src="images/chassis.png" width="60%">
+	<h4 style=""><i>Robot Chassis</i></h4>
+</div>
+<p>
+	The chassis was fabricated using 3D printed ABS parts printed on the MRSD <a href="http://store.makerbot.com/replicator2" rel="nofollow">Makerbot</a>. This fabrication method allowed rapid redesign and prototype iteration turnaround. Each major chassis component required on average about 4 hours of time to print. This rapid turnaround, combined with the part complexity we were able to generate using the 3D printer, allowed us to develop a very lightweight, well-integrated chassis. Although we did have some issues with breakage and layer separation of the ABS parts, the design flexibility of this fabrication method was unmatched. The original prototype had been made with laser-cut MDF, and switching to ABS allowed us to not only implement a much tighter form factor, but cut the robot’s net weight by 60%.
+<p>
+</p>
+	The chassis is actuated using Hitec hobby servos. For the shoulder and wrist joints, where high torque was needed, <a href="http://hitecrcd.com/products/servos/sport-servos/digital-sport-servos/hs-5585mh-economical-high-torque-digital-coreless-servo/product" rel="nofollow">Hitec HS-5585MH</a> digital metal-gear high-voltage servos were used (See figure X). In addition to the higher torques and better control accuracy of the digital servos, these high-voltage models may be powered directly from the battery, simplifying power distribution and increasing power efficiency and battery life. 
+<p>
+</p>
+	For the linear actuators for which less torque is required, <a href="http://hitecrcd.com/products/servos/sport-servos/digital-sport-servos/hs-5496mh-hv-economical-digital-metal-gear-sport-servo/product" rel="nofollow">HS-5496MH</a> servos are used. These have the same advantages as the HS-5585MH, but are much more affordable. For the linear actuators, these were modified and attached to an external feedback potentiometer, allowing them to be calibrated and adjusted to provide maximum possible accuracy over their specific linear range.
+<p>
+</p>
+	All servos were calibrated using the Hitec HPP-21 digital servo controller programmer (figure XX) which allows precise adjustment of the range and accuracy of the servos, and calibration of the robot’s position in hardware, obviating the need for complex software calibration and configuration joint angles. The programmer also allows the setting of fallback positions and stall voltage dropouts, to protect the power system and chassis in case of collisions with a physical obstacles or loss of connection to the command center.
+</p>
+
+<h3>Attachment</h3>
+<p>
+	Each of the three robot segments has a “foot” mounted to it which is responsible for maintaining the attachment of the robot to the surface. For the center segment, the foot is a separate assembly topped with a screw which is guided through the central pivot joint. For the two end segments, the foot surface is integrated directly into the 3D printed segment.
+</p>
+<div class="row">
+	<div class="column" style="text-align: center;">
+		<img src="images/foot_detail.png" width="80%">
+	</div>
+	<div class="column" style="text-align: center;">
+		<img src="images/foot_detail_2.png" width="80%">
+	</div>
+</div>
+<h4 style="text-align: center;"><i>Attachment Mechanism Detail</i></h4>
+
+<p>
+	Attachment to the inspection surface is accomplished using an array of magnets inset within the contact surface of each foot. Each foot is 3D printed and two magnets are secured in each inset using epoxy. To prevent slip between a foot and the surface, a layer of high-friction, off-the-shelf grip tape is applied to the contact surface after the magnets have been installed. The number of magnets in each foot is intentionally more than necessary to secure it against most surfaces, and additional layers of tape may then be used to increase the distance between the surface and the magnets and thus adjust the total attachment force.
+</p>
+<p>
+	Detachment is accomplished differently for the front and end segments. End segments can be independently pitched forward or backward prior to lifting, levering the foot about one of its edges. This forces enough magnets away from the surface that the entire foot can then easily be lifted. To place the end segment again, the foot needs only to be leveled parallel to the surface and lowered to meet it. In the case of the center segment foot, an actuated solid plunger is inset in the center of the foot and can be extended to push the foot away from the surface as other actuated joints lift it simultaneously. Placing the center segment is a matter of retracting the detachment plunger and lowering the foot to again meet the surface.
+</p>
+
+<h3>Sensing</h3>
+<div style="text-align: center;">
+	<img src="images/inspection_camera.png" width="60%">
+	<h4 style=""><i>Inspection Camera (a Belkin webcam)</i></h4>
+</div>
+<p>
+	Our inspection data is collected using a physically modified <a href="http://www.belkin.com/us/Products/home-automation/c/netcam/" rel="nofollow">Belkin NetCam</a> Wifi enabled camera attached to mount which is integrated with the robot frame. Using this camera allowed us to simplify the onboard processing system of our robot, as image data is transmitted directly to the operator PC, without the need for the onboard processor to do any image processing. The camera was attached to campus Wifi, and could be accessed from anywhere. The use of a webcam also simplified testing, as several people could connect to the camera stream at the same time, and view or troubleshoot their software components separately.
+</p>
+
+<h3>Communication</h3>
+<p>
+	Serial communication of commands and robot status information is transmitted between the control console and the robot using<a href="https://www.sparkfun.com/products/8742" rel="nofollow"> XBee Pro 60mW</a> radio modules, which implement the IEEE 802.15.4 standard. These simple devices act as a drop in replacement for the USB cable on the Arduino, allowing our ROS software implementation to be completely agnostic of the transport medium.
+</p>
+
+
+<h2>Control Console Subsystems</h2>
+
+<p>
+	The command center software is comprised of three primary processes, run on a single computer connected to the robot by serial connection (USB or radio). All processes are implemented in Python and communicate through ROS messaging unless otherwise noted. The following is an expanded description of the software architecture depicted below:
+</p>
+
+<div style="text-align: center;">
+	<img src="images/software_architecture_2.png" width="60%">
+	<h4 style=""><i>ROS Software Architecture</i></h4>
+</div>
+
+<p>
+	Images of the world from the rover's perspective are gathered by the camera and transmitted to the command console, where they provide the operator with a robot's-eye-view of the surface as well as views of AR-tags that assist localization. Using the knowledge of position and orientation provided by the localization module, images from the robot may be warped and superimposed on the "clean" map of the world. By comparing this live map with the "clean" map, a flaw detection module identifies significant differences and alerts the user of probably defects, highlighting them with a bounding box on the GUI.<br>
+</p>
+<p>To command the robot to move, the operator clicks to create a waypoint on the map, or drags to select a region of inspection, which is then populated with a grid of waypoints. The command console will then generate a path that allows the robot to view each waypoint. The "Major Planner" module decides the series of segment motions that will bring the robot to the point, and delegates the task of generating precise joint trajectories of each segment to the "Minor Planner".
+</p>
+<p>
+	Joint trajectories generated by the minor planner are sent to the scheduler, which dispatches joint commands one at a time to the robot itself. The speed of dispatch is governed by known maximum joint velocities of the robot. As commands are sent, an updated joint configuration is used to update the kinematic model of the robot, which is displayed in the GUI as both an RViz simulation and as a top-down view in the GUI.<br>
+</p>
+
+
+<div style="text-align: center;">
+	<img src="images/gui_screen.png" width="60%">
+	<h4 style=""><i>GUI screenshot showing robot position (Blue), inspect waypoints (Green), and flaw detection boxes (Red)</i></h4>
+</div>
