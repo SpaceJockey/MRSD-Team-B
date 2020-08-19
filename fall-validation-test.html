@@ -1,0 +1,165 @@
+---
+title: Fall Semester Validation Test
+---
+<h3>Demo Setup</h3>
+<ul>
+	<li><b>Date: </b>Nov. 25th, 2013</li>
+	<li><b>Location: </b>Newell Simon Hall B Level</li>
+	<li><b>Equipment: </b></li>
+	<ul>
+		<li>Robot</li>
+		<li>Command Laptop</li>
+		<li>Clean Vertical Surface (table or whiteboard will suffice)</li>
+		<li>Safety Tether</li>
+	</ul>
+	<li><b>Estimated operating area: </b>6’x6’</li>
+</ul>
+
+<h3>Procedure</h3>
+<ol>
+	<li>Robot shall be powered on and GUI started</li>
+	<li>GUI will display sensor data from the robot</li>
+	<li>Robot commanded to assume pre-configured stances that collectively demonstrate actuation of all motors</li>
+	<li>Robot will maintain or recover its stance in response to external disturbances</li>
+	<li>Robot commanded to move forward and backward and demonstrate such motions with reasonable smoothness of motion</li>
+	<ul><li>TPM: 1 meter in 6 minutes</li></ul>
+	<li>Robot commanded to execute a 45 degree turn while moving forward, and will demonstrate such motion</li>
+	<ul><li>TPM: Turn within 5 degrees</li></ul>
+</ol>
+
+<h3>Results</h3>
+
+<center>
+	<div class="video_wrapper">
+		<iframe title="YouTube video player" class="youtube-player" type="text/html" src="https://www.youtube.com/embed/Z0jmQd7a3Ro?rel=0&amp;wmode=opaque" frameborder="0" allowfullscreen="true"></iframe>
+	</div>
+	<h4><i>YouTube Video</i></h4>
+</center>
+
+<p>
+	The results of the Fall Validation Experiment are summarized in table 1 below. The test procedure is listed in sequence with a brief description of each step and comment on the result. More in-depth discussion on these results may be found in the following section.
+</p>
+
+<center>
+	<h4>Table 1. Summary table of validation experiment results</h4>
+	<table>
+		<thead>
+			<tr>
+				<td width="10%">
+					Test
+				</td>
+				<td width="45%">Description</td>
+				<td width="45%">Result</td>
+			</tr>
+		</thead><tbody>
+			<tr>
+				<td style="text-align: center;">1</td>
+				<td>Robot powers on &amp; GUI is started</td>
+				<td class="success">Robot powered on with no issues</td>
+			</tr>
+			<tr>
+				<td style="text-align: center;">2</td>
+				<td>GUI will display sensor data from the robot</td>
+				<td class="success">Displayed battery status</td>
+			</tr>
+			<tr>
+				<td style="text-align: center;">3</td>
+				<td>Robot commanded to pre-configured stances that demonstrate actuation of all motors</td>
+				<td class="success">Demonstrated during gait</td>
+			</tr>
+			<tr>
+				<td style="text-align: center;">4</td>
+				<td>Robot commanded to move forward and backward<br>[TPM: 10 meters per hour]</td>
+				<td class="success">Walked forward and backward successfully at an average speed of 1 meter in 10 seconds</td>
+			</tr>
+			<tr>
+				<td style="text-align: center;">5</td>
+				<td>Robot will maintain or recover its stance in response to external disturbances</td>
+				<td class="failure">Robot maintained configuration but was subject to tipping over</td>
+			</tr>
+			<tr>
+				<td style="text-align: center;">6</td>
+				<td>Robot commanded to execute a 45 degree turn while moving forward<br>[TPM: Turn within 5 degrees]</td>
+				<td class="failure">Robot was able to execute turns but degree accuracy failed to meet TPM</td>
+			</tr>
+		</tbody>
+	</table>
+</center>
+
+<h3>Strengths and Weaknesses</h3>
+<p>Testing and integration trials made clear the strengths and weaknesses of the system as developed so far, summarized in table 2 and 3. A major weakness of the system was revealed by intermittent communication dropouts suffered during 	The fall validation experiment. It is unclear at this time whether this is caused by power brownouts or by communication issues with the command center. Another weakness is that the command center GUI is reliable and highly configurable, but lacks user friendliness and would likely be confusing for an uninitiated tester. The chassis is very lightweight, thanks to its MDF construction material, but there are multiple sources of flex that cause the robot to sag during operation, often dragging its feet on the ground.
+</p>
+<p>
+	The attachment mechanism is the most pressing weakness of the system. Though on the horizontal surface it was able to attach to the ground, the lifting of segments as a means of detachment was unreliable and error prone. In addition, the complaint ball joint in the ankle seems to impede detachment during segment lift actions. From these findings, it’s clear that a distinct detachment mechanism will be necessary to achieve reliable lifting of each segment. Additionally, each leg currently unable to hold more than 0.6lbs (0.272 kg) of mass, which is insufficient to support our robot on a vertical surface, this will require drastic steps to rectify this issue in the Spring semester.
+</p>
+
+<center>
+	<h4>Table 2. Robot subsystem strengths and weaknesses</h4>
+	<table>
+		<thead>
+			<tr>
+				<td width="10%"></td>
+				<td width="40%">Strengths</td>
+				<td width="40%">Weaknesses</td>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>Power</td>
+				<td>Able to Power all Motors</td>
+				<td>Anomalous Brownouts?</td>
+			</tr>
+			<tr>
+				<td>Computing</td>
+				<td>Simple ROS Communication</td>
+				<td>Serial &amp; I2C Comms Problem</td>
+			</tr>
+			<tr>
+				<td>Chassis/Mobility</td>
+				<td>Lightweight, Rapid Fabrication</td>
+				<td>Significant Flex</td>
+			</tr>
+			<tr>
+				<td>Attachment</td>
+				<td>Refined Molding Techniques</td>
+				<td>Weak HoldAttach/Detach Mechanisms</td>
+			</tr>
+		</tbody>
+	</table>
+
+	<h4>Table 8. Command center subsystem strengths and weaknesses</h4>
+	<table>
+		<thead>
+			<tr>
+				<td></td>
+				<td>Strengths</td>
+				<td>Weaknesses</td>
+			</tr>
+		</thead><tbody>
+			<tr>
+				<td>Communication</td>
+				<td>Simple ROS Communication,Scheduler, Gait Generator</td><
+				td>Occasional lost packetsOccasional connection loss</td>
+			</tr>
+			<tr>
+				<td>G.U.I</td>
+				<td>Reliable, dummy-proof, highly configurable</td>
+				<td>"Engineer’s GUI" Lacks Spring Capabilities</td>
+			</tr>
+			<tr>
+				<td>Simulation</td>
+				<td>Clean kinematic representation</td>
+				<td>No physical dynamics</td>
+			</tr>
+		</tbody>
+	</table>
+</center>
+
+<h3>Lessons Learned</h3>
+<ul>
+	<li>3d printing proved to be a highly effective means for rapidly prototyping complex parts, though with strength limitations and exacting requirements of the printer calibration. We’ll continue to leverage the experience we’ve gathered in the future, but focus on creating stronger components.</li>
+	<li>Another valuable rapid prototyping method was laser-cutting. We’ve established an efficient process for fabricating using this method, and will continue in the Spring Semester.</li>
+	<li>Late integration of software with hardware made it very difficult to adjust the software for the issues of flex discovered in the completed prototype. In the future, we plan to parallelize development more effectively to avoid this, implement a more sophisticated simulation, and may even maintain multiple prototypes.</li>
+	<li>Another reason the completed prototype performed with unexpected flex was the failure to integrate physical dynamics into our simulation. This lesson could be best summarized as, “Rigid bodies are not indeed rigid.” We plan to do modelling of physical dynamics to simulate flex in the Spring to avoid repeating this mistake.</li>
+	<li>Experiences with shipping and supplies indicated a set of clearly dependable suppliers, namely McMaster-Carr, Servo City, Amazon, and Adafruit Industries. We’ll prioritize these shippers in the Spring and continue ordering parts well in advance of planned integration.</li>
+</ul>

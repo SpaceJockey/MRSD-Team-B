@@ -102,3 +102,28 @@ nav {
   footer {
     grid-column: 1 / 3;
   }
+
+table{
+	border-collapse:collapse;
+	border-spacing: 0px;
+}
+
+
+td {
+	border:1px solid black;
+	padding:5px;
+}
+
+thead td {
+	text-align: center;
+	background-color:rgb(164,194,244);
+	font-weight: bold;
+}
+
+td.success {
+	background-color:rgb(217,234,211);
+}
+
+td.failure {
+	background-color:rgb(244,204,204);
+}
