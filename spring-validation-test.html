@@ -1,0 +1,76 @@
+---
+title: Spring Semester Validation Test
+---
+
+<h3>Test Description</h3>
+<p>
+	<b>Objective: </b>Robot crawls on vertical surface and detects defects.<br />
+	<b>Location: </b>NSH B-Level<br />
+	<b>Equipment:</b>
+	<ul>
+		<li>Robot</li>
+		<li>Ubuntu PC with ROS and Control GUI installed</li>
+		<li>clean 1m x 3m vertical surface with AR tags affixed in known locations</li>
+		<li>misc. colors of dry-erase marker to create defects.</li>
+	</ul>
+</p>
+
+<h3>Procedure</h3>
+<ol>
+	<li>Vertical surface is marked with a random number ( &gt; 5) of dry-erase marker drawn defects.</li>
+	<li>Power on robot and operator interface.</li>
+	<li>Place robot on vertical surface in a random location. Handler remains nearby, spotting the robot in case of falls.</li>
+	<li>Operator initializes localization routine.</li>
+	<li>Operator selects regions of interest for inspection routine, for this test, the region of interest is the full test surface.</li>
+</ol>
+
+<h3>Success conditions</h3>
+<ol>
+	<li>Robot navigates and inspects vertical test environment, notifying operator of defects encountered</li>
+	<ul>
+		<li>A flaw is defined as a mark, or smudged area drawn on the test surface using a dry erase marker</li>
+	</ul>
+	<li>90% success rate in identifying defects, with fewer than 2 false positives</li>
+	<ul>
+		<li>Success rate and false positives are based on the detection of flaws over the full test region</li>
+	</ul>
+		<li>The robot must not detach from surface and fall at any point during test.</li>
+		<li>The robot must complete the inspection routine in less than 30 Minutes</li>
+	<ul>
+		<li>Assuming a minimum survey speed of 10 meters/hr (CDR) and image swath width of .5 meter</li>
+	</ul>
+</ol>
+
+<h3>Result&nbsp;</h3>
+<ul class="success_criteria">
+	<li class="failure">90% success rate in identifying defects</li>
+	<ul><li>Current flaw detection implementation is overzealous and sensitive to lighting conditions, producing many false positives</li></ul>
+	<li class="failure">The localization routine was not functional at the SVE</li>
+	<ul><li>Testing was performed using manual position corrections</li></ul>
+	<li class="success">The robot must not detach from surface and fall at any point during testing.</li>
+	<li class="success">The robot must inspect at a rate of 6 meters<sup>2</sup> per hour.</li>
+	<li class="success">The robot must perform autonomously when given an inspection command</li>
+	<li class="success">The robot has must weigh less than 10 Kg (final weight: 1.65 Kg)</li>
+	<li class="success">The robot must operate wirelessly.</li>
+
+</ul>
+
+<h3>Lessons Learned</h3>
+<h4>Project Management</h4>
+<ul>
+	<li>Have regular meetings at least twice a week</li>
+	<li>Clearly define tasks for each team member at every meeting. </li>
+	<li>Use spiral model for systems engineering.</li>
+	<li>Parallelize tasks in each iteration cycle to maximize team productivity.</li>
+	<li>Group work sessions facilitate communication and help people stay on track.</li>
+</ul>
+
+<h4>Design/Fabrication</h4>
+<ul>
+	<li>Develop GUI design early to pin down desired functionality at the onset.</li>
+	<li>Keep all source code and design docs under version control, for safety and communication.</li>
+	<li>Use rapid prototyping techniques to create early versions of all parts to check fits and tolerances before fabricating/machining a final part.</li>
+	<li>Add a 2X cost and time buffer to the project to assure sufficient project time.</li>
+	<li>Always maintain a separate “production” code branch in git with the last stable build of all demo-ready code, regardless of non-critical bugs</li>
+	<li>Always order spare parts for critical components.</li>
+</ul>

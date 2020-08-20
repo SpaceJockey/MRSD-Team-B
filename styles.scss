@@ -24,7 +24,7 @@ body {
 	justify-content: center;
 
 	background-color: #000000;
-	background-image: url(Header2.png);
+	background-image: url(images/Header.png);
 	background-size: 100% auto;
 	background-position: center top;
 	background-repeat: no-repeat;
@@ -109,12 +109,12 @@ table{
 }
 
 
-td {
+td, th {
 	border:1px solid black;
 	padding:5px;
 }
 
-thead td {
+thead td, thead th {
 	text-align: center;
 	background-color:rgb(164,194,244);
 	font-weight: bold;
@@ -126,4 +126,19 @@ td.success {
 
 td.failure {
 	background-color:rgb(244,204,204);
+}
+
+ul.success_criteria {
+	list-style: none;
+	margin-left: 0;
+	text-indent: -1em;
+	li.success:before {
+		content: "✔ ";
+		color:rgb(56,118,29)
+	}
+
+	li.failure:before {
+		content: "✘ ";
+		color:rgb(153,0,0);
+	}
 }
